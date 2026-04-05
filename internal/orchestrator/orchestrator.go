@@ -76,6 +76,11 @@ func (o *Orchestrator) Install(ctx context.Context) error {
 			len(plan.NewPackages), len(plan.CachedPackages), len(plan.SkippedPackages))
 	}
 
+	// Warn about skipped packages per spec §8.1 step 4
+	for _, sp := range plan.SkippedPackages {
+		log.Printf("warning: skipping package %s (%s)", sp.Name, sp.Reason)
+	}
+
 	// Step 4-5: Download and store new packages
 	if len(plan.NewPackages) > 0 {
 		if err := o.downloadAndStore(ctx, plan.NewPackages); err != nil {
@@ -218,19 +223,17 @@ func (o *Orchestrator) extractAndStore(ctx context.Context, r fetcher.DownloadRe
 	log.Printf("extraction failed for %s, re-downloading: %v", r.Task.Name, err)
 	time.Sleep(time.Second) // backoff
 
-	pool := fetcher.NewPool(1)
-	results := pool.Download(ctx, []fetcher.DownloadTask{{
-		Name: r.Task.Name, URL: r.Task.URL,
-		Shasum: r.Task.Shasum, DistType: r.Task.DistType,
-	}})
-	if len(results) > 0 && results[0].Error != nil {
-		return fmt.Errorf("download %s (re-download for extraction retry): %w", r.Task.Name, results[0].Error)
+	// Single-shot re-download (no internal retries — budget already spent by worker pool)
+	client := fetcher.NewClient()
+	resp, dlErr := client.DownloadFull(ctx, r.Task.URL)
+	if dlErr != nil {
+		return fmt.Errorf("download %s (re-download for extraction retry): %w", r.Task.Name, dlErr)
 	}
-	if len(results) == 0 {
-		return fmt.Errorf("re-download %s: no results", r.Task.Name)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return fmt.Errorf("download %s: HTTP %d on extraction retry", r.Task.Name, resp.StatusCode)
 	}
 
-	if err := o.tryExtract(results[0].Data, r.Task, packages); err != nil {
+	if err := o.tryExtract(resp.Body, r.Task, packages); err != nil {
 		return fmt.Errorf("archive extraction failed for %s after retry: %w", r.Task.Name, err)
 	}
 	return nil
@@ -244,7 +247,7 @@ func (o *Orchestrator) tryExtract(data []byte, task fetcher.DownloadTask, packag
 	}
 	defer os.RemoveAll(tmpDir)
 
-	if err := store.ExtractByType(data, task.DistType, tmpDir); err != nil {
+	if err := store.ExtractByType(data, task.DistType, tmpDir, task.Name); err != nil {
 		return fmt.Errorf("archive extraction failed for %s: %w", task.Name, err)
 	}
 

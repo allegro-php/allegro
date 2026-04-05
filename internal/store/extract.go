@@ -196,7 +196,7 @@ func StripTopLevelDir(dir string) error {
 }
 
 // ExtractByType extracts an archive based on dist.type.
-func ExtractByType(data []byte, distType, destDir string) error {
+func ExtractByType(data []byte, distType, destDir, packageName string) error {
 	switch strings.ToLower(distType) {
 	case "zip":
 		return ExtractZip(data, destDir)
@@ -207,6 +207,6 @@ func ExtractByType(data []byte, distType, destDir string) error {
 	case "xz":
 		return ExtractXz(data, destDir)
 	default:
-		return fmt.Errorf("unsupported dist type: %s", distType)
+		return fmt.Errorf("unsupported dist type: %s for package %s", distType, packageName)
 	}
 }

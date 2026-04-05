@@ -128,7 +128,7 @@ func TestExtractByType(t *testing.T) {
 	zipData := createTestZip(t, map[string]string{"a.txt": "hello"})
 
 	dir := t.TempDir()
-	if err := ExtractByType(zipData, "zip", dir); err != nil {
+	if err := ExtractByType(zipData, "zip", dir, "test/pkg"); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := os.Stat(filepath.Join(dir, "a.txt")); err != nil {
@@ -137,7 +137,7 @@ func TestExtractByType(t *testing.T) {
 }
 
 func TestExtractByTypeUnsupported(t *testing.T) {
-	err := ExtractByType(nil, "rar", t.TempDir())
+	err := ExtractByType(nil, "rar", t.TempDir(), "test/pkg")
 	if err == nil {
 		t.Error("expected error for unsupported type")
 	}
