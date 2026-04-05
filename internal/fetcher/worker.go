@@ -61,25 +61,44 @@ func (p *Pool) Download(ctx context.Context, tasks []DownloadTask) []DownloadRes
 					resultCh <- DownloadResult{Task: task, Error: ctx.Err()}
 					continue
 				}
-				data, err := p.client.DownloadWithRetry(ctx, task.URL)
-				if err != nil {
-					p.recordFailure()
-					if p.shouldAbort() {
-						cancel()
+
+				// Download with SHA-1 retry loop per spec §11.1:
+				// Hash mismatch triggers re-download within the 3-retry budget.
+				var finalData []byte
+				var finalErr error
+				for hashAttempt := 0; hashAttempt <= maxRetries; hashAttempt++ {
+					data, err := p.client.DownloadWithRetry(ctx, task.URL)
+					if err != nil {
+						p.recordFailure()
+						if p.shouldAbort() {
+							cancel()
+						}
+						finalErr = err
+						break
 					}
-					resultCh <- DownloadResult{Task: task, Error: err}
-					continue
+
+					// Verify SHA-1 if shasum is non-empty
+					if task.Shasum != "" {
+						if err := verifySHA1(data, task.Shasum); err != nil {
+							p.recordFailure()
+							if p.shouldAbort() {
+								cancel()
+							}
+							finalErr = fmt.Errorf("SHA-1 mismatch for %s (attempt %d): %w", task.Name, hashAttempt+1, err)
+							continue // Re-download
+						}
+					}
+
+					finalData = data
+					finalErr = nil
+					break
 				}
 
-				// Verify SHA-1 if shasum is non-empty
-				if task.Shasum != "" {
-					if err := verifySHA1(data, task.Shasum); err != nil {
-						resultCh <- DownloadResult{Task: task, Error: err}
-						continue
-					}
+				if finalErr != nil {
+					resultCh <- DownloadResult{Task: task, Error: finalErr}
+				} else {
+					resultCh <- DownloadResult{Task: task, Data: finalData}
 				}
-
-				resultCh <- DownloadResult{Task: task, Data: data}
 			}
 		}()
 	}

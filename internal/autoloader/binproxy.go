@@ -48,7 +48,6 @@ func DetectBinTarget(path string) (BinTargetType, error) {
 
 
 // BuildIncludePath returns the PHP include path string for a bin proxy.
-// BuildIncludePath returns the PHP include path string for a bin proxy.
 func BuildIncludePath(packageName, binEntry string) string {
 	return fmt.Sprintf("__DIR__ . '/..'.'/%s/%s'", packageName, binEntry)
 }

@@ -5,6 +5,7 @@ import (
 	"archive/zip"
 	"bytes"
 	"compress/gzip"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -12,6 +13,9 @@ import (
 	"path/filepath"
 	"strings"
 )
+
+// ErrEmptyArchive is returned when an archive contains no files.
+var ErrEmptyArchive = errors.New("empty archive (no files after extraction)")
 
 // isInsideDir checks that the resolved path is inside destDir (prevents path traversal).
 func isInsideDir(path, destDir string) bool {
@@ -146,7 +150,7 @@ func StripTopLevelDir(dir string) error {
 	}
 
 	if len(entries) == 0 {
-		return fmt.Errorf("empty archive (no files after extraction)")
+		return ErrEmptyArchive
 	}
 
 	if len(entries) != 1 || !entries[0].IsDir() {

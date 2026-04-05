@@ -3,6 +3,7 @@ package orchestrator
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -200,44 +201,49 @@ func (o *Orchestrator) downloadAndStore(ctx context.Context, packages []parser.P
 		if err != nil {
 			return err
 		}
+		defer os.RemoveAll(tmpDir) // Safety net per spec §18.5
 
 		if err := store.ExtractByType(r.Data, r.Task.DistType, tmpDir); err != nil {
-			os.RemoveAll(tmpDir)
 			return fmt.Errorf("archive extraction failed for %s: %w", r.Task.Name, err)
 		}
 
 		if err := store.StripTopLevelDir(tmpDir); err != nil {
-			if err.Error() == "empty archive (no files after extraction)" {
-				os.RemoveAll(tmpDir)
+			if errors.Is(err, store.ErrEmptyArchive) {
 				return fmt.Errorf("archive extraction failed for %s: %w", r.Task.Name, err)
 			}
-			// Non-fatal: stripping not needed (multiple top-level entries)
+			// StripTopLevelDir returns nil for "no stripping needed" cases.
+			// Any other error is a real filesystem error — propagate it.
+			return fmt.Errorf("strip top-level for %s: %w", r.Task.Name, err)
 		}
 
 		// Hash and store each file
 		manifest, err := o.storeExtractedFiles(tmpDir, r.Task.Name, r.Data, packages)
 		if err != nil {
-			os.RemoveAll(tmpDir)
 			return err
 		}
 
 		if err := o.store.WriteManifest(manifest); err != nil {
-			os.RemoveAll(tmpDir)
 			return err
 		}
 
-		os.RemoveAll(tmpDir)
+		os.RemoveAll(tmpDir) // Eager cleanup (defer is safety net)
 	}
+	return nil
 	return nil
 }
 
 func (o *Orchestrator) storeExtractedFiles(dir, pkgName string, archiveData []byte, packages []parser.Package) (*store.Manifest, error) {
 	var pkg parser.Package
+	found := false
 	for _, p := range packages {
 		if p.Name == pkgName {
 			pkg = p
+			found = true
 			break
 		}
+	}
+	if !found {
+		return nil, fmt.Errorf("internal: package %s not in plan", pkgName)
 	}
 
 	manifest := &store.Manifest{
