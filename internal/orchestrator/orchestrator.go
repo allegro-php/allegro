@@ -203,19 +203,19 @@ func (o *Orchestrator) downloadAndStore(ctx context.Context, packages []parser.P
 
 		if err := store.ExtractByType(r.Data, r.Task.DistType, tmpDir); err != nil {
 			os.RemoveAll(tmpDir)
-			return fmt.Errorf("extract %s: %w", r.Task.Name, err)
+			return fmt.Errorf("archive extraction failed for %s: %w", r.Task.Name, err)
 		}
 
-		if err := store.StripTopLevelDir(tmpDir); err != nil && err.Error() != "empty archive (no files after extraction)" {
-			// Only fail on actual errors, not "no stripping needed"
-			if _, statErr := os.ReadDir(tmpDir); statErr != nil {
+		if err := store.StripTopLevelDir(tmpDir); err != nil {
+			if err.Error() == "empty archive (no files after extraction)" {
 				os.RemoveAll(tmpDir)
-				return fmt.Errorf("strip %s: %w", r.Task.Name, err)
+				return fmt.Errorf("archive extraction failed for %s: %w", r.Task.Name, err)
 			}
+			// Non-fatal: stripping not needed (multiple top-level entries)
 		}
 
 		// Hash and store each file
-		manifest, err := o.storeExtractedFiles(tmpDir, r.Task.Name, packages)
+		manifest, err := o.storeExtractedFiles(tmpDir, r.Task.Name, r.Data, packages)
 		if err != nil {
 			os.RemoveAll(tmpDir)
 			return err
@@ -231,7 +231,7 @@ func (o *Orchestrator) downloadAndStore(ctx context.Context, packages []parser.P
 	return nil
 }
 
-func (o *Orchestrator) storeExtractedFiles(dir, pkgName string, packages []parser.Package) (*store.Manifest, error) {
+func (o *Orchestrator) storeExtractedFiles(dir, pkgName string, archiveData []byte, packages []parser.Package) (*store.Manifest, error) {
 	var pkg parser.Package
 	for _, p := range packages {
 		if p.Name == pkgName {
@@ -241,13 +241,11 @@ func (o *Orchestrator) storeExtractedFiles(dir, pkgName string, packages []parse
 	}
 
 	manifest := &store.Manifest{
-		Name:    pkg.Name,
-		Version: pkg.Version,
-		Files:   []store.FileEntry{},
+		Name:     pkg.Name,
+		Version:  pkg.Version,
+		DistHash: "sha256:" + store.HashBytes(archiveData),
+		Files:    []store.FileEntry{},
 		StoredAt: time.Now().UTC(),
-	}
-	if pkg.Dist != nil {
-		manifest.DistHash = "sha256:" + store.HashBytes([]byte(pkg.Dist.Reference))
 	}
 
 	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {

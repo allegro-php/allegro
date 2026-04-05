@@ -7,10 +7,18 @@ import (
 	"compress/gzip"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
 )
+
+// isInsideDir checks that the resolved path is inside destDir (prevents path traversal).
+func isInsideDir(path, destDir string) bool {
+	cleanPath := filepath.Clean(path)
+	cleanDest := filepath.Clean(destDir) + string(os.PathSeparator)
+	return strings.HasPrefix(cleanPath+string(os.PathSeparator), cleanDest)
+}
 
 // ExtractZip extracts a zip archive to destDir.
 func ExtractZip(data []byte, destDir string) error {
@@ -23,16 +31,24 @@ func ExtractZip(data []byte, destDir string) error {
 		if f.FileInfo().IsDir() {
 			continue
 		}
-		// Skip symlinks
+		// Skip symlinks with warning
 		if f.Mode()&os.ModeSymlink != 0 {
+			log.Printf("warning: skipping symlink %s", f.Name)
 			continue
 		}
-		// Skip special files
+		// Skip special files with warning
 		if !f.Mode().IsRegular() {
+			log.Printf("warning: skipping special file %s (mode %v)", f.Name, f.Mode())
 			continue
 		}
 
 		path := filepath.Join(destDir, f.Name)
+		// Path traversal check
+		if !isInsideDir(path, destDir) {
+			log.Printf("warning: skipping path-traversal entry %s", f.Name)
+			continue
+		}
+
 		if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
 			return err
 		}
@@ -54,7 +70,6 @@ func ExtractZip(data []byte, destDir string) error {
 			return err
 		}
 
-		// Preserve executable bit
 		if f.Mode()&0111 != 0 {
 			os.Chmod(path, 0755)
 		}
@@ -74,18 +89,23 @@ func ExtractTar(r io.Reader, destDir string) error {
 			return fmt.Errorf("read tar: %w", err)
 		}
 
-		// Skip directories, symlinks, and special files
 		switch hdr.Typeflag {
 		case tar.TypeReg, tar.TypeRegA:
 			// Regular file — process
 		case tar.TypeLink:
 			// Hard link in tar — extract as independent copy
-			// The content will be read from the tar stream
 		default:
-			continue // Skip symlinks, dirs, devices, etc.
+			log.Printf("warning: skipping %s (type %c)", hdr.Name, hdr.Typeflag)
+			continue
 		}
 
 		path := filepath.Join(destDir, hdr.Name)
+		// Path traversal check
+		if !isInsideDir(path, destDir) {
+			log.Printf("warning: skipping path-traversal entry %s", hdr.Name)
+			continue
+		}
+
 		if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
 			return err
 		}
@@ -129,7 +149,6 @@ func StripTopLevelDir(dir string) error {
 		return fmt.Errorf("empty archive (no files after extraction)")
 	}
 
-	// Check if there's exactly one top-level entry and it's a directory
 	if len(entries) != 1 || !entries[0].IsDir() {
 		return nil // Multiple entries or single file — don't strip
 	}
@@ -140,7 +159,6 @@ func StripTopLevelDir(dir string) error {
 		return err
 	}
 
-	// Move all contents up
 	for _, entry := range subEntries {
 		src := filepath.Join(topDir, entry.Name())
 		dst := filepath.Join(dir, entry.Name())
@@ -149,7 +167,6 @@ func StripTopLevelDir(dir string) error {
 		}
 	}
 
-	// Remove the now-empty top-level directory
 	return os.Remove(topDir)
 }
 

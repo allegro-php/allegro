@@ -29,7 +29,6 @@ type InstalledPackage struct {
 	Description       string                 `json:"description,omitempty"`
 	Bin               []string               `json:"bin,omitempty"`
 	NotificationURL   string                 `json:"notification-url,omitempty"`
-	Require           map[string]string      `json:"require,omitempty"`
 	Replace           map[string]string      `json:"replace,omitempty"`
 	Provide           map[string]string      `json:"provide,omitempty"`
 	Source            map[string]interface{} `json:"source,omitempty"`
@@ -68,7 +67,6 @@ func GenerateInstalledJSON(lock *parser.ComposerLock) ([]byte, error) {
 			Description:       pkg.Description,
 			Bin:               pkg.Bin,
 			NotificationURL:   pkg.NotificationURL,
-			Require:           pkg.Require,
 			Replace:           pkg.Replace,
 			Provide:           pkg.Provide,
 			Source:            pkg.Source,

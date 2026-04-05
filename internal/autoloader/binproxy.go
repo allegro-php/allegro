@@ -16,7 +16,7 @@ const (
 	BinNonPHP
 )
 
-var phpDetectRegex = regexp.MustCompile(`(?s)^(\x{FEFF})?(#!.*?\r?\n)?[\r\n\t ]*<\?php`)
+var phpDetectRegex = regexp.MustCompile(`(?s)^(#!.*?\r?\n)?[\r\n\t ]*<\?php`)
 
 // DetectBinTarget reads the first 500 bytes and classifies the file.
 func DetectBinTarget(path string) (BinTargetType, error) {
@@ -46,11 +46,8 @@ func DetectBinTarget(path string) (BinTargetType, error) {
 	return BinPHPNoShebang, nil
 }
 
-// BinProxyPath constructs the relative path from vendor/bin/ to the target.
-func BinProxyPath(vendorName, packageName, binEntry string) string {
-	return fmt.Sprintf("__DIR__ . '/..'.'/%%s/%s'", binEntry)
-}
 
+// BuildIncludePath returns the PHP include path string for a bin proxy.
 // BuildIncludePath returns the PHP include path string for a bin proxy.
 func BuildIncludePath(packageName, binEntry string) string {
 	return fmt.Sprintf("__DIR__ . '/..'.'/%s/%s'", packageName, binEntry)

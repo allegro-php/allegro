@@ -62,7 +62,7 @@ func CleanStaleStoreTmp(storeTmpDir string) {
 
 // CreateTempDir creates a process-unique temp directory in store/tmp/.
 func CreateTempDir(storeTmpDir string) (string, error) {
-	name := fmt.Sprintf("tmp-%d-%s", os.Getpid(), randomHex(8))
+	name := fmt.Sprintf("tmp-%d-%s", os.Getpid(), randomHex(16))
 	path := filepath.Join(storeTmpDir, name)
 	if err := os.MkdirAll(path, 0755); err != nil {
 		return "", fmt.Errorf("create temp dir: %w", err)

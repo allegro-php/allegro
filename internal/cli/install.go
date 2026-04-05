@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"runtime"
+	"strings"
 
 	"github.com/allegro-php/allegro/internal/orchestrator"
 	"github.com/allegro-php/allegro/internal/parser"
@@ -60,8 +61,19 @@ func runInstall(cmd *cobra.Command, args []string) error {
 
 	orch := orchestrator.New(cfg)
 	if err := orch.Install(context.Background()); err != nil {
+		errMsg := err.Error()
 		fmt.Fprintf(cmd.ErrOrStderr(), "install failed: %v\n", err)
-		os.Exit(ExitGeneralError)
+		// Map errors to exit codes per spec §7.3
+		switch {
+		case strings.Contains(errMsg, "download") || strings.Contains(errMsg, "HTTP") || strings.Contains(errMsg, "network"):
+			os.Exit(ExitNetworkError)
+		case strings.Contains(errMsg, "composer dumpautoload") || strings.Contains(errMsg, "exit 5") || strings.Contains(errMsg, "composer binary"):
+			os.Exit(ExitComposerError)
+		case strings.Contains(errMsg, "permission") || strings.Contains(errMsg, "disk") || strings.Contains(errMsg, "rename") || strings.Contains(errMsg, "create store") || strings.Contains(errMsg, "link"):
+			os.Exit(ExitFilesystemError)
+		default:
+			os.Exit(ExitGeneralError)
+		}
 	}
 
 	// Windows bin proxy warning

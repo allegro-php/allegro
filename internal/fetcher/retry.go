@@ -3,6 +3,7 @@ package fetcher
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"strconv"
 	"time"
 )
@@ -39,39 +40,83 @@ func RetryAfterDuration(headerValue string) time.Duration {
 	return d
 }
 
+// DownloadResult holds response details for retry decisions.
+type DownloadResponse struct {
+	Body       []byte
+	StatusCode int
+	Headers    http.Header
+}
+
+// DownloadFull fetches a URL and returns body, status, headers.
+func (c *Client) DownloadFull(ctx context.Context, url string) (*DownloadResponse, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("create request: %w", err)
+	}
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("download %s: %w", url, err)
+	}
+	defer resp.Body.Close()
+
+	body, err := readAll(resp.Body)
+	if err != nil {
+		return &DownloadResponse{StatusCode: resp.StatusCode, Headers: resp.Header},
+			fmt.Errorf("read body %s: %w", url, err)
+	}
+
+	return &DownloadResponse{Body: body, StatusCode: resp.StatusCode, Headers: resp.Header}, nil
+}
+
 // DownloadWithRetry downloads a URL with retry logic per spec.
+// Max 3 retries; 429 respects Retry-After; 4xx (except 429) not retried.
 func (c *Client) DownloadWithRetry(ctx context.Context, url string) ([]byte, error) {
 	var lastErr error
-	for attempt := 0; attempt <= maxRetries; attempt++ {
+
+	for attempt := 0; attempt < maxRetries+1; attempt++ {
+		// Backoff before retries (not before first attempt)
 		if attempt > 0 {
+			backoffIdx := attempt - 1
+			if backoffIdx >= len(backoffSchedule) {
+				backoffIdx = len(backoffSchedule) - 1
+			}
 			select {
 			case <-ctx.Done():
 				return nil, ctx.Err()
-			case <-time.After(backoffSchedule[attempt-1]):
+			case <-time.After(backoffSchedule[backoffIdx]):
 			}
 		}
 
-		body, status, err := c.Download(ctx, url)
+		resp, err := c.DownloadFull(ctx, url)
 		if err != nil {
 			lastErr = err
 			continue
 		}
 
-		if status >= 200 && status < 300 {
-			return body, nil
+		if resp.StatusCode >= 200 && resp.StatusCode < 300 {
+			return resp.Body, nil
 		}
 
-		if status == 429 {
-			// 429 consumes a retry
+		if resp.StatusCode == 429 {
+			// Respect Retry-After header (counts as one retry)
+			retryAfter := RetryAfterDuration(resp.Headers.Get("Retry-After"))
+			if retryAfter > 0 {
+				select {
+				case <-ctx.Done():
+					return nil, ctx.Err()
+				case <-time.After(retryAfter):
+				}
+			}
 			lastErr = fmt.Errorf("HTTP 429 for %s", url)
 			continue
 		}
 
-		if !IsRetryable(status) {
-			return nil, fmt.Errorf("HTTP %d for %s (not retryable)", status, url)
+		if !IsRetryable(resp.StatusCode) {
+			return nil, fmt.Errorf("HTTP %d for %s (not retryable)", resp.StatusCode, url)
 		}
 
-		lastErr = fmt.Errorf("HTTP %d for %s", status, url)
+		lastErr = fmt.Errorf("HTTP %d for %s", resp.StatusCode, url)
 	}
 	return nil, fmt.Errorf("download failed after %d retries: %w", maxRetries, lastErr)
 }
