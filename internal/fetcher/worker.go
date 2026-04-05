@@ -99,6 +99,7 @@ func (p *Pool) Download(ctx context.Context, tasks []DownloadTask) []DownloadRes
 							select {
 							case <-ctx.Done():
 								finalErr = ctx.Err()
+								break retryLoop
 							case <-time.After(retryAfter):
 							}
 						}
