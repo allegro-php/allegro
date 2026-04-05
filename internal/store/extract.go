@@ -10,10 +10,10 @@ import (
 	"io"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 )
-
 // ErrEmptyArchive is returned when an archive contains no files.
 var ErrEmptyArchive = errors.New("empty archive (no files after extraction)")
 
@@ -131,6 +131,27 @@ func ExtractTar(r io.Reader, destDir string) error {
 	return nil
 }
 
+// ExtractXz decompresses xz then extracts tar using system xz command.
+func ExtractXz(data []byte, destDir string) error {
+	cmd := exec.Command("xz", "--decompress", "--stdout")
+	cmd.Stdin = bytes.NewReader(data)
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		return fmt.Errorf("xz pipe: %w", err)
+	}
+	if err := cmd.Start(); err != nil {
+		return fmt.Errorf("xz start: %w", err)
+	}
+	if err := ExtractTar(stdout, destDir); err != nil {
+		cmd.Wait()
+		return fmt.Errorf("xz+tar extract: %w", err)
+	}
+	if err := cmd.Wait(); err != nil {
+		return fmt.Errorf("xz decompress: %w", err)
+	}
+	return nil
+}
+
 // ExtractGzip decompresses gzip then extracts tar.
 func ExtractGzip(data []byte, destDir string) error {
 	gr, err := gzip.NewReader(bytes.NewReader(data))
@@ -184,7 +205,7 @@ func ExtractByType(data []byte, distType, destDir string) error {
 	case "gzip":
 		return ExtractGzip(data, destDir)
 	case "xz":
-		return fmt.Errorf("xz extraction not yet implemented")
+		return ExtractXz(data, destDir)
 	default:
 		return fmt.Errorf("unsupported dist type: %s", distType)
 	}

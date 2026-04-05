@@ -229,7 +229,6 @@ func (o *Orchestrator) downloadAndStore(ctx context.Context, packages []parser.P
 		os.RemoveAll(tmpDir) // Eager cleanup (defer is safety net)
 	}
 	return nil
-	return nil
 }
 
 func (o *Orchestrator) storeExtractedFiles(dir, pkgName string, archiveData []byte, packages []parser.Package) (*store.Manifest, error) {

@@ -62,36 +62,80 @@ func (p *Pool) Download(ctx context.Context, tasks []DownloadTask) []DownloadRes
 					continue
 				}
 
-				// Download with SHA-1 retry loop per spec §11.1:
-				// Hash mismatch triggers re-download within the 3-retry budget.
+				// Unified retry loop per spec §11.2:
+				// Max 3 retries total. HTTP errors, hash mismatches, and 429s
+				// all consume from the same shared 3-retry budget.
 				var finalData []byte
 				var finalErr error
-				for hashAttempt := 0; hashAttempt <= maxRetries; hashAttempt++ {
-					data, err := p.client.DownloadWithRetry(ctx, task.URL)
+
+				for attempt := 0; attempt < maxRetries+1; attempt++ {
+					if attempt > 0 {
+						backoffIdx := attempt - 1
+						if backoffIdx >= len(backoffSchedule) {
+							backoffIdx = len(backoffSchedule) - 1
+						}
+						select {
+						case <-ctx.Done():
+							finalErr = ctx.Err()
+							break
+						case <-time.After(backoffSchedule[backoffIdx]):
+						}
+					}
+
+					resp, err := p.client.DownloadFull(ctx, task.URL)
 					if err != nil {
 						p.recordFailure()
 						if p.shouldAbort() {
 							cancel()
 						}
 						finalErr = err
+						continue
+					}
+
+					if resp.StatusCode == 429 {
+						retryAfter := RetryAfterDuration(resp.Headers.Get("Retry-After"))
+						if retryAfter > 0 {
+							select {
+							case <-ctx.Done():
+								finalErr = ctx.Err()
+							case <-time.After(retryAfter):
+							}
+						}
+						p.recordFailure()
+						if p.shouldAbort() {
+							cancel()
+						}
+						finalErr = fmt.Errorf("HTTP 429 for %s", task.URL)
+						continue
+					}
+
+					if resp.StatusCode >= 200 && resp.StatusCode < 300 {
+						// Verify SHA-1 if shasum is non-empty
+						if task.Shasum != "" {
+							if err := verifySHA1(resp.Body, task.Shasum); err != nil {
+								p.recordFailure()
+								if p.shouldAbort() {
+									cancel()
+								}
+								finalErr = fmt.Errorf("SHA-1 mismatch for %s (attempt %d): %w", task.Name, attempt+1, err)
+								continue // Re-download counts as retry
+							}
+						}
+						finalData = resp.Body
+						finalErr = nil
 						break
 					}
 
-					// Verify SHA-1 if shasum is non-empty
-					if task.Shasum != "" {
-						if err := verifySHA1(data, task.Shasum); err != nil {
-							p.recordFailure()
-							if p.shouldAbort() {
-								cancel()
-							}
-							finalErr = fmt.Errorf("SHA-1 mismatch for %s (attempt %d): %w", task.Name, hashAttempt+1, err)
-							continue // Re-download
-						}
+					if !IsRetryable(resp.StatusCode) {
+						finalErr = fmt.Errorf("HTTP %d for %s (not retryable)", resp.StatusCode, task.URL)
+						break
 					}
 
-					finalData = data
-					finalErr = nil
-					break
+					p.recordFailure()
+					if p.shouldAbort() {
+						cancel()
+					}
+					finalErr = fmt.Errorf("HTTP %d for %s", resp.StatusCode, task.URL)
 				}
 
 				if finalErr != nil {
