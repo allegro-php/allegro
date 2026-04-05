@@ -80,7 +80,7 @@ func (s *Store) FileExists(hash string) bool {
 func (s *Store) StoreFile(srcPath, hash string, executable bool) error {
 	dst := s.FilePath(hash)
 
-	// Skip if already exists
+	// Skip if already exists (fast path)
 	if s.FileExists(hash) {
 		return nil
 	}
@@ -91,18 +91,27 @@ func (s *Store) StoreFile(srcPath, hash string, executable bool) error {
 		return fmt.Errorf("create shard dir: %w", err)
 	}
 
-	// Atomic rename
-	if err := os.Rename(srcPath, dst); err != nil {
-		return fmt.Errorf("store file rename: %w", err)
-	}
-
-	// Set CAS permissions
+	// Set permissions on source BEFORE rename so the file arrives
+	// in CAS with correct permissions atomically (no chmod gap).
 	perm := os.FileMode(0444)
 	if executable {
 		perm = 0555
 	}
-	if err := os.Chmod(dst, perm); err != nil {
-		return fmt.Errorf("chmod CAS file: %w", err)
+	if err := os.Chmod(srcPath, perm); err != nil {
+		return fmt.Errorf("chmod src file: %w", err)
+	}
+
+	// Atomic rename — on POSIX this overwrites atomically if another
+	// process raced to store the same hash (safe, identical content).
+	// On Windows, os.Rename may fail if dst exists — handle gracefully.
+	if err := os.Rename(srcPath, dst); err != nil {
+		// If destination already exists (race condition), that's OK —
+		// content is identical by definition (same SHA-256).
+		if s.FileExists(hash) {
+			os.Remove(srcPath) // Clean up our copy
+			return nil
+		}
+		return fmt.Errorf("store file rename: %w", err)
 	}
 
 	return nil

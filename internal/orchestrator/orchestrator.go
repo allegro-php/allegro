@@ -196,27 +196,62 @@ func (o *Orchestrator) downloadAndStore(ctx context.Context, packages []parser.P
 			return fmt.Errorf("download %s: %w", r.Task.Name, r.Error)
 		}
 
-		// Extract and store
+		if err := o.extractAndStore(r, packages); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// extractAndStore handles extraction with retry per spec §11.1.
+// Each call is a separate function scope so defer works correctly.
+func (o *Orchestrator) extractAndStore(r fetcher.DownloadResult, packages []parser.Package) error {
+	var lastErr error
+
+	for attempt := 0; attempt < 4; attempt++ { // 1 initial + 3 retries
+		if attempt > 0 {
+			backoff := []time.Duration{time.Second, 2 * time.Second, 4 * time.Second}
+			idx := attempt - 1
+			if idx >= len(backoff) {
+				idx = len(backoff) - 1
+			}
+			time.Sleep(backoff[idx])
+
+			// Re-download the package for retry
+			pool := fetcher.NewPool(1)
+			results := pool.Download(context.Background(), []fetcher.DownloadTask{{
+				Name: r.Task.Name, URL: r.Task.URL,
+				Shasum: r.Task.Shasum, DistType: r.Task.DistType,
+			}})
+			if len(results) > 0 && results[0].Error != nil {
+				return fmt.Errorf("download %s (re-download for extraction retry): %w", r.Task.Name, results[0].Error)
+			}
+			if len(results) > 0 {
+				r.Data = results[0].Data
+			}
+		}
+
 		tmpDir, err := linker.CreateTempDir(o.store.TmpDir())
 		if err != nil {
 			return err
 		}
-		defer os.RemoveAll(tmpDir) // Safety net per spec §18.5
+		defer os.RemoveAll(tmpDir)
 
 		if err := store.ExtractByType(r.Data, r.Task.DistType, tmpDir); err != nil {
-			return fmt.Errorf("archive extraction failed for %s: %w", r.Task.Name, err)
+			lastErr = fmt.Errorf("archive extraction failed for %s: %w", r.Task.Name, err)
+			os.RemoveAll(tmpDir)
+			continue // Retry with re-download
 		}
 
 		if err := store.StripTopLevelDir(tmpDir); err != nil {
 			if errors.Is(err, store.ErrEmptyArchive) {
-				return fmt.Errorf("archive extraction failed for %s: %w", r.Task.Name, err)
+				lastErr = fmt.Errorf("archive extraction failed for %s: %w", r.Task.Name, err)
+				os.RemoveAll(tmpDir)
+				continue
 			}
-			// StripTopLevelDir returns nil for "no stripping needed" cases.
-			// Any other error is a real filesystem error — propagate it.
 			return fmt.Errorf("strip top-level for %s: %w", r.Task.Name, err)
 		}
 
-		// Hash and store each file
 		manifest, err := o.storeExtractedFiles(tmpDir, r.Task.Name, r.Data, packages)
 		if err != nil {
 			return err
@@ -226,9 +261,10 @@ func (o *Orchestrator) downloadAndStore(ctx context.Context, packages []parser.P
 			return err
 		}
 
-		os.RemoveAll(tmpDir) // Eager cleanup (defer is safety net)
+		os.RemoveAll(tmpDir)
+		return nil // Success
 	}
-	return nil
+	return lastErr
 }
 
 func (o *Orchestrator) storeExtractedFiles(dir, pkgName string, archiveData []byte, packages []parser.Package) (*store.Manifest, error) {
@@ -302,6 +338,23 @@ func (o *Orchestrator) buildVendorTree(vendorTmp string, packages []parser.Packa
 				return err
 			}
 
+			// Check if CAS file exists; if missing, re-download per spec §6.3 step 3
+			if !o.store.FileExists(hash) {
+				log.Printf("warning: CAS file missing for %s/%s, re-downloading package", pkg.Name, f.Path)
+				if err := o.redownloadPackage(pkg); err != nil {
+					return fmt.Errorf("re-download %s for missing CAS file: %w", pkg.Name, err)
+				}
+				// Re-read manifest (may have been updated)
+				manifest, err = o.store.ReadManifest(pkg.Name, pkg.Version)
+				if err != nil {
+					return fmt.Errorf("re-read manifest %s: %w", pkg.Name, err)
+				}
+				// Retry — if still missing after re-download, fail
+				if !o.store.FileExists(hash) {
+					return fmt.Errorf("CAS file still missing for %s/%s after re-download", pkg.Name, f.Path)
+				}
+			}
+
 			if err := lnk.LinkFile(srcPath, dstPath); err != nil {
 				return fmt.Errorf("link %s/%s: %w", pkg.Name, f.Path, err)
 			}
@@ -317,6 +370,27 @@ func (o *Orchestrator) buildVendorTree(vendorTmp string, packages []parser.Packa
 		}
 	}
 	return nil
+}
+
+// redownloadPackage re-downloads and re-stores a package when CAS files are missing.
+func (o *Orchestrator) redownloadPackage(pkg parser.Package) error {
+	if pkg.Dist == nil {
+		return fmt.Errorf("cannot re-download %s: no dist info", pkg.Name)
+	}
+	pool := fetcher.NewPool(1)
+	results := pool.Download(context.Background(), []fetcher.DownloadTask{{
+		Name: pkg.Name, URL: pkg.Dist.URL,
+		Shasum: pkg.Dist.Shasum, DistType: pkg.Dist.Type,
+	}})
+	if len(results) == 0 || results[0].Error != nil {
+		if len(results) > 0 {
+			return results[0].Error
+		}
+		return fmt.Errorf("re-download %s: no results", pkg.Name)
+	}
+
+	r := results[0]
+	return o.extractAndStore(r, []parser.Package{pkg})
 }
 
 func (o *Orchestrator) generateBinProxies(vendorTmp string, packages []parser.Package) error {
