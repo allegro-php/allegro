@@ -96,7 +96,7 @@ func (o *Orchestrator) Install(ctx context.Context) error {
 
 	// Build vendor tree
 	vendorTmp := filepath.Join(o.config.ProjectDir, "vendor.allegro.tmp")
-	if err := o.buildVendorTree(vendorTmp, plan.AllPackages, lnk, strategy); err != nil {
+	if err := o.buildVendorTree(ctx, vendorTmp, plan.AllPackages, lnk, strategy); err != nil {
 		os.RemoveAll(vendorTmp)
 		return err
 	}
@@ -196,7 +196,7 @@ func (o *Orchestrator) downloadAndStore(ctx context.Context, packages []parser.P
 			return fmt.Errorf("download %s: %w", r.Task.Name, r.Error)
 		}
 
-		if err := o.extractAndStore(r, packages); err != nil {
+		if err := o.extractAndStore(ctx, r, packages); err != nil {
 			return err
 		}
 	}
@@ -205,7 +205,7 @@ func (o *Orchestrator) downloadAndStore(ctx context.Context, packages []parser.P
 
 // extractAndStore handles extraction with retry per spec §11.1.
 // Each call is a separate function scope so defer works correctly.
-func (o *Orchestrator) extractAndStore(r fetcher.DownloadResult, packages []parser.Package) error {
+func (o *Orchestrator) extractAndStore(ctx context.Context, r fetcher.DownloadResult, packages []parser.Package) error {
 	var lastErr error
 
 	for attempt := 0; attempt < 4; attempt++ { // 1 initial + 3 retries
@@ -219,7 +219,7 @@ func (o *Orchestrator) extractAndStore(r fetcher.DownloadResult, packages []pars
 
 			// Re-download the package for retry
 			pool := fetcher.NewPool(1)
-			results := pool.Download(context.Background(), []fetcher.DownloadTask{{
+			results := pool.Download(ctx, []fetcher.DownloadTask{{
 				Name: r.Task.Name, URL: r.Task.URL,
 				Shasum: r.Task.Shasum, DistType: r.Task.DistType,
 			}})
@@ -318,7 +318,7 @@ func (o *Orchestrator) storeExtractedFiles(dir, pkgName string, archiveData []by
 	return manifest, err
 }
 
-func (o *Orchestrator) buildVendorTree(vendorTmp string, packages []parser.Package, lnk linker.Linker, strategy linker.Strategy) error {
+func (o *Orchestrator) buildVendorTree(ctx context.Context, vendorTmp string, packages []parser.Package, lnk linker.Linker, strategy linker.Strategy) error {
 	for _, pkg := range packages {
 		manifest, err := o.store.ReadManifest(pkg.Name, pkg.Version)
 		if err != nil {
@@ -341,7 +341,7 @@ func (o *Orchestrator) buildVendorTree(vendorTmp string, packages []parser.Packa
 			// Check if CAS file exists; if missing, re-download per spec §6.3 step 3
 			if !o.store.FileExists(hash) {
 				log.Printf("warning: CAS file missing for %s/%s, re-downloading package", pkg.Name, f.Path)
-				if err := o.redownloadPackage(pkg); err != nil {
+				if err := o.redownloadPackage(ctx, pkg); err != nil {
 					return fmt.Errorf("re-download %s for missing CAS file: %w", pkg.Name, err)
 				}
 				// Re-read manifest (may have been updated)
@@ -373,12 +373,12 @@ func (o *Orchestrator) buildVendorTree(vendorTmp string, packages []parser.Packa
 }
 
 // redownloadPackage re-downloads and re-stores a package when CAS files are missing.
-func (o *Orchestrator) redownloadPackage(pkg parser.Package) error {
+func (o *Orchestrator) redownloadPackage(ctx context.Context, pkg parser.Package) error {
 	if pkg.Dist == nil {
 		return fmt.Errorf("cannot re-download %s: no dist info", pkg.Name)
 	}
 	pool := fetcher.NewPool(1)
-	results := pool.Download(context.Background(), []fetcher.DownloadTask{{
+	results := pool.Download(ctx, []fetcher.DownloadTask{{
 		Name: pkg.Name, URL: pkg.Dist.URL,
 		Shasum: pkg.Dist.Shasum, DistType: pkg.Dist.Type,
 	}})
@@ -390,7 +390,7 @@ func (o *Orchestrator) redownloadPackage(pkg parser.Package) error {
 	}
 
 	r := results[0]
-	return o.extractAndStore(r, []parser.Package{pkg})
+	return o.extractAndStore(ctx, r, []parser.Package{pkg})
 }
 
 func (o *Orchestrator) generateBinProxies(vendorTmp string, packages []parser.Package) error {

@@ -69,7 +69,11 @@ func runInstall(cmd *cobra.Command, args []string) error {
 			os.Exit(ExitNetworkError)
 		case strings.Contains(errMsg, "composer dumpautoload") || strings.Contains(errMsg, "exit 5") || strings.Contains(errMsg, "composer binary"):
 			os.Exit(ExitComposerError)
-		case strings.Contains(errMsg, "permission") || strings.Contains(errMsg, "disk") || strings.Contains(errMsg, "rename") || strings.Contains(errMsg, "create store") || strings.Contains(errMsg, "link"):
+		case strings.Contains(errMsg, "permission") || strings.Contains(errMsg, "disk") ||
+			strings.Contains(errMsg, "rename") || strings.Contains(errMsg, "create store") ||
+			strings.Contains(errMsg, "link") || strings.Contains(errMsg, "create temp dir") ||
+			strings.Contains(errMsg, "create lock file") || strings.Contains(errMsg, "shard dir") ||
+			strings.Contains(errMsg, "chmod") || strings.Contains(errMsg, "mkdir"):
 			os.Exit(ExitFilesystemError)
 		default:
 			os.Exit(ExitGeneralError)
