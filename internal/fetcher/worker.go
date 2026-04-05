@@ -68,6 +68,7 @@ func (p *Pool) Download(ctx context.Context, tasks []DownloadTask) []DownloadRes
 				var finalData []byte
 				var finalErr error
 
+			retryLoop:
 				for attempt := 0; attempt < maxRetries+1; attempt++ {
 					if attempt > 0 {
 						backoffIdx := attempt - 1
@@ -77,7 +78,7 @@ func (p *Pool) Download(ctx context.Context, tasks []DownloadTask) []DownloadRes
 						select {
 						case <-ctx.Done():
 							finalErr = ctx.Err()
-							break
+							break retryLoop
 						case <-time.After(backoffSchedule[backoffIdx]):
 						}
 					}
