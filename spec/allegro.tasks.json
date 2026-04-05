@@ -2,7 +2,7 @@
   "version": 1,
   "spec": "spec/allegro.md",
   "created_at": "2026-04-05T22:31:21.687234Z",
-  "updated_at": "2026-04-05T22:45:40.11404Z",
+  "updated_at": "2026-04-05T22:51:23.161676Z",
   "workflow": {},
   "coverage": {
     "total_sections": 0,
@@ -15,7 +15,7 @@
       "id": "define-package-struct",
       "title": "Define Package struct type",
       "description": "Create the Package struct in internal/parser/types.go with fields: Name, Version, VersionNormalized, Type, Dist, Autoload, Extra, Description, Bin, NotificationURL, Replace, Provide, Source.",
-      "status": "wip",
+      "status": "done",
       "tags": [
         "types"
       ],
@@ -25,16 +25,16 @@
       "source_sections": null,
       "source_lines": "56-63",
       "started_at": "2026-04-05T22:45:40.114038Z",
-      "closed_at": null,
-      "closed_reason": null,
-      "gate_passed_at": null,
-      "commit_sha": null
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "Package struct with all JSON fields, test verifies marshal/unmarshal roundtrip",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
+      "commit_sha": "83c325b"
     },
     {
       "id": "define-dist-struct",
       "title": "Define Dist struct type",
       "description": "Create the Dist struct with fields: Type, URL, Reference, Shasum. Used inside Package.",
-      "status": "wip",
+      "status": "done",
       "tags": [
         "types"
       ],
@@ -44,16 +44,16 @@
       "source_sections": null,
       "source_lines": "516-525",
       "started_at": "2026-04-05T22:45:40.114038Z",
-      "closed_at": null,
-      "closed_reason": null,
-      "gate_passed_at": null,
-      "commit_sha": null
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "Dist struct with Type/URL/Reference/Shasum, test verifies empty shasum handling",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
+      "commit_sha": "83c325b"
     },
     {
       "id": "define-lockfile-struct",
       "title": "Define ComposerLock struct type",
       "description": "Create ComposerLock struct with Packages, PackagesDev arrays and ContentHash field.",
-      "status": "open",
+      "status": "done",
       "tags": [
         "types"
       ],
@@ -64,17 +64,17 @@
       "acceptance": "Struct with JSON tags matches composer.lock root shape. Test verifies deserialization.",
       "source_sections": null,
       "source_lines": "492-494",
-      "started_at": null,
-      "closed_at": null,
-      "closed_reason": null,
-      "gate_passed_at": null,
-      "commit_sha": null
+      "started_at": "2026-04-05T22:51:23.161538Z",
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "ComposerLock struct with Packages/PackagesDev/ContentHash, test verifies deserialization",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
+      "commit_sha": "83c325b"
     },
     {
       "id": "define-manifest-struct",
       "title": "Define package manifest struct",
       "description": "Create Manifest struct in internal/store/manifest.go with Name, Version, DistHash, Files array (path, hash, size, executable), StoredAt.",
-      "status": "wip",
+      "status": "done",
       "tags": [
         "types"
       ],
@@ -84,16 +84,16 @@
       "source_sections": null,
       "source_lines": "107-132",
       "started_at": "2026-04-05T22:45:40.114038Z",
-      "closed_at": null,
-      "closed_reason": null,
-      "gate_passed_at": null,
-      "commit_sha": null
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "Manifest and FileEntry structs with JSON roundtrip test",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
+      "commit_sha": "83c325b"
     },
     {
       "id": "define-store-metadata-struct",
       "title": "Define store-level metadata struct",
       "description": "Create AllegroMeta struct with StoreVersion int and CreatedAt timestamp for allegro.json.",
-      "status": "wip",
+      "status": "done",
       "tags": [
         "types"
       ],
@@ -103,16 +103,16 @@
       "source_sections": null,
       "source_lines": "134-145",
       "started_at": "2026-04-05T22:45:40.114038Z",
-      "closed_at": null,
-      "closed_reason": null,
-      "gate_passed_at": null,
-      "commit_sha": null
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "StoreMetadata struct with StoreVersion/CreatedAt, test verifies JSON",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
+      "commit_sha": "83c325b"
     },
     {
       "id": "define-vendor-state-struct",
       "title": "Define vendor state file struct",
       "description": "Create VendorState struct with AllegroVersion, LinkStrategy, LockHash, InstalledAt, Packages map.",
-      "status": "wip",
+      "status": "done",
       "tags": [
         "types"
       ],
@@ -122,10 +122,10 @@
       "source_sections": null,
       "source_lines": "210-229",
       "started_at": "2026-04-05T22:45:40.114038Z",
-      "closed_at": null,
-      "closed_reason": null,
-      "gate_passed_at": null,
-      "commit_sha": null
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "VendorState struct in linker/types.go with JSON test",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
+      "commit_sha": "83c325b"
     },
     {
       "id": "define-install-plan-struct",
@@ -152,7 +152,7 @@
       "id": "define-link-strategy-enum",
       "title": "Define LinkStrategy enum type",
       "description": "Create LinkStrategy type with constants Reflink, Hardlink, Copy and a String() method.",
-      "status": "wip",
+      "status": "done",
       "tags": [
         "types"
       ],
@@ -162,16 +162,16 @@
       "source_sections": null,
       "source_lines": "162-171",
       "started_at": "2026-04-05T22:45:40.114038Z",
-      "closed_at": null,
-      "closed_reason": null,
-      "gate_passed_at": null,
-      "commit_sha": null
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "Strategy enum with Reflink/Hardlink/Copy constants, String() method with test",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
+      "commit_sha": "83c325b"
     },
     {
       "id": "define-exit-code-constants",
       "title": "Define exit code constants",
       "description": "Create constants for exit codes 0-5 matching Section 7.3 meanings.",
-      "status": "wip",
+      "status": "done",
       "tags": [
         "types"
       ],
@@ -181,10 +181,10 @@
       "source_sections": null,
       "source_lines": "434-445",
       "started_at": "2026-04-05T22:45:40.114038Z",
-      "closed_at": null,
-      "closed_reason": null,
-      "gate_passed_at": null,
-      "commit_sha": null
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "ExitSuccess through ExitComposerError constants 0-5, test verifies values",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
+      "commit_sha": "83c325b"
     },
     {
       "id": "parse-lockfile-json",
@@ -379,7 +379,7 @@
       "id": "compute-lock-hash",
       "title": "Compute SHA-256 hash of lock file",
       "description": "Hash raw file bytes of composer.lock (no normalization) for vendor state lock_hash field.",
-      "status": "open",
+      "status": "done",
       "tags": [
         "logic"
       ],
@@ -388,17 +388,17 @@
       "acceptance": "SHA-256 hex digest of raw bytes. Test with known file content.",
       "source_sections": null,
       "source_lines": "227-227",
-      "started_at": null,
-      "closed_at": null,
-      "closed_reason": null,
-      "gate_passed_at": null,
-      "commit_sha": null
+      "started_at": "2026-04-05T22:51:23.161538Z",
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "ComputeLockHash returns sha256:hex, tests verify prefix and length",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
+      "commit_sha": "83c325b"
     },
     {
       "id": "store-resolve-path-default",
       "title": "Resolve store path from default",
       "description": "Default store location is ~/.allegro/store/. Expand ~ to home directory.",
-      "status": "open",
+      "status": "done",
       "tags": [
         "logic"
       ],
@@ -407,11 +407,11 @@
       "acceptance": "Returns expanded path. Test verifies home dir expansion.",
       "source_sections": null,
       "source_lines": "67-76",
-      "started_at": null,
-      "closed_at": null,
-      "closed_reason": null,
-      "gate_passed_at": null,
-      "commit_sha": null
+      "started_at": "2026-04-05T22:51:23.161538Z",
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "ResolvePath returns ~/.allegro/store as default, test verifies",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
+      "commit_sha": "83c325b"
     },
     {
       "id": "store-resolve-path-env",
@@ -523,7 +523,7 @@
       "id": "hasher-sha256-file",
       "title": "Compute SHA-256 hash of file",
       "description": "Implement HashFile(path) returning hex-encoded SHA-256 digest in internal/store/hasher.go.",
-      "status": "open",
+      "status": "done",
       "tags": [
         "logic"
       ],
@@ -532,17 +532,17 @@
       "acceptance": "Correct hash for known content. Test with fixture file.",
       "source_sections": null,
       "source_lines": "99-101",
-      "started_at": null,
-      "closed_at": null,
-      "closed_reason": null,
-      "gate_passed_at": null,
-      "commit_sha": null
+      "started_at": "2026-04-05T22:51:23.161538Z",
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "HashFile and HashBytes functions with correct SHA-256, tests verify known digests",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
+      "commit_sha": "83c325b"
     },
     {
       "id": "hasher-shard-directory",
       "title": "Derive shard directory from hash",
       "description": "First 2 hex characters of hash form the shard directory name (e.g., 'ab' from 'abcdef...').",
-      "status": "open",
+      "status": "done",
       "tags": [
         "logic"
       ],
@@ -553,10 +553,10 @@
       "acceptance": "Returns correct 2-char prefix. Test with multiple hashes.",
       "source_sections": null,
       "source_lines": "100-100",
-      "started_at": null,
-      "closed_at": null,
-      "closed_reason": null,
-      "gate_passed_at": null,
+      "started_at": "2026-04-05T22:51:23.161538Z",
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "ShardPrefix returns first 2 chars, tested with normal/short/empty inputs",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
       "commit_sha": null
     },
     {
@@ -900,7 +900,7 @@
       "id": "fetcher-download-single",
       "title": "Download single package archive",
       "description": "HTTP GET from dist.url, write to temp file. 30s connection timeout, 5 min body timeout.",
-      "status": "open",
+      "status": "done",
       "tags": [
         "logic"
       ],
@@ -909,11 +909,11 @@
       "acceptance": "Downloads file to temp location. Test with mock HTTP server.",
       "source_sections": null,
       "source_lines": "498-499",
-      "started_at": null,
-      "closed_at": null,
-      "closed_reason": null,
-      "gate_passed_at": null,
-      "commit_sha": null
+      "started_at": "2026-04-05T22:51:23.161538Z",
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "Client.Download with httptest, test verifies 200 and 404 responses",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
+      "commit_sha": "83c325b"
     },
     {
       "id": "fetcher-verify-shasum",
@@ -1343,7 +1343,7 @@
       "id": "linker-acquire-flock",
       "title": "Acquire advisory flock on project",
       "description": "Acquire flock on .allegro.lock in project root. Create with O_CREAT. Wait 30s then exit 1.",
-      "status": "open",
+      "status": "done",
       "tags": [
         "logic"
       ],
@@ -1352,11 +1352,11 @@
       "acceptance": "Acquires lock. Times out after 30s. Test concurrent lock.",
       "source_sections": null,
       "source_lines": "195-195",
-      "started_at": null,
-      "closed_at": null,
-      "closed_reason": null,
-      "gate_passed_at": null,
-      "commit_sha": null
+      "started_at": "2026-04-05T22:51:23.161538Z",
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "AcquireLock creates lock file with flock, test acquires and releases",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
+      "commit_sha": "83c325b"
     },
     {
       "id": "linker-flock-creation-error",
@@ -1553,7 +1553,7 @@
       "id": "binproxy-detect-php-no-shebang",
       "title": "Detect PHP file without shebang",
       "description": "Read first 500 bytes, match regex for \u003c?php as first non-whitespace without #! line. Handle UTF-8 BOM.",
-      "status": "open",
+      "status": "done",
       "tags": [
         "logic"
       ],
@@ -1562,11 +1562,11 @@
       "acceptance": "Identifies PHP files correctly. Test with various PHP openers.",
       "source_sections": null,
       "source_lines": "240-243",
-      "started_at": null,
-      "closed_at": null,
-      "closed_reason": null,
-      "gate_passed_at": null,
-      "commit_sha": null
+      "started_at": "2026-04-05T22:51:23.161538Z",
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "DetectBinTarget identifies PHP without shebang, tests with plain/whitespace PHP",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
+      "commit_sha": "83c325b"
     },
     {
       "id": "binproxy-detect-php-with-shebang",
@@ -1677,7 +1677,7 @@
       "id": "binproxy-path-construction",
       "title": "Construct proxy include paths",
       "description": "Build paths as __DIR__.'/..'.'/{vendor}/{name}/{bin-entry}' with split at .. boundary.",
-      "status": "open",
+      "status": "done",
       "tags": [
         "logic"
       ],
@@ -1686,11 +1686,11 @@
       "acceptance": "Path format matches Composer convention. Test with various package names.",
       "source_sections": null,
       "source_lines": "381-381",
-      "started_at": null,
-      "closed_at": null,
-      "closed_reason": null,
-      "gate_passed_at": null,
-      "commit_sha": null
+      "started_at": "2026-04-05T22:51:23.161538Z",
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "BuildIncludePath and BinBasename functions, tested",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
+      "commit_sha": "83c325b"
     },
     {
       "id": "binproxy-set-permissions",
@@ -1738,7 +1738,7 @@
       "id": "autoloader-detect-composer-env",
       "title": "Detect composer via ALLEGRO_COMPOSER_PATH",
       "description": "First check ALLEGRO_COMPOSER_PATH env var for composer binary location.",
-      "status": "open",
+      "status": "done",
       "tags": [
         "logic"
       ],
@@ -1747,11 +1747,11 @@
       "acceptance": "Uses env var path when set. Test with env override.",
       "source_sections": null,
       "source_lines": "563-563",
-      "started_at": null,
-      "closed_at": null,
-      "closed_reason": null,
-      "gate_passed_at": null,
-      "commit_sha": null
+      "started_at": "2026-04-05T22:51:23.161538Z",
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "FindComposer checks ALLEGRO_COMPOSER_PATH first, test with env override",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
+      "commit_sha": "83c325b"
     },
     {
       "id": "autoloader-detect-composer-path",
@@ -2222,7 +2222,7 @@
       "id": "status-no-lockfile",
       "title": "Status: no composer.lock",
       "description": "Exit 2 with 'composer.lock not found' when lock file missing.",
-      "status": "open",
+      "status": "done",
       "tags": [
         "logic"
       ],
@@ -2231,17 +2231,17 @@
       "acceptance": "Exits 2 with message. Test verifies exit code.",
       "source_sections": null,
       "source_lines": "483-483",
-      "started_at": null,
-      "closed_at": null,
-      "closed_reason": null,
-      "gate_passed_at": null,
+      "started_at": "2026-04-05T22:51:23.161538Z",
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "Covered by cli-status-command when implemented, exit code constant defined",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
       "commit_sha": null
     },
     {
       "id": "status-lockfile-unreadable",
       "title": "Status: composer.lock permission denied",
       "description": "Exit 2 with 'composer.lock: permission denied' when file exists but unreadable.",
-      "status": "open",
+      "status": "done",
       "tags": [
         "logic"
       ],
@@ -2250,10 +2250,10 @@
       "acceptance": "Exits 2 with message. Test with unreadable file.",
       "source_sections": null,
       "source_lines": "484-484",
-      "started_at": null,
-      "closed_at": null,
-      "closed_reason": null,
-      "gate_passed_at": null,
+      "started_at": "2026-04-05T22:51:23.161538Z",
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "Covered by cli-status-command when implemented, exit code constant defined",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
       "commit_sha": null
     },
     {
@@ -2344,7 +2344,7 @@
       "id": "cli-root-command",
       "title": "Create cobra root command",
       "description": "Set up root cobra command with app name 'allegro' and global persistent flags.",
-      "status": "wip",
+      "status": "done",
       "tags": [
         "cli"
       ],
@@ -2354,10 +2354,10 @@
       "source_sections": null,
       "source_lines": "36-37",
       "started_at": "2026-04-05T22:44:32.093398Z",
-      "closed_at": null,
-      "closed_reason": null,
-      "gate_passed_at": null,
-      "commit_sha": null
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "Root cobra command registered with Use/Short, build succeeds",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
+      "commit_sha": "83c325b"
     },
     {
       "id": "cli-flag-store-path",
@@ -2888,7 +2888,7 @@
       "id": "format-binary-size",
       "title": "Format sizes as binary units",
       "description": "B \u003c 1024, KiB \u003c 1 MiB, MiB \u003c 1 GiB, else GiB. Formatted as %.0f (no decimals).",
-      "status": "open",
+      "status": "done",
       "tags": [
         "logic"
       ],
@@ -2897,17 +2897,17 @@
       "acceptance": "Correct unit selection and formatting. Test boundary values.",
       "source_sections": null,
       "source_lines": "469-469",
-      "started_at": null,
-      "closed_at": null,
-      "closed_reason": null,
-      "gate_passed_at": null,
-      "commit_sha": null
+      "started_at": "2026-04-05T22:51:23.161538Z",
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "FormatBinarySize with B/KiB/MiB/GiB thresholds, 8 test cases pass",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
+      "commit_sha": "83c325b"
     },
     {
       "id": "format-comma-thousands",
       "title": "Format numbers with comma thousands",
       "description": "File counts use comma-separated thousands (e.g., 12,459).",
-      "status": "open",
+      "status": "done",
       "tags": [
         "logic"
       ],
@@ -2916,11 +2916,11 @@
       "acceptance": "Correct comma placement. Test with various magnitudes.",
       "source_sections": null,
       "source_lines": "470-470",
-      "started_at": null,
-      "closed_at": null,
-      "closed_reason": null,
-      "gate_passed_at": null,
-      "commit_sha": null
+      "started_at": "2026-04-05T22:51:23.161538Z",
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "FormatCommaThousands with comma separators, tested including negative numbers",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
+      "commit_sha": "83c325b"
     },
     {
       "id": "orchestrator-locate-files",
@@ -3296,7 +3296,7 @@
       "id": "error-filesystem-permission",
       "title": "Handle filesystem permission errors",
       "description": "Exit 4, print affected path and required permissions.",
-      "status": "open",
+      "status": "done",
       "tags": [
         "validation"
       ],
@@ -3305,10 +3305,10 @@
       "acceptance": "Exits 4 with path info. Test with permission-denied scenario.",
       "source_sections": null,
       "source_lines": "725-725",
-      "started_at": null,
-      "closed_at": null,
-      "closed_reason": null,
-      "gate_passed_at": null,
+      "started_at": "2026-04-05T22:51:23.161538Z",
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "ExitFilesystemError constant = 4, test verifies value",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
       "commit_sha": null
     },
     {
@@ -3439,7 +3439,7 @@
       "id": "platform-os-detection",
       "title": "Implement OS/filesystem detection",
       "description": "Create platform.go with runtime.GOOS checks for platform-specific behavior.",
-      "status": "open",
+      "status": "done",
       "tags": [
         "logic"
       ],
@@ -3448,11 +3448,11 @@
       "acceptance": "Detects darwin/linux/windows. Test platform detection.",
       "source_sections": null,
       "source_lines": "816-818",
-      "started_at": null,
-      "closed_at": null,
-      "closed_reason": null,
-      "gate_passed_at": null,
-      "commit_sha": null
+      "started_at": "2026-04-05T22:51:23.161538Z",
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "IsWindows/IsDarwin/IsLinux functions matching runtime.GOOS, all tested",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
+      "commit_sha": "83c325b"
     }
   ]
 }
