@@ -7,6 +7,7 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/allegro-php/allegro/internal/linker"
 	"github.com/allegro-php/allegro/internal/orchestrator"
 	"github.com/allegro-php/allegro/internal/parser"
 	"github.com/allegro-php/allegro/internal/store"
@@ -89,18 +90,46 @@ func runInstall(cmd *cobra.Command, args []string) error {
 }
 
 func runDryRun(cmd *cobra.Command, projectDir string) error {
+	// Step 1: Locate and parse
 	lockPath := projectDir + "/composer.lock"
 	lock, err := parser.ParseLockFile(lockPath)
 	if err != nil {
 		return err
 	}
 
+	// Step 2: Detect link strategy
+	storePath := store.ResolvePath(flagStorePath, os.Getenv("ALLEGRO_STORE"))
+	s := store.New(storePath)
+	s.EnsureDirectories()
+	strategy, _ := linker.DetectStrategy(s.Root, projectDir, ResolveLinkStrategy())
+
+	// Step 3: Parse packages
 	all := parser.MergePackages(lock)
-	fmt.Fprintf(cmd.OutOrStdout(), "Dry run: %d packages would be installed\n", len(all))
+
+	// Step 4: Build install plan (check CAS for new vs cached)
+	var newPkgs, cachedPkgs, skippedPkgs int
 	for _, pkg := range all {
-		cached := ""
-		// Could check CAS here but keeping simple for dry-run
-		fmt.Fprintf(cmd.OutOrStdout(), "  %s %s%s\n", pkg.Name, pkg.Version, cached)
+		if pkg.Dist == nil || pkg.Dist.Type == "path" {
+			skippedPkgs++
+			continue
+		}
+		if s.ManifestExists(pkg.Name, pkg.Version) {
+			cachedPkgs++
+		} else {
+			newPkgs++
+		}
+	}
+
+	fmt.Fprintf(cmd.OutOrStdout(), "Dry run: %d packages (%d new, %d cached, %d skipped), strategy: %s\n",
+		len(all), newPkgs, cachedPkgs, skippedPkgs, strategy)
+	for _, pkg := range all {
+		status := "new"
+		if pkg.Dist == nil || pkg.Dist.Type == "path" {
+			status = "skip"
+		} else if s.ManifestExists(pkg.Name, pkg.Version) {
+			status = "cached"
+		}
+		fmt.Fprintf(cmd.OutOrStdout(), "  [%s] %s %s\n", status, pkg.Name, pkg.Version)
 	}
 	return nil
 }

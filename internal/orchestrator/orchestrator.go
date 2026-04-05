@@ -203,68 +203,64 @@ func (o *Orchestrator) downloadAndStore(ctx context.Context, packages []parser.P
 	return nil
 }
 
-// extractAndStore handles extraction with retry per spec §11.1.
-// Each call is a separate function scope so defer works correctly.
+// extractAndStore handles extraction with a single re-download retry per spec §11.1.
+// The worker pool has already used its share of the 3-retry budget for HTTP-level
+// errors. Extraction failure gets at most 1 re-download attempt to stay within
+// the shared budget.
 func (o *Orchestrator) extractAndStore(ctx context.Context, r fetcher.DownloadResult, packages []parser.Package) error {
-	var lastErr error
-
-	for attempt := 0; attempt < 4; attempt++ { // 1 initial + 3 retries
-		if attempt > 0 {
-			backoff := []time.Duration{time.Second, 2 * time.Second, 4 * time.Second}
-			idx := attempt - 1
-			if idx >= len(backoff) {
-				idx = len(backoff) - 1
-			}
-			time.Sleep(backoff[idx])
-
-			// Re-download the package for retry
-			pool := fetcher.NewPool(1)
-			results := pool.Download(ctx, []fetcher.DownloadTask{{
-				Name: r.Task.Name, URL: r.Task.URL,
-				Shasum: r.Task.Shasum, DistType: r.Task.DistType,
-			}})
-			if len(results) > 0 && results[0].Error != nil {
-				return fmt.Errorf("download %s (re-download for extraction retry): %w", r.Task.Name, results[0].Error)
-			}
-			if len(results) > 0 {
-				r.Data = results[0].Data
-			}
-		}
-
-		tmpDir, err := linker.CreateTempDir(o.store.TmpDir())
-		if err != nil {
-			return err
-		}
-		defer os.RemoveAll(tmpDir)
-
-		if err := store.ExtractByType(r.Data, r.Task.DistType, tmpDir); err != nil {
-			lastErr = fmt.Errorf("archive extraction failed for %s: %w", r.Task.Name, err)
-			os.RemoveAll(tmpDir)
-			continue // Retry with re-download
-		}
-
-		if err := store.StripTopLevelDir(tmpDir); err != nil {
-			if errors.Is(err, store.ErrEmptyArchive) {
-				lastErr = fmt.Errorf("archive extraction failed for %s: %w", r.Task.Name, err)
-				os.RemoveAll(tmpDir)
-				continue
-			}
-			return fmt.Errorf("strip top-level for %s: %w", r.Task.Name, err)
-		}
-
-		manifest, err := o.storeExtractedFiles(tmpDir, r.Task.Name, r.Data, packages)
-		if err != nil {
-			return err
-		}
-
-		if err := o.store.WriteManifest(manifest); err != nil {
-			return err
-		}
-
-		os.RemoveAll(tmpDir)
-		return nil // Success
+	// Attempt 1: extract the already-downloaded data
+	err := o.tryExtract(r.Data, r.Task, packages)
+	if err == nil {
+		return nil
 	}
-	return lastErr
+
+	// Attempt 2: re-download and retry extraction (1 retry only)
+	log.Printf("extraction failed for %s, re-downloading: %v", r.Task.Name, err)
+	time.Sleep(time.Second) // backoff
+
+	pool := fetcher.NewPool(1)
+	results := pool.Download(ctx, []fetcher.DownloadTask{{
+		Name: r.Task.Name, URL: r.Task.URL,
+		Shasum: r.Task.Shasum, DistType: r.Task.DistType,
+	}})
+	if len(results) > 0 && results[0].Error != nil {
+		return fmt.Errorf("download %s (re-download for extraction retry): %w", r.Task.Name, results[0].Error)
+	}
+	if len(results) == 0 {
+		return fmt.Errorf("re-download %s: no results", r.Task.Name)
+	}
+
+	if err := o.tryExtract(results[0].Data, r.Task, packages); err != nil {
+		return fmt.Errorf("archive extraction failed for %s after retry: %w", r.Task.Name, err)
+	}
+	return nil
+}
+
+// tryExtract attempts to extract, strip, hash, and store a package's files.
+func (o *Orchestrator) tryExtract(data []byte, task fetcher.DownloadTask, packages []parser.Package) error {
+	tmpDir, err := linker.CreateTempDir(o.store.TmpDir())
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(tmpDir)
+
+	if err := store.ExtractByType(data, task.DistType, tmpDir); err != nil {
+		return fmt.Errorf("archive extraction failed for %s: %w", task.Name, err)
+	}
+
+	if err := store.StripTopLevelDir(tmpDir); err != nil {
+		if errors.Is(err, store.ErrEmptyArchive) {
+			return fmt.Errorf("archive extraction failed for %s: %w", task.Name, err)
+		}
+		return fmt.Errorf("strip top-level for %s: %w", task.Name, err)
+	}
+
+	manifest, err := o.storeExtractedFiles(tmpDir, task.Name, data, packages)
+	if err != nil {
+		return err
+	}
+
+	return o.store.WriteManifest(manifest)
 }
 
 func (o *Orchestrator) storeExtractedFiles(dir, pkgName string, archiveData []byte, packages []parser.Package) (*store.Manifest, error) {
