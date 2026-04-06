@@ -65,10 +65,10 @@ allegro/
     platform/                   # OS detection
   qa/                           # comprehensive QA tests (Phase 1 + Phase 2)
   benchmark/
-    run.sh                      # speed benchmark (3 projects × 3 scenarios)
+    run.sh                      # speed benchmark (4 projects × 3 scenarios)
     disk-savings.sh             # CAS dedup benchmark (N × same project)
   spec/
-    allegro.md                  # Phase 1 spec
+    phase1.md                   # Phase 1 spec
     phase2.md                   # Phase 2 spec
   .goreleaser.yml               # GoReleaser config (6 platform targets)
   .github/workflows/
