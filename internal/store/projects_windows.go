@@ -1,28 +1,15 @@
-//go:build !windows
+//go:build windows
 
 package store
 
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
-	"syscall"
 	"time"
 )
-
-// ProjectEntry represents a single project in the registry.
-type ProjectEntry struct {
-	Path        string            `json:"path"`
-	LastInstall time.Time         `json:"last_install"`
-	LockHash    string            `json:"lock_hash"`
-	Packages    map[string]string `json:"packages"`
-}
-
-// ProjectRegistry represents ~/.allegro/projects.json.
-type ProjectRegistry struct {
-	Projects []ProjectEntry `json:"projects"`
-}
 
 // DefaultRegistryPath returns ~/.allegro/projects.json.
 func DefaultRegistryPath() string {
@@ -33,7 +20,7 @@ func DefaultRegistryPath() string {
 	return filepath.Join(home, ".allegro", "projects.json")
 }
 
-// ReadRegistry reads ~/.allegro/projects.json. Returns empty registry if missing.
+// ReadRegistry reads projects.json. Returns empty registry if missing.
 func ReadRegistry(path string) (*ProjectRegistry, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -49,28 +36,14 @@ func ReadRegistry(path string) (*ProjectRegistry, error) {
 	return &reg, nil
 }
 
-// RegisterProject adds or updates a project entry in the registry.
+// RegisterProject on Windows — no flock (not available).
 func RegisterProject(path string, entry ProjectEntry) error {
-	// Acquire flock on projects.lock (§9.1)
-	lockPath := filepath.Join(filepath.Dir(path), "projects.lock")
-	lockFile, err := os.OpenFile(lockPath, os.O_CREATE|os.O_RDWR, 0644)
-	if err != nil {
-		return fmt.Errorf("create projects lock: %w", err)
-	}
-	defer lockFile.Close()
-	if err := syscall.Flock(int(lockFile.Fd()), syscall.LOCK_EX); err != nil {
-		return fmt.Errorf("acquire projects lock: %w", err)
-	}
-	defer syscall.Flock(int(lockFile.Fd()), syscall.LOCK_UN)
-
+	log.Printf("warning: file locking not available on Windows; concurrent project registration unprotected")
 	reg, err := ReadRegistry(path)
 	if err != nil {
 		return err
 	}
-
 	entry.LastInstall = time.Now().UTC()
-
-	// Update existing or append
 	found := false
 	for i, p := range reg.Projects {
 		if p.Path == entry.Path {
@@ -82,8 +55,6 @@ func RegisterProject(path string, entry ProjectEntry) error {
 	if !found {
 		reg.Projects = append(reg.Projects, entry)
 	}
-
-	// Write atomically (temp file + rename)
 	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
 		return err
 	}

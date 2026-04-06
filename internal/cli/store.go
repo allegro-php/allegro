@@ -92,7 +92,10 @@ func runStorePrune(cmd *cobra.Command, args []string) error {
 	if flagGC {
 		// Full GC with project awareness (§9.2)
 		regPath := store.DefaultRegistryPath()
-		staleDays := 90 // TODO: read from config
+		staleDays := 90
+		if c := getConfig(); c.PruneStaleDay > 0 {
+			staleDays = c.PruneStaleDay
+		}
 		result, err := store.GarbageCollect(storePath, regPath, staleDays, flagDryRunPrune)
 		if err != nil {
 			return err
