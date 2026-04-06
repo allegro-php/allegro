@@ -22,7 +22,7 @@ type VerifyIssue struct {
 // VerifyResult holds the outcome of a verify operation.
 type VerifyResult struct {
 	TotalPackages int
-	TotalFiles    int
+	TotalFiles    int64
 	Issues        []VerifyIssue
 	OKPackages    int
 	FailPackages  int
@@ -68,7 +68,7 @@ func VerifyVendor(vendorDir string, s *store.Store, state *linker.VendorState, w
 			go func() {
 				defer wg.Done()
 				for f := range fileCh {
-					result.TotalFiles++
+					atomic.AddInt64(&result.TotalFiles, 1)
 					vendorPath := filepath.Join(vendorDir, pkgName, f.Path)
 
 					// Check exists

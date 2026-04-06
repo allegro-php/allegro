@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"time"
 )
 
@@ -54,24 +55,69 @@ func GarbageCollect(storePath, registryPath string, staleDays int, dryRun bool) 
 		}
 	}
 
-	// Step 4-6: Collect referenced packages, prune manifests and files
-	// (delegates to existing Phase 1 prune logic for CAS files)
-	// Full manifest pruning based on project packages is done here
-	referencedPkgs := make(map[string]bool)
-	for _, p := range kept {
-		for name, version := range p.Packages {
-			referencedPkgs[name+"@"+version] = true
+	if !dryRun {
+		// Step 4-6: Prune unreferenced manifests and CAS files
+		referencedPkgs := make(map[string]bool)
+		for _, p := range kept {
+			for name, version := range p.Packages {
+				referencedPkgs[name+"@"+version] = true
+			}
 		}
+
+		s := New(storePath)
+
+		// Step 5: Delete unreferenced manifests
+		packagesDir := filepath.Join(s.Root, "packages")
+		referencedHashes := make(map[string]bool)
+		filepath.Walk(packagesDir, func(path string, info os.FileInfo, err error) error {
+			if err != nil || info.IsDir() || filepath.Ext(path) != ".json" {
+				return nil
+			}
+			data, readErr := os.ReadFile(path)
+			if readErr != nil { return nil }
+			var m Manifest
+			if json.Unmarshal(data, &m) != nil { return nil }
+
+			key := m.Name + "@" + m.Version
+			if !referencedPkgs[key] {
+				os.Remove(path)
+				result.ManifestsPruned++
+			} else {
+				for _, f := range m.Files {
+					hash := f.Hash
+					if len(hash) > 7 && hash[:7] == "sha256:" { hash = hash[7:] }
+					referencedHashes[hash] = true
+				}
+			}
+			return nil
+		})
+
+		// Step 6: Delete orphaned CAS files
+		filesDir := filepath.Join(s.Root, "files")
+		filepath.Walk(filesDir, func(path string, info os.FileInfo, err error) error {
+			if err != nil || info.IsDir() { return nil }
+			if !referencedHashes[filepath.Base(path)] {
+				result.BytesFreed += info.Size()
+				os.Remove(path)
+				result.FilesPruned++
+			}
+			return nil
+		})
 	}
 
 	return result, nil
 }
+
 func writeRegistry(path string, reg *ProjectRegistry) error {
 	data, err := json.MarshalIndent(reg, "", "  ")
-	if err != nil {
+	if err != nil { return err }
+	tmpPath := path + ".tmp"
+	if err := os.WriteFile(tmpPath, data, 0644); err != nil { return err }
+	if err := os.Rename(tmpPath, path); err != nil {
+		os.Remove(tmpPath)
 		return err
 	}
-	return os.WriteFile(path, data, 0644)
+	return nil
 }
 
 // FormatGCResult formats the result for display.
