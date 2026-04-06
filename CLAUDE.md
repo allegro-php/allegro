@@ -37,13 +37,10 @@ A Go CLI tool that accelerates PHP Composer installs using a content-addressable
 - **`installed.json` `require` field** — needed by Composer plugin manager for `composer-plugin-api` verification
 - **`installed.php` replaced/provided** — virtual packages (e.g. `illuminate/*` from `laravel/framework`) now emitted so `InstalledVersions::isInstalled()` works correctly
 - **`installed.php` root package** entry added to `versions` array
-- **Composer-plugin packages** copy-linked (not hardlinked) so plugins can modify their own files at runtime (e.g. `phpstan/extension-installer` writes `GeneratedConfig.php`)
 - **Parallel linking in `buildVendorTree`** — was sequential, now uses `ParallelLink` worker pool
 - **Per-file fsync removed** from `CopyLinker` — vendor files are in temp dir with atomic swap, fsync was pure overhead
-
-### Phase 3-4 — NOT STARTED
-See `spec/allegro.md` §16 for the phased delivery plan. Phase 3 covers private repos, auth, workspace support. Phase 4 covers IDE plugins and Docker optimization.
-
+- **Hybrid executable detection** — ZIP/TAR archive metadata is unreliable for permissions (GitHub zipballs give LICENSE.md execute bits). Now uses manifest-first (`bin` field from `composer.lock`) + shebang-second (`#!` check) — matching Composer/pip/pnpm best practices
+- **Verify skips composer-plugin packages** — plugins are copy-linked and modify their own files at runtime; verifying them against CAS produced false positives. Plugin package names tracked in `.allegro-state.json`
 ### Known Limitations
 - **`composer/installers`** — packages with custom install paths (WordPress, Drupal, CraftCMS) are not supported; everything goes to `vendor/`
 - **`symfony/flex`** — install-time recipe execution not supported (Flex hooks into Composer's install events, not post-install-cmd)
@@ -99,6 +96,10 @@ allegro/
 
 10. **`InstalledVersions.php` is embedded** — Go `embed` directive includes the Composer runtime class in the binary. Written to `vendor/composer/` during install.
 
+11. **Executable detection is hybrid, not archive-based** — ZIP metadata is unreliable (GitHub zipballs lose permission info). Detection uses: (1) `bin` field from `composer.lock` (manifest-first), (2) shebang `#!` check (fallback). This matches Composer/pip/pnpm best practices. Never trust `f.Mode()&0111` from ZIP/TAR entries.
+
+12. **Verify skips composer-plugin packages** — Plugins are copy-linked and expected to modify their own files at runtime. Their names are tracked in `plugin_packages` field of `.allegro-state.json`.
+
 ## How to Build, Test, and Release
 
 ```bash
@@ -150,3 +151,5 @@ git push origin v0.x.y
 - `installed.php` must include `replaced`/`provided` virtual packages — without them, `InstalledVersions::isInstalled('illuminate/contracts')` returns false.
 - Platform packages (`ext-*`, `php`, `lib-*`) must be filtered from replaced/provided entries in `installed.php`.
 - Shared types used across `//go:build` files must live in platform-independent files (e.g. `projects_types.go`), not in `_windows.go` or `!windows` guarded files.
+- **Never use `f.Mode()&0111` from ZIP/TAR for executable detection** — GitHub zipballs give uniform or wrong permissions. Use `bin` field from `composer.lock` + shebang `#!` check instead.
+- **Hardlinked CAS files share inodes with vendor** — if any post-install process (e.g. `composer dumpautoload`) changes vendor file permissions, the CAS file is also corrupted. This is why correct permissions must be set at store time, not after linking.
