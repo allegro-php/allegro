@@ -68,3 +68,22 @@ func TestReadConfigMalformedJSON(t *testing.T) {
 	// Malformed returns zero-value config (spec §7.6: warn, use defaults)
 	if c.Workers != 0 { t.Error("malformed should return defaults") }
 }
+
+func TestResolveWorkersPrecedence(t *testing.T) {
+	// Config value
+	c := Config{Workers: 12}
+	got := ResolveWithConfig(0, "", c.Workers, 8) // no flag, no env, config=12, default=8
+	if got != 12 { t.Errorf("config should win over default: %d", got) }
+
+	// Env overrides config
+	got = ResolveWithConfig(0, "16", c.Workers, 8)
+	if got != 16 { t.Errorf("env should win over config: %d", got) }
+
+	// Flag overrides env
+	got = ResolveWithConfig(4, "16", c.Workers, 8)
+	if got != 4 { t.Errorf("flag should win over env: %d", got) }
+
+	// Default when nothing set
+	got = ResolveWithConfig(0, "", 0, 8)
+	if got != 8 { t.Errorf("default should apply: %d", got) }
+}

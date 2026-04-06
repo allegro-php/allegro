@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
 )
 
 // Config represents ~/.allegro/config.json.
@@ -47,4 +48,21 @@ func WriteConfig(path string, c Config) error {
 		return err
 	}
 	return os.WriteFile(path, data, 0644)
+}
+
+// ResolveWithConfig implements the 4-tier precedence: flag > env > config > default.
+// For int values: 0 means "not set" for flag and config tiers.
+func ResolveWithConfig(flagVal int, envVal string, configVal int, defaultVal int) int {
+	if flagVal != 0 {
+		return flagVal
+	}
+	if envVal != "" {
+		if v, err := strconv.Atoi(envVal); err == nil && v != 0 {
+			return v
+		}
+	}
+	if configVal != 0 {
+		return configVal
+	}
+	return defaultVal
 }
