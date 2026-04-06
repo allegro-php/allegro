@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/allegro-php/allegro/internal/parser"
+	"github.com/allegro-php/allegro/internal/store"
 )
 
 // InstalledJSON represents vendor/composer/installed.json.
@@ -165,12 +166,12 @@ func WriteInstalledFiles(vendorDir string, lock *parser.ComposerLock, composerJS
 	if err != nil {
 		return fmt.Errorf("generate installed.json: %w", err)
 	}
-	if err := os.WriteFile(filepath.Join(composerDir, "installed.json"), jsonData, 0644); err != nil {
+	if err := store.WriteFileAtomic(filepath.Join(composerDir, "installed.json"), jsonData, 0644); err != nil {
 		return fmt.Errorf("write installed.json: %w", err)
 	}
 
 	phpContent := GenerateInstalledPHP(lock, composerJSON)
-	if err := os.WriteFile(filepath.Join(composerDir, "installed.php"), []byte(phpContent), 0644); err != nil {
+	if err := store.WriteFileAtomic(filepath.Join(composerDir, "installed.php"), []byte(phpContent), 0644); err != nil {
 		return fmt.Errorf("write installed.php: %w", err)
 	}
 

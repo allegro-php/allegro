@@ -92,5 +92,4 @@ func RegisterProject(path string, entry ProjectEntry) error {
 		return err
 	}
 	return WriteFileAtomic(path, data, 0644)
-	return nil
 }

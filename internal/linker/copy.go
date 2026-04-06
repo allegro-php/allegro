@@ -25,5 +25,8 @@ func (c *CopyLinker) LinkFile(src, dst string) error {
 	if _, err := io.Copy(out, in); err != nil {
 		return fmt.Errorf("copy content: %w", err)
 	}
+	if err := out.Sync(); err != nil {
+		return fmt.Errorf("copy sync: %w", err)
+	}
 	return nil
 }

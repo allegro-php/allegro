@@ -7,38 +7,38 @@ import (
 	"testing"
 )
 
-func TestDownloadSuccess(t *testing.T) {
+func TestDownloadFullSuccess(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("hello"))
 	}))
 	defer srv.Close()
 
 	c := NewClient()
-	body, status, err := c.Download(context.Background(), srv.URL)
+	resp, err := c.DownloadFull(context.Background(), srv.URL)
 	if err != nil {
-		t.Fatalf("Download: %v", err)
+		t.Fatalf("DownloadFull: %v", err)
 	}
-	if status != 200 {
-		t.Errorf("status = %d, want 200", status)
+	if resp.StatusCode != 200 {
+		t.Errorf("status = %d, want 200", resp.StatusCode)
 	}
-	if string(body) != "hello" {
-		t.Errorf("body = %q, want hello", body)
+	if string(resp.Body) != "hello" {
+		t.Errorf("body = %q, want hello", resp.Body)
 	}
 }
 
-func TestDownload404(t *testing.T) {
+func TestDownloadFull404(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(404)
 	}))
 	defer srv.Close()
 
 	c := NewClient()
-	_, status, err := c.Download(context.Background(), srv.URL)
+	resp, err := c.DownloadFull(context.Background(), srv.URL)
 	if err != nil {
-		t.Fatalf("Download: %v", err)
+		t.Fatalf("DownloadFull: %v", err)
 	}
-	if status != 404 {
-		t.Errorf("status = %d, want 404", status)
+	if resp.StatusCode != 404 {
+		t.Errorf("status = %d, want 404", resp.StatusCode)
 	}
 }
 

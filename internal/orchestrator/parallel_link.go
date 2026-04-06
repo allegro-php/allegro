@@ -91,10 +91,11 @@ func ParallelLink(ops []LinkOp, lnk linker.Linker, strategy linker.Strategy, wor
 		}()
 	}
 
+sendLoop:
 	for _, op := range ops {
 		select {
 		case <-done:
-			break // stop sending if cancelled
+			break sendLoop
 		case opCh <- op:
 		}
 	}

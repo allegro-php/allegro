@@ -1,7 +1,6 @@
 package fetcher
 
 import (
-	"context"
 	"io"
 	"net/http"
 	"time"
@@ -22,19 +21,6 @@ func NewClient() *Client {
 			},
 		},
 	}
-}
-
-// Download fetches a URL and returns its body bytes.
-func (c *Client) Download(ctx context.Context, url string) ([]byte, int, error) {
-	resp, err := c.DownloadFull(ctx, url)
-	if err != nil {
-		statusCode := 0
-		if resp != nil {
-			statusCode = resp.StatusCode
-		}
-		return nil, statusCode, err
-	}
-	return resp.Body, resp.StatusCode, nil
 }
 
 func readAll(r io.Reader) ([]byte, error) {
