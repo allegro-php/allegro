@@ -37,17 +37,29 @@ allegro install --frozen-lockfile --no-dev --no-scripts
 
 ## Benchmark
 
-Measured on Apple M-series (macOS, APFS) across 3 open-source PHP projects.
-Run `./benchmark/run.sh` to reproduce.
+### Speed
+
+Measured on Apple M-series (macOS, APFS). Run `./benchmark/run.sh` to reproduce.
 
 | Scenario | Project | Composer | Allegro | Speedup |
 |----------|---------|---------|---------|---------|
-| Warm cache, no vendor | Laravel (106 pkgs) | 3.83s | **0.96s** | **4.0x** |
-| Warm cache, no vendor | Koel (194 pkgs) | 8.43s | **2.40s** | **3.5x** |
-| Warm cache, no vendor | Matomo (85 pkgs) | 3.58s | **0.89s** | **4.0x** |
+| Warm cache, no vendor | Laravel (106 pkgs) | 5.93s | **1.25s** | **4.7x** |
+| Warm cache, no vendor | Koel (194 pkgs) | 8.53s | **2.06s** | **4.1x** |
+| Warm cache, no vendor | Matomo (85 pkgs) | 3.73s | **0.95s** | **3.9x** |
 | Noop (vendor up-to-date) | All projects | ~0.40s | **0.03s** | **13x** |
 
 Cold installs are network-bound so both tools perform similarly. The real advantage is on subsequent installs: Allegro skips downloads entirely and links from the local CAS.
+
+### Disk Savings
+
+With hardlinks, multiple projects sharing the same dependencies use a single copy on disk. Run `./benchmark/disk-savings.sh` to reproduce.
+
+| Setup | Disk Usage | Savings |
+|-------|-----------|---------|
+| 10 × Laravel with Composer | 773 MB | — |
+| 10 × Laravel with Allegro (shared CAS) | **84 MB** | **89%** |
+
+The CAS stores each file once by SHA-256 hash. Every project's `vendor/` hardlinks to the same inodes — no duplication.
 
 
 ```
