@@ -7,14 +7,21 @@ import (
 )
 
 var (
-	flagStorePath    string
-	flagNoAutoload   bool
-	flagLinkStrategy string
-	flagWorkers      int
-	flagVerbose      bool
-	flagQuiet        bool
-	flagNoProgress   bool
-	flagDryRun       bool
+	flagStorePath      string
+	flagNoAutoload     bool
+	flagLinkStrategy   string
+	flagWorkers        int
+	flagVerbose        bool
+	flagQuiet          bool
+	flagNoProgress     bool
+	flagDryRun         bool
+	// Phase 2 flags
+	flagForce          bool
+	flagNoDev          bool
+	flagDev            bool
+	flagNoScripts      bool
+	flagNoColor        bool
+	flagFrozenLockfile bool
 )
 
 func init() {
@@ -27,6 +34,13 @@ func init() {
 	pf.BoolVarP(&flagQuiet, "quiet", "q", false, "Suppress non-error output")
 	pf.BoolVar(&flagNoProgress, "no-progress", false, "Disable progress bars")
 	pf.BoolVar(&flagDryRun, "dry-run", false, "Show what would be installed")
+	// Phase 2
+	pf.BoolVar(&flagForce, "force", false, "Full rebuild, skip incremental")
+	pf.BoolVar(&flagNoDev, "no-dev", false, "Exclude dev dependencies")
+	pf.BoolVar(&flagDev, "dev", false, "Explicitly install dev dependencies (overrides --no-dev)")
+	pf.BoolVar(&flagNoScripts, "no-scripts", false, "Skip Composer script execution")
+	pf.BoolVar(&flagNoColor, "no-color", false, "Disable colored output")
+	pf.BoolVar(&flagFrozenLockfile, "frozen-lockfile", false, "Error if lock missing/out of sync")
 }
 
 // ResolveWorkers returns the effective worker count with clamping.
@@ -98,4 +112,56 @@ func ResolveLinkStrategy() string {
 		return flagLinkStrategy
 	}
 	return os.Getenv("ALLEGRO_LINK_STRATEGY")
+	return os.Getenv("ALLEGRO_LINK_STRATEGY")
+}
+
+// IsDevMode resolves dev mode: --dev flag > --no-dev flag > ALLEGRO_NO_DEV env > default (true).
+func IsDevMode() bool {
+	if flagDev {
+		return true // explicit --dev overrides everything
+	}
+	if flagNoDev {
+		return false
+	}
+	if os.Getenv("ALLEGRO_NO_DEV") != "" {
+		return false
+	}
+	// TODO: config file tier (Phase 2 §7.3)
+	return true // default: install dev deps
+}
+
+// IsColorEnabled returns true if colored output should be shown.
+func IsColorEnabled() bool {
+	if flagNoColor {
+		return false
+	}
+	if os.Getenv("NO_COLOR") != "" {
+		return false
+	}
+	// TODO: config file tier, TTY detection
+	return true
+}
+
+// IsForce returns true if --force flag is set.
+func IsForce() bool {
+	if flagForce {
+		return true
+	}
+	return os.Getenv("ALLEGRO_FORCE") != ""
+}
+
+// IsNoScripts returns true if --no-scripts flag is set.
+func IsNoScripts() bool {
+	if flagNoScripts {
+		return true
+	}
+	return os.Getenv("ALLEGRO_NO_SCRIPTS") != ""
+}
+
+// IsFrozenLockfile returns true if --frozen-lockfile flag is set.
+func IsFrozenLockfile() bool {
+	if flagFrozenLockfile {
+		return true
+	}
+	return os.Getenv("ALLEGRO_FROZEN_LOCKFILE") != ""
 }

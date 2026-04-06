@@ -50,4 +50,27 @@ func ReadVendorState(vendorDir string) (*VendorState, error) {
 		return nil, fmt.Errorf("state file missing lock_hash field")
 	}
 	return &state, nil
+	return &state, nil
+}
+
+// EffectiveDev returns the dev mode from state, treating absent as true (Phase 1 default).
+func (s *VendorState) EffectiveDev() bool {
+	if s.SchemaVersion == 0 {
+		return true // Phase 1 state: always installed dev
+	}
+	return s.Dev
+}
+
+// HasDevPackages returns true if dev_packages info is available for incremental diff.
+func (s *VendorState) HasDevPackages() bool {
+	return s.SchemaVersion >= 2 && s.DevPackages != nil
+}
+
+// NeedsFullRebuildForDevSwitch returns true if switching dev mode requires
+// a full rebuild because dev_packages info is missing (Phase 1 state).
+func (s *VendorState) NeedsFullRebuildForDevSwitch(currentDev bool) bool {
+	if !s.HasDevPackages() && s.EffectiveDev() != currentDev {
+		return true
+	}
+	return false
 }

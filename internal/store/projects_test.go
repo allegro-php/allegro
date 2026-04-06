@@ -2,6 +2,7 @@ package store
 
 import (
 	"encoding/json"
+	"strings"
 	"testing"
 	"time"
 )
@@ -31,4 +32,11 @@ func TestProjectRegistryJSONRoundtrip(t *testing.T) {
 	if err := json.Unmarshal(data, &r2); err != nil { t.Fatal(err) }
 	if len(r2.Projects) != 2 { t.Errorf("projects count = %d", len(r2.Projects)) }
 	if r2.Projects[0].Path != "/app1" { t.Error("first project path") }
+}
+
+func TestDefaultRegistryPath(t *testing.T) {
+	p := DefaultRegistryPath()
+	if !strings.Contains(p, ".allegro") || !strings.HasSuffix(p, "projects.json") {
+		t.Errorf("registry path = %q", p)
+	}
 }

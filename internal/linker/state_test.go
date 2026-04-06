@@ -59,3 +59,46 @@ func TestReadVendorStateMissingLockHash(t *testing.T) {
 		t.Error("expected error for missing lock_hash")
 	}
 }
+
+func TestEffectiveDevPhase1(t *testing.T) {
+	s := &VendorState{SchemaVersion: 0} // Phase 1 - no schema version
+	if !s.EffectiveDev() {
+		t.Error("Phase 1 state should default to dev=true")
+	}
+}
+
+func TestEffectiveDevPhase2(t *testing.T) {
+	s := &VendorState{SchemaVersion: 2, Dev: false}
+	if s.EffectiveDev() {
+		t.Error("Phase 2 with dev=false should return false")
+	}
+}
+
+func TestHasDevPackages(t *testing.T) {
+	s1 := &VendorState{SchemaVersion: 0}
+	if s1.HasDevPackages() {
+		t.Error("Phase 1 should not have dev_packages")
+	}
+	s2 := &VendorState{SchemaVersion: 2, DevPackages: []string{"phpunit/phpunit"}}
+	if !s2.HasDevPackages() {
+		t.Error("Phase 2 with dev_packages should return true")
+	}
+}
+
+func TestNeedsFullRebuildForDevSwitch(t *testing.T) {
+	// Phase 1 state switching dev mode → needs full rebuild
+	s1 := &VendorState{SchemaVersion: 0}
+	if !s1.NeedsFullRebuildForDevSwitch(false) {
+		t.Error("Phase 1 switching to no-dev needs rebuild")
+	}
+	// Phase 2 state with dev_packages → no rebuild needed
+	s2 := &VendorState{SchemaVersion: 2, Dev: true, DevPackages: []string{"phpunit/phpunit"}}
+	if s2.NeedsFullRebuildForDevSwitch(false) {
+		t.Error("Phase 2 with dev_packages should not need rebuild")
+	}
+	// Phase 2 same dev mode → no rebuild
+	s3 := &VendorState{SchemaVersion: 2, Dev: true, DevPackages: []string{"x"}}
+	if s3.NeedsFullRebuildForDevSwitch(true) {
+		t.Error("same dev mode should not need rebuild")
+	}
+}

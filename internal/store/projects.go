@@ -1,6 +1,10 @@
 package store
 
-import "time"
+import (
+	"os"
+	"path/filepath"
+	"time"
+)
 
 // ProjectEntry represents a single project in the registry.
 type ProjectEntry struct {
@@ -13,4 +17,13 @@ type ProjectEntry struct {
 // ProjectRegistry represents ~/.allegro/projects.json.
 type ProjectRegistry struct {
 	Projects []ProjectEntry `json:"projects"`
+}
+
+// DefaultRegistryPath returns ~/.allegro/projects.json.
+func DefaultRegistryPath() string {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return filepath.Join(".", ".allegro", "projects.json")
+	}
+	return filepath.Join(home, ".allegro", "projects.json")
 }
