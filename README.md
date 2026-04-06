@@ -16,9 +16,11 @@ Allegro is a fast, disk-efficient alternative to `composer install`. Inspired by
 ## Quick Start
 
 ```bash
-# Build from source
-go build -o allegro ./cmd/allegro
+# Install via Go
+go install github.com/allegro-php/allegro/cmd/allegro@latest
 
+# Or build from source
+go build -o allegro ./cmd/allegro
 # Install dependencies (reads composer.lock, downloads via CAS, links into vendor/)
 allegro install
 
