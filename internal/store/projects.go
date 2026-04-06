@@ -1,6 +1,7 @@
 package store
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"time"
@@ -26,4 +27,54 @@ func DefaultRegistryPath() string {
 		return filepath.Join(".", ".allegro", "projects.json")
 	}
 	return filepath.Join(home, ".allegro", "projects.json")
+	return filepath.Join(home, ".allegro", "projects.json")
+}
+
+// ReadRegistry reads ~/.allegro/projects.json. Returns empty registry if missing.
+func ReadRegistry(path string) (*ProjectRegistry, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return &ProjectRegistry{}, nil
+		}
+		return &ProjectRegistry{}, nil
+	}
+	var reg ProjectRegistry
+	if err := json.Unmarshal(data, &reg); err != nil {
+		return &ProjectRegistry{}, nil
+	}
+	return &reg, nil
+}
+
+// RegisterProject adds or updates a project entry in the registry.
+func RegisterProject(path string, entry ProjectEntry) error {
+	reg, err := ReadRegistry(path)
+	if err != nil {
+		return err
+	}
+
+	entry.LastInstall = time.Now().UTC()
+
+	// Update existing or append
+	found := false
+	for i, p := range reg.Projects {
+		if p.Path == entry.Path {
+			reg.Projects[i] = entry
+			found = true
+			break
+		}
+	}
+	if !found {
+		reg.Projects = append(reg.Projects, entry)
+	}
+
+	// Write atomically
+	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+		return err
+	}
+	data, err := json.MarshalIndent(reg, "", "  ")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(path, data, 0644)
 }

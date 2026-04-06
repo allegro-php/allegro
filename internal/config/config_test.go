@@ -2,6 +2,7 @@ package config
 
 import (
 	"encoding/json"
+	"os"
 	"testing"
 )
 
@@ -37,4 +38,33 @@ func TestConfigJSONRoundtrip(t *testing.T) {
 	if c2.Workers != 8 || c2.PruneStaleDay != 90 {
 		t.Errorf("roundtrip: %+v", c2)
 	}
+}
+
+func TestReadConfigMissing(t *testing.T) {
+	c, err := ReadConfig("/nonexistent/config.json")
+	if err != nil { t.Fatal(err) }
+	// Missing file returns zero-value config (all defaults)
+	if c.Workers != 0 { t.Errorf("workers = %d, want 0", c.Workers) }
+}
+
+func TestWriteAndReadConfig(t *testing.T) {
+	dir := t.TempDir()
+	path := dir + "/config.json"
+	c := Config{Workers: 16, LinkStrategy: "copy", PruneStaleDay: 30}
+	if err := WriteConfig(path, c); err != nil { t.Fatal(err) }
+	c2, err := ReadConfig(path)
+	if err != nil { t.Fatal(err) }
+	if c2.Workers != 16 { t.Errorf("workers = %d", c2.Workers) }
+	if c2.LinkStrategy != "copy" { t.Errorf("link_strategy = %q", c2.LinkStrategy) }
+	if c2.PruneStaleDay != 30 { t.Errorf("prune_stale_days = %d", c2.PruneStaleDay) }
+}
+
+func TestReadConfigMalformedJSON(t *testing.T) {
+	dir := t.TempDir()
+	path := dir + "/config.json"
+	os.WriteFile(path, []byte("{bad"), 0644)
+	c, err := ReadConfig(path)
+	if err != nil { t.Fatal(err) }
+	// Malformed returns zero-value config (spec §7.6: warn, use defaults)
+	if c.Workers != 0 { t.Error("malformed should return defaults") }
 }

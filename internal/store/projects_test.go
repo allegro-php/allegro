@@ -2,6 +2,7 @@ package store
 
 import (
 	"encoding/json"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -38,5 +39,43 @@ func TestDefaultRegistryPath(t *testing.T) {
 	p := DefaultRegistryPath()
 	if !strings.Contains(p, ".allegro") || !strings.HasSuffix(p, "projects.json") {
 		t.Errorf("registry path = %q", p)
+	}
+}
+
+func TestRegisterProject(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "projects.json")
+
+	entry := ProjectEntry{
+		Path:     "/app/test",
+		LockHash: "sha256:abc",
+		Packages: map[string]string{"a/b": "1.0"},
+	}
+	if err := RegisterProject(path, entry); err != nil {
+		t.Fatal(err)
+	}
+	reg, err := ReadRegistry(path)
+	if err != nil { t.Fatal(err) }
+	if len(reg.Projects) != 1 || reg.Projects[0].Path != "/app/test" {
+		t.Errorf("projects = %+v", reg.Projects)
+	}
+
+	// Register again — should update, not duplicate
+	entry.LockHash = "sha256:def"
+	if err := RegisterProject(path, entry); err != nil { t.Fatal(err) }
+	reg2, _ := ReadRegistry(path)
+	if len(reg2.Projects) != 1 {
+		t.Errorf("duplicate entry: %d projects", len(reg2.Projects))
+	}
+	if reg2.Projects[0].LockHash != "sha256:def" {
+		t.Error("should update existing entry")
+	}
+}
+
+func TestReadRegistryMissing(t *testing.T) {
+	reg, err := ReadRegistry("/nonexistent/projects.json")
+	if err != nil { t.Fatal(err) }
+	if len(reg.Projects) != 0 {
+		t.Error("missing file should return empty registry")
 	}
 }
