@@ -28,14 +28,18 @@ var storePathCmd = &cobra.Command{
 		fmt.Fprintln(cmd.OutOrStdout(), storePath)
 	},
 }
-
 var storePruneCmd = &cobra.Command{
 	Use:   "prune",
 	Short: "Remove orphaned CAS files",
 	RunE:  runStorePrune,
 }
 
+var flagGC bool
+var flagDryRunPrune bool
+
 func init() {
+	storePruneCmd.Flags().BoolVar(&flagGC, "gc", false, "Full garbage collection with project awareness")
+	storePruneCmd.Flags().BoolVar(&flagDryRunPrune, "dry-run", false, "Preview without deleting")
 	storeCmd.AddCommand(storeStatusCmd, storePathCmd, storePruneCmd)
 	rootCmd.AddCommand(storeCmd)
 }
@@ -70,14 +74,40 @@ func runStoreStatus(cmd *cobra.Command, args []string) error {
 	fmt.Fprintf(cmd.OutOrStdout(), "Store: %s\n", storePath)
 	fmt.Fprintf(cmd.OutOrStdout(), "  Files: %s (%s)\n", FormatCommaThousands(fileCount), FormatBinarySize(totalSize))
 	fmt.Fprintf(cmd.OutOrStdout(), "  Package manifests: %d\n", manifestCount)
+
+	// Phase 2: project registry info (§9.3)
+	regPath := store.DefaultRegistryPath()
+	reg, _ := store.ReadRegistry(regPath)
+	if reg != nil && len(reg.Projects) > 0 {
+		fmt.Fprintf(cmd.OutOrStdout(), "  Registered projects: %d\n", len(reg.Projects))
+	}
+
 	return nil
 }
 
+
 func runStorePrune(cmd *cobra.Command, args []string) error {
 	storePath := store.ResolvePath(flagStorePath, os.Getenv("ALLEGRO_STORE"))
-	s := store.New(storePath)
 
-	// Step 1: Enumerate all manifests and collect referenced hashes
+	if flagGC {
+		// Full GC with project awareness (§9.2)
+		regPath := store.DefaultRegistryPath()
+		staleDays := 90 // TODO: read from config
+		result, err := store.GarbageCollect(storePath, regPath, staleDays, flagDryRunPrune)
+		if err != nil {
+			return err
+		}
+		prefix := ""
+		if flagDryRunPrune {
+			prefix = "[dry-run] "
+		}
+		fmt.Fprintf(cmd.OutOrStdout(), "%sPruned %d manifests, %d files. %d stale projects warned. %d projects removed.\n",
+			prefix, result.ManifestsPruned, result.FilesPruned, result.StaleWarned, result.ProjectsRemoved)
+		return nil
+	}
+
+	// Phase 1 orphan-only prune
+	s := store.New(storePath)
 	packagesDir := filepath.Join(s.Root, "packages")
 	referencedHashes := make(map[string]bool)
 
@@ -85,16 +115,12 @@ func runStorePrune(cmd *cobra.Command, args []string) error {
 		if err != nil || info.IsDir() || filepath.Ext(path) != ".json" {
 			return nil
 		}
-		data, err := os.ReadFile(path)
-		if err != nil {
-			return nil
-		}
+		data, _ := os.ReadFile(path)
 		var m store.Manifest
-		if err := parseManifestJSON(data, &m); err != nil {
+		if json.Unmarshal(data, &m) != nil {
 			return nil
 		}
 		for _, f := range m.Files {
-			// Strip "sha256:" prefix if present
 			hash := f.Hash
 			if len(hash) > 7 && hash[:7] == "sha256:" {
 				hash = hash[7:]
@@ -104,16 +130,13 @@ func runStorePrune(cmd *cobra.Command, args []string) error {
 		return nil
 	})
 
-	// Step 2: Enumerate CAS files and delete unreferenced
 	filesDir := filepath.Join(s.Root, "files")
 	var pruned int
-
 	filepath.Walk(filesDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil || info.IsDir() {
 			return nil
 		}
-		hash := filepath.Base(path)
-		if !referencedHashes[hash] {
+		if !referencedHashes[filepath.Base(path)] {
 			os.Remove(path)
 			pruned++
 		}
@@ -122,9 +145,4 @@ func runStorePrune(cmd *cobra.Command, args []string) error {
 
 	fmt.Fprintf(cmd.OutOrStdout(), "Pruned %d orphaned files\n", pruned)
 	return nil
-}
-
-
-func parseManifestJSON(data []byte, m *store.Manifest) error {
-	return json.Unmarshal(data, m)
 }

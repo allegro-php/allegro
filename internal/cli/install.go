@@ -131,6 +131,8 @@ func runInstall(cmd *cobra.Command, args []string) error {
 		Verbose:      IsVerbose(),
 		Quiet:        IsQuiet(),
 		Version:      versionStr,
+		Dev:          IsDevMode(),
+		NoScripts:    IsNoScripts(),
 	}
 
 	orch := orchestrator.New(cfg)
@@ -151,6 +153,32 @@ func runInstall(cmd *cobra.Command, args []string) error {
 		default:
 			os.Exit(ExitGeneralError)
 		}
+	}
+
+	// --- Post-flock: Composer scripts (§8.3 step 10) ---
+	if !IsNoScripts() {
+		composerBin, findErr := autoloader.FindComposer(projectDir)
+		if findErr == nil {
+			scriptEvent := "post-install-cmd"
+			if err := orchestrator.ComposerRunScript(composerBin, projectDir, scriptEvent); err != nil {
+				fmt.Fprintf(cmd.ErrOrStderr(), "warning: %v\n", err)
+				// Do NOT fail the install — vendor is already built
+			}
+		}
+	}
+
+	// --- Register project in projects.json (§9.1) ---
+	regPath := store.DefaultRegistryPath()
+	lock, _ := parser.ParseLockFile(lockPath)
+	if lock != nil {
+		currentHash, _ := parser.ComputeLockHash(lockPath)
+		pkgMap := make(map[string]string)
+		for _, p := range parser.MergePackages(lock) {
+			pkgMap[p.Name] = p.Version
+		}
+		store.RegisterProject(regPath, store.ProjectEntry{
+			Path: projectDir, LockHash: currentHash, Packages: pkgMap,
+		})
 	}
 
 	if runtime.GOOS == "windows" {

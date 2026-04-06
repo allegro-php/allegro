@@ -32,8 +32,12 @@ func FindComposer(projectDir string) (string, error) {
 
 // RunDumpautoload runs "composer dumpautoload --optimize" in the given directory.
 // stderr is forwarded, stdout is captured.
-func RunDumpautoload(composerPath, projectDir string, verbose bool) error {
-	cmd := exec.Command(composerPath, "dumpautoload", "--optimize")
+func RunDumpautoload(composerPath, projectDir string, verbose, noDev bool) error {
+	args := []string{"dumpautoload", "--optimize"}
+	if noDev {
+		args = append(args, "--no-dev")
+	}
+	cmd := exec.Command(composerPath, args...)
 	cmd.Dir = projectDir
 	cmd.Stderr = os.Stderr
 	if verbose {

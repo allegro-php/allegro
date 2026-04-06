@@ -26,7 +26,9 @@ type Config struct {
 	NoAutoload   bool
 	Verbose      bool
 	Quiet        bool
-	Version      string // allegro version for state file
+	Version      string
+	Dev          bool   // true = install dev deps (default)
+	NoScripts    bool   // skip post-install/post-update scripts
 }
 
 // Orchestrator coordinates the install pipeline.
@@ -131,7 +133,7 @@ func (o *Orchestrator) Install(ctx context.Context) error {
 		if err != nil {
 			return fmt.Errorf("exit 5: %w", err)
 		}
-		if err := autoloader.RunDumpautoload(composerBin, o.config.ProjectDir, o.config.Verbose); err != nil {
+		if err := autoloader.RunDumpautoload(composerBin, o.config.ProjectDir, o.config.Verbose, !o.config.Dev); err != nil {
 			return fmt.Errorf("composer dumpautoload failed: %w", err)
 		}
 	}
@@ -148,7 +150,7 @@ func (o *Orchestrator) Install(ctx context.Context) error {
 		Strategy:        strategy,
 		LockHash:        lockHash,
 		Packages:        pkgMap,
-		Dev:             true, // Phase 1 always installs dev
+		Dev:             o.config.Dev,
 		DevPackages:     devPkgNames,
 		ScriptsExecuted: false, // scripts run after flock release
 	}); err != nil {
