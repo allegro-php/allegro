@@ -2,7 +2,7 @@
   "version": 1,
   "spec": "spec/phase2.md",
   "created_at": "2026-04-06T06:49:40.379858Z",
-  "updated_at": "2026-04-06T07:32:00.010984Z",
+  "updated_at": "2026-04-06T07:35:28.692528Z",
   "workflow": {},
   "coverage": {
     "total_sections": 0,
@@ -15,7 +15,7 @@
       "id": "f1-package-diff-struct",
       "title": "Add PackageDiff struct type",
       "description": "TDD: write failing test that instantiates PackageDiff with Added/Removed/Updated/Unchanged slices, then define the struct in internal/orchestrator/diff.go",
-      "status": "wip",
+      "status": "done",
       "tags": [
         "types"
       ],
@@ -25,16 +25,16 @@
       "source_sections": null,
       "source_lines": "44-50",
       "started_at": "2026-04-06T07:32:00.01098Z",
-      "closed_at": null,
-      "closed_reason": null,
-      "gate_passed_at": null,
-      "commit_sha": null
+      "closed_at": "2026-04-06T07:35:08.599926Z",
+      "closed_reason": "PackageDiff struct with Added/Removed/Updated/Unchanged, test written first, passes",
+      "gate_passed_at": "2026-04-06T07:35:08.599926Z",
+      "commit_sha": "e521f8d"
     },
     {
       "id": "f1-package-update-struct",
       "title": "Add PackageUpdate struct type",
       "description": "TDD: write failing test that instantiates PackageUpdate with Name, OldVersion, NewVersion, then define the struct",
-      "status": "wip",
+      "status": "done",
       "tags": [
         "types"
       ],
@@ -44,16 +44,16 @@
       "source_sections": null,
       "source_lines": "52-56",
       "started_at": "2026-04-06T07:32:00.01098Z",
-      "closed_at": null,
-      "closed_reason": null,
-      "gate_passed_at": null,
-      "commit_sha": null
+      "closed_at": "2026-04-06T07:35:08.599926Z",
+      "closed_reason": "PackageUpdate with Name/OldVersion/NewVersion, test written first, passes",
+      "gate_passed_at": "2026-04-06T07:35:08.599926Z",
+      "commit_sha": "e521f8d"
     },
     {
       "id": "f1-compute-added-packages",
       "title": "Compute added packages from diff",
       "description": "TDD: write test that given old state map and new lock packages, identifies packages present in new but not old as Added",
-      "status": "open",
+      "status": "wip",
       "tags": [
         "logic"
       ],
@@ -64,7 +64,7 @@
       "acceptance": "Test written first. Function returns correct Added slice for new packages. Test passes.",
       "source_sections": null,
       "source_lines": "46-46,60-60",
-      "started_at": null,
+      "started_at": "2026-04-06T07:35:28.692526Z",
       "closed_at": null,
       "closed_reason": null,
       "gate_passed_at": null,
@@ -74,7 +74,7 @@
       "id": "f1-compute-removed-packages",
       "title": "Compute removed packages from diff",
       "description": "TDD: write test that given old state map and new lock packages, identifies packages present in old but not new as Removed",
-      "status": "open",
+      "status": "wip",
       "tags": [
         "logic"
       ],
@@ -85,7 +85,7 @@
       "acceptance": "Test written first. Function returns correct Removed slice. Test passes.",
       "source_sections": null,
       "source_lines": "47-47,61-61",
-      "started_at": null,
+      "started_at": "2026-04-06T07:35:28.692526Z",
       "closed_at": null,
       "closed_reason": null,
       "gate_passed_at": null,
@@ -95,7 +95,7 @@
       "id": "f1-compute-updated-packages",
       "title": "Compute updated packages from diff",
       "description": "TDD: write test that given old state map and new lock packages, identifies packages in both with different versions as Updated",
-      "status": "open",
+      "status": "wip",
       "tags": [
         "logic"
       ],
@@ -107,7 +107,7 @@
       "acceptance": "Test written first. Function returns correct Updated slice with old/new versions. Test passes.",
       "source_sections": null,
       "source_lines": "48-48,62-62",
-      "started_at": null,
+      "started_at": "2026-04-06T07:35:28.692526Z",
       "closed_at": null,
       "closed_reason": null,
       "gate_passed_at": null,
@@ -117,7 +117,7 @@
       "id": "f1-compute-unchanged-packages",
       "title": "Compute unchanged packages from diff",
       "description": "TDD: write test that given old state map and new lock packages, identifies packages in both with same version as Unchanged",
-      "status": "open",
+      "status": "wip",
       "tags": [
         "logic"
       ],
@@ -128,7 +128,7 @@
       "acceptance": "Test written first. Function returns correct Unchanged slice. Test passes.",
       "source_sections": null,
       "source_lines": "49-49,63-63",
-      "started_at": null,
+      "started_at": "2026-04-06T07:35:28.692526Z",
       "closed_at": null,
       "closed_reason": null,
       "gate_passed_at": null,
@@ -183,7 +183,7 @@
       "id": "f1-read-lock-hash-from-state",
       "title": "Read lock_hash from state file",
       "description": "TDD: write test reading lock_hash field from vendor/.allegro-state.json",
-      "status": "open",
+      "status": "wip",
       "tags": [
         "logic"
       ],
@@ -192,7 +192,7 @@
       "acceptance": "Test written first. lock_hash parsed from state JSON. Test passes.",
       "source_sections": null,
       "source_lines": "38-38",
-      "started_at": null,
+      "started_at": "2026-04-06T07:35:28.692526Z",
       "closed_at": null,
       "closed_reason": null,
       "gate_passed_at": null,
@@ -202,7 +202,7 @@
       "id": "f1-compute-lock-file-hash",
       "title": "Compute SHA-256 of composer.lock",
       "description": "TDD: write test computing SHA-256 hash of raw lock file bytes",
-      "status": "open",
+      "status": "wip",
       "tags": [
         "logic"
       ],
@@ -211,7 +211,7 @@
       "acceptance": "Test written first. SHA-256 of known content matches expected. Test passes.",
       "source_sections": null,
       "source_lines": "39-39",
-      "started_at": null,
+      "started_at": "2026-04-06T07:35:28.692526Z",
       "closed_at": null,
       "closed_reason": null,
       "gate_passed_at": null,
@@ -724,7 +724,7 @@
       "id": "f2-state-dev-field",
       "title": "Add dev field to state file",
       "description": "TDD: write test that state file includes 'dev' boolean field",
-      "status": "wip",
+      "status": "done",
       "tags": [
         "types"
       ],
@@ -734,16 +734,16 @@
       "source_sections": null,
       "source_lines": "108-110,563-563,575-575",
       "started_at": "2026-04-06T07:32:00.01098Z",
-      "closed_at": null,
-      "closed_reason": null,
-      "gate_passed_at": null,
-      "commit_sha": null
+      "closed_at": "2026-04-06T07:35:08.599926Z",
+      "closed_reason": "Dev bool field added to VendorState with omitempty, test passes",
+      "gate_passed_at": "2026-04-06T07:35:08.599926Z",
+      "commit_sha": "e521f8d"
     },
     {
       "id": "f2-state-dev-packages-field",
       "title": "Add dev_packages field to state file",
       "description": "TDD: write test that state file includes 'dev_packages' string array listing all dev package names",
-      "status": "wip",
+      "status": "done",
       "tags": [
         "types"
       ],
@@ -753,10 +753,10 @@
       "source_sections": null,
       "source_lines": "108-110,564-564,576-576",
       "started_at": "2026-04-06T07:32:00.01098Z",
-      "closed_at": null,
-      "closed_reason": null,
-      "gate_passed_at": null,
-      "commit_sha": null
+      "closed_at": "2026-04-06T07:35:08.599926Z",
+      "closed_reason": "DevPackages []string field added, test + backward compat pass",
+      "gate_passed_at": "2026-04-06T07:35:08.599926Z",
+      "commit_sha": "e521f8d"
     },
     {
       "id": "f2-dev-packages-always-written",
@@ -1857,7 +1857,7 @@
       "id": "f5-config-struct",
       "title": "Add Config struct type",
       "description": "TDD: write test instantiating Config struct with all valid keys",
-      "status": "wip",
+      "status": "done",
       "tags": [
         "types"
       ],
@@ -1867,10 +1867,10 @@
       "source_sections": null,
       "source_lines": "239-253",
       "started_at": "2026-04-06T07:31:38.517856Z",
-      "closed_at": null,
-      "closed_reason": null,
-      "gate_passed_at": null,
-      "commit_sha": null
+      "closed_at": "2026-04-06T07:35:08.599926Z",
+      "closed_reason": "Config struct with all 9 keys matching spec §7.2, JSON roundtrip test passes",
+      "gate_passed_at": "2026-04-06T07:35:08.599926Z",
+      "commit_sha": "e521f8d"
     },
     {
       "id": "f5-config-file-path",
@@ -2630,7 +2630,7 @@
       "id": "f7-project-registry-struct",
       "title": "Add ProjectRegistry struct type",
       "description": "TDD: write test instantiating ProjectRegistry with projects array",
-      "status": "wip",
+      "status": "done",
       "tags": [
         "types"
       ],
@@ -2640,16 +2640,16 @@
       "source_sections": null,
       "source_lines": "367-381",
       "started_at": "2026-04-06T07:32:00.01098Z",
-      "closed_at": null,
-      "closed_reason": null,
-      "gate_passed_at": null,
-      "commit_sha": null
+      "closed_at": "2026-04-06T07:35:08.599926Z",
+      "closed_reason": "ProjectRegistry with Projects array, JSON roundtrip test passes",
+      "gate_passed_at": "2026-04-06T07:35:08.599926Z",
+      "commit_sha": "e521f8d"
     },
     {
       "id": "f7-project-entry-struct",
       "title": "Add ProjectEntry struct type",
       "description": "TDD: write test instantiating ProjectEntry with path/last_install/lock_hash/packages",
-      "status": "wip",
+      "status": "done",
       "tags": [
         "types"
       ],
@@ -2659,10 +2659,10 @@
       "source_sections": null,
       "source_lines": "374-379",
       "started_at": "2026-04-06T07:32:00.01098Z",
-      "closed_at": null,
-      "closed_reason": null,
-      "gate_passed_at": null,
-      "commit_sha": null
+      "closed_at": "2026-04-06T07:35:08.599926Z",
+      "closed_reason": "ProjectEntry with Path/LastInstall/LockHash/Packages, test passes",
+      "gate_passed_at": "2026-04-06T07:35:08.599926Z",
+      "commit_sha": "e521f8d"
     },
     {
       "id": "f7-registry-file-path",
@@ -3710,7 +3710,7 @@
       "id": "f10-link-op-struct",
       "title": "Add LinkOp struct type",
       "description": "TDD: write test instantiating LinkOp with src/dst/executable fields",
-      "status": "wip",
+      "status": "done",
       "tags": [
         "types"
       ],
@@ -3720,10 +3720,10 @@
       "source_sections": null,
       "source_lines": "529-529",
       "started_at": "2026-04-06T07:32:00.01098Z",
-      "closed_at": null,
-      "closed_reason": null,
-      "gate_passed_at": null,
-      "commit_sha": null
+      "closed_at": "2026-04-06T07:35:08.599926Z",
+      "closed_reason": "LinkOp with Src/Dst/Executable, test written first, passes",
+      "gate_passed_at": "2026-04-06T07:35:08.599926Z",
+      "commit_sha": "e521f8d"
     },
     {
       "id": "f10-collect-directories",
@@ -3984,7 +3984,7 @@
       "id": "f12-state-schema-version-field",
       "title": "Add schema_version field to state",
       "description": "TDD: write test that state file includes schema_version:2",
-      "status": "wip",
+      "status": "done",
       "tags": [
         "types"
       ],
@@ -3994,16 +3994,16 @@
       "source_sections": null,
       "source_lines": "559-559,574-574",
       "started_at": "2026-04-06T07:32:00.01098Z",
-      "closed_at": null,
-      "closed_reason": null,
-      "gate_passed_at": null,
-      "commit_sha": null
+      "closed_at": "2026-04-06T07:35:08.599926Z",
+      "closed_reason": "SchemaVersion int field added to VendorState, test + backward compat test pass",
+      "gate_passed_at": "2026-04-06T07:35:08.599926Z",
+      "commit_sha": "e521f8d"
     },
     {
       "id": "f12-state-scripts-executed-field",
       "title": "Add scripts_executed field to state",
       "description": "TDD: write test that state file includes scripts_executed boolean",
-      "status": "wip",
+      "status": "done",
       "tags": [
         "types"
       ],
@@ -4013,10 +4013,10 @@
       "source_sections": null,
       "source_lines": "565-565,577-577",
       "started_at": "2026-04-06T07:32:00.01098Z",
-      "closed_at": null,
-      "closed_reason": null,
-      "gate_passed_at": null,
-      "commit_sha": null
+      "closed_at": "2026-04-06T07:35:08.599926Z",
+      "closed_reason": "ScriptsExecuted bool field added, test + backward compat test pass",
+      "gate_passed_at": "2026-04-06T07:35:08.599926Z",
+      "commit_sha": "e521f8d"
     },
     {
       "id": "f12-compat-missing-schema-version",
