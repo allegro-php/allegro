@@ -127,6 +127,24 @@ func GenerateInstalledPHP(lock *parser.ComposerLock, composerJSON map[string]int
 	packagesDev := parser.FilterInstallable(lock.PackagesDev)
 	all := append(packages, packagesDev...)
 
+	// Track emitted names to avoid duplicates from replace/provide
+	emitted := make(map[string]bool)
+
+	// Root package version entry (mirrors the 'root' section)
+	rootNameStr := "__root__"
+	if v, ok := composerJSON["name"].(string); ok && v != "" {
+		rootNameStr = v
+	}
+	b.WriteString(fmt.Sprintf("        '%s' => array(\n", escapePHP(rootNameStr)))
+	b.WriteString(fmt.Sprintf("            'pretty_version' => %s,\n", rootVersion))
+	b.WriteString(fmt.Sprintf("            'version' => %s,\n", rootVersion))
+	b.WriteString("            'reference' => NULL,\n")
+	b.WriteString(fmt.Sprintf("            'type' => %s,\n", rootType))
+	b.WriteString("            'install_path' => __DIR__ . '/../../',\n")
+	b.WriteString("            'aliases' => array(),\n")
+	b.WriteString("            'dev_requirement' => false,\n")
+	b.WriteString("        ),\n")
+	emitted[rootNameStr] = true
 	for _, pkg := range all {
 		isDev := parser.IsDevPackage(pkg.Name, lock)
 		ref := "NULL"
@@ -155,6 +173,39 @@ func GenerateInstalledPHP(lock *parser.ComposerLock, composerJSON map[string]int
 		}
 		b.WriteString(fmt.Sprintf("            'dev_requirement' => %s,\n", devReq))
 		b.WriteString("        ),\n")
+		emitted[pkg.Name] = true
+	}
+
+	// Emit replaced/provided virtual packages.
+	// e.g. laravel/framework replaces illuminate/auth, illuminate/contracts, etc.
+	// Without these, InstalledVersions::isInstalled('illuminate/contracts') returns false.
+	// Skip platform packages (ext-*, php, lib-*) and already-emitted names.
+	for _, pkg := range all {
+		isDev := parser.IsDevPackage(pkg.Name, lock)
+		devReq := "false"
+		if isDev {
+			devReq = "true"
+		}
+		for name, ver := range pkg.Replace {
+			if emitted[name] || parser.IsPlatformPackage(name) {
+				continue
+			}
+			b.WriteString(fmt.Sprintf("        '%s' => array(\n", escapePHP(name)))
+			b.WriteString(fmt.Sprintf("            'dev_requirement' => %s,\n", devReq))
+			b.WriteString(fmt.Sprintf("            'replaced' => array('%s'),\n", escapePHP(ver)))
+			b.WriteString("        ),\n")
+			emitted[name] = true
+		}
+		for name, ver := range pkg.Provide {
+			if emitted[name] || parser.IsPlatformPackage(name) {
+				continue
+			}
+			b.WriteString(fmt.Sprintf("        '%s' => array(\n", escapePHP(name)))
+			b.WriteString(fmt.Sprintf("            'dev_requirement' => %s,\n", devReq))
+			b.WriteString(fmt.Sprintf("            'provided' => array('%s'),\n", escapePHP(ver)))
+			b.WriteString("        ),\n")
+			emitted[name] = true
+		}
 	}
 
 	b.WriteString("    ),\n")
