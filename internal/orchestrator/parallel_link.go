@@ -74,14 +74,24 @@ func ParallelLink(ops []LinkOp, lnk linker.Linker, strategy linker.Strategy, wor
 					return // cancelled
 				default:
 				}
-				if err := lnk.LinkFile(op.Src, op.Dst); err != nil {
+			if err := lnk.LinkFile(op.Src, op.Dst); err != nil {
 					errOnce.Do(func() {
 						firstErr = err
 						close(done) // signal other workers to stop
 					})
 					return
 				}
-				if strategy != linker.Hardlink {
+				if strategy == linker.Hardlink {
+					// Self-heal CAS permissions: a prior install's composer
+					// dumpautoload may have corrupted them via the shared inode.
+					expectedPerm := os.FileMode(0444)
+					if op.Executable {
+						expectedPerm = 0555
+					}
+					if info, err := os.Stat(op.Src); err == nil && info.Mode().Perm() != expectedPerm {
+						os.Chmod(op.Src, expectedPerm)
+					}
+				} else {
 					perm := os.FileMode(0644)
 					if op.Executable {
 						perm = 0755
