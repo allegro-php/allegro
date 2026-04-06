@@ -17,14 +17,14 @@ BENCH_DIR="${BENCH_DIR:-/tmp/allegro-benchmark}"
 ALLEGRO_BIN="$BENCH_DIR/allegro"
 SKIP_CLONE="${1:-}"
 
-# Projects: name url (small / medium / large)
-NAMES=(laravel koel matomo)
+# Projects: name url (small / medium / large / enterprise)
+NAMES=(laravel koel matomo spryker)
 URLS=(
     "https://github.com/laravel/laravel.git"
     "https://github.com/koel/koel.git"
     "https://github.com/matomo-org/matomo.git"
+    "https://github.com/spryker-shop/suite.git"
 )
-
 C='\033[0;36m'
 B='\033[1m'
 N='\033[0m'
