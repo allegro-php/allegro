@@ -33,7 +33,6 @@ func ReadRegistry(path string) (*ProjectRegistry, error) {
 	if err := json.Unmarshal(data, &reg); err != nil {
 		return nil, fmt.Errorf("corrupt projects.json: %w", err)
 	}
-	}
 	return &reg, nil
 }
 
