@@ -56,10 +56,11 @@ func ParallelLink(ops []LinkOp, lnk linker.Linker, strategy linker.Strategy, wor
 			return err
 		}
 	}
-
-	// 2. Link files in parallel
-	errCh := make(chan error, len(ops))
+	// 2. Link files in parallel with cancellation on first error
+	var firstErr error
+	var errOnce sync.Once
 	opCh := make(chan LinkOp, len(ops))
+	done := make(chan struct{})
 
 	var wg sync.WaitGroup
 	for i := 0; i < workers; i++ {
@@ -67,9 +68,17 @@ func ParallelLink(ops []LinkOp, lnk linker.Linker, strategy linker.Strategy, wor
 		go func() {
 			defer wg.Done()
 			for op := range opCh {
+				select {
+				case <-done:
+					return // cancelled
+				default:
+				}
 				if err := lnk.LinkFile(op.Src, op.Dst); err != nil {
-					errCh <- err
-					continue
+					errOnce.Do(func() {
+						firstErr = err
+						close(done) // signal other workers to stop
+					})
+					return
 				}
 				if strategy != linker.Hardlink {
 					perm := os.FileMode(0644)
@@ -83,16 +92,17 @@ func ParallelLink(ops []LinkOp, lnk linker.Linker, strategy linker.Strategy, wor
 	}
 
 	for _, op := range ops {
-		opCh <- op
+		select {
+		case <-done:
+			break // stop sending if cancelled
+		case opCh <- op:
+		}
 	}
 	close(opCh)
 	wg.Wait()
-	close(errCh)
 
-	for err := range errCh {
-		if err != nil {
-			return err
-		}
+	if firstErr != nil {
+		return firstErr
 	}
 	return nil
 }

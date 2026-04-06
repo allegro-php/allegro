@@ -83,7 +83,7 @@ func RegisterProject(path string, entry ProjectEntry) error {
 		reg.Projects = append(reg.Projects, entry)
 	}
 
-	// Write atomically (temp file + rename)
+	// Write atomically with fsync
 	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
 		return err
 	}
@@ -91,13 +91,6 @@ func RegisterProject(path string, entry ProjectEntry) error {
 	if err != nil {
 		return err
 	}
-	tmpPath := path + ".tmp"
-	if err := os.WriteFile(tmpPath, data, 0644); err != nil {
-		return fmt.Errorf("write projects tmp: %w", err)
-	}
-	if err := os.Rename(tmpPath, path); err != nil {
-		os.Remove(tmpPath)
-		return fmt.Errorf("rename projects: %w", err)
-	}
+	return WriteFileAtomic(path, data, 0644)
 	return nil
 }

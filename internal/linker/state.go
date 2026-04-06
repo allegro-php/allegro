@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/allegro-php/allegro/internal/store"
 )
 
 // WriteVendorState writes vendor/.allegro-state.json.
@@ -40,15 +42,7 @@ func WriteVendorState(vendorDir string, opts WriteVendorStateOpts) error {
 	}
 
 	path := filepath.Join(vendorDir, ".allegro-state.json")
-	tmpPath := path + ".tmp"
-	if err := os.WriteFile(tmpPath, data, 0644); err != nil {
-		return fmt.Errorf("write state tmp: %w", err)
-	}
-	if err := os.Rename(tmpPath, path); err != nil {
-		os.Remove(tmpPath)
-		return fmt.Errorf("rename state: %w", err)
-	}
-	return nil
+	return store.WriteFileAtomic(path, data, 0644)
 }
 
 // ReadVendorState reads vendor/.allegro-state.json.

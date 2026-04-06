@@ -108,11 +108,5 @@ func garbageCollectImpl(storePath, registryPath string, staleDays int, dryRun bo
 func writeRegistryAtomic(path string, reg *ProjectRegistry) error {
 	data, err := json.MarshalIndent(reg, "", "  ")
 	if err != nil { return err }
-	tmpPath := path + ".tmp"
-	if err := os.WriteFile(tmpPath, data, 0644); err != nil { return err }
-	if err := os.Rename(tmpPath, path); err != nil {
-		os.Remove(tmpPath)
-		return err
-	}
-	return nil
+	return WriteFileAtomic(path, data, 0644)
 }
