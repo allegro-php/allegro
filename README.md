@@ -43,10 +43,12 @@ Measured on Apple M-series (macOS, APFS). Run `./benchmark/run.sh` to reproduce.
 
 | Scenario | Project | Composer | Allegro | Speedup |
 |----------|---------|---------|---------|---------:|
-| Warm cache, no vendor | Laravel (106 pkgs) | 5.93s | **1.25s** | **4.7x** |
-| Warm cache, no vendor | Koel (194 pkgs) | 8.53s | **2.06s** | **4.1x** |
-| Warm cache, no vendor | Matomo (85 pkgs) | 3.73s | **0.95s** | **3.9x** |
-| Noop (vendor up-to-date) | All projects | ~0.40s | **0.03s** | **13x** |
+| Warm cache, no vendor | Laravel (106 pkgs) | 4.68s | **1.14s** | **4.1x** |
+| Warm cache, no vendor | Koel (194 pkgs) | 8.53s | **2.43s** | **3.5x** |
+| Warm cache, no vendor | Matomo (85 pkgs) | 3.90s | **1.69s** | **2.3x** |
+| Warm cache, no vendor | Spryker (1574 pkgs) | 106s | **23s** | **4.6x** |
+| Noop (vendor up-to-date) | Laravel | 0.41s | **0.03s** | **14x** |
+| Noop (vendor up-to-date) | Spryker | 3.96s | **0.05s** | **79x** |
 
 Cold installs are network-bound so both tools perform similarly. The real advantage is on subsequent installs: Allegro skips downloads entirely and links from the local CAS.
 

@@ -98,10 +98,13 @@ run_benchmark() {
 
     log "Benchmarking: $name"
 
+    # Use --ignore-platform-reqs so Composer doesn't fail on missing extensions
+    local COMPOSER_OPTS="--no-scripts --no-interaction --ignore-platform-reqs"
+
     echo -n "  S1: Cold (no cache)         "
     composer clear-cache > /dev/null 2>&1 || true
     rm -rf vendor
-    local s1c; s1c=$(timeit "composer install --no-scripts --no-interaction")
+    local s1c; s1c=$(timeit "composer install $COMPOSER_OPTS")
     echo -n "Composer: ${s1c}s  "
     rm -rf vendor "$cas" ~/.allegro
     export ALLEGRO_STORE="$cas"
@@ -110,14 +113,14 @@ run_benchmark() {
 
     echo -n "  S2: Warm cache, no vendor   "
     rm -rf vendor
-    local s2c; s2c=$(timeit "composer install --no-scripts --no-interaction")
+    local s2c; s2c=$(timeit "composer install $COMPOSER_OPTS")
     echo -n "Composer: ${s2c}s  "
     rm -rf vendor
     local s2a; s2a=$(timeit "$ALLEGRO_BIN install --no-autoload --link-strategy copy")
     echo "Allegro: ${s2a}s"
 
     echo -n "  S3: Warm + vendor (noop)    "
-    local s3c; s3c=$(timeit "composer install --no-scripts --no-interaction")
+    local s3c; s3c=$(timeit "composer install $COMPOSER_OPTS")
     echo -n "Composer: ${s3c}s  "
     local s3a; s3a=$(timeit "$ALLEGRO_BIN install --no-autoload --link-strategy copy")
     echo "Allegro: ${s3a}s"
