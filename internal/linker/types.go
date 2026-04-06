@@ -31,9 +31,13 @@ type Linker interface {
 
 // VendorState represents vendor/.allegro-state.json.
 type VendorState struct {
-	AllegroVersion string            `json:"allegro_version"`
-	LinkStrategy   string            `json:"link_strategy"`
-	LockHash       string            `json:"lock_hash"`
-	InstalledAt    time.Time         `json:"installed_at"`
-	Packages       map[string]string `json:"packages"`
+	AllegroVersion  string            `json:"allegro_version"`
+	SchemaVersion   int               `json:"schema_version,omitempty"`
+	LinkStrategy    string            `json:"link_strategy"`
+	LockHash        string            `json:"lock_hash"`
+	InstalledAt     time.Time         `json:"installed_at"`
+	Dev             bool              `json:"dev,omitempty"`
+	DevPackages     []string          `json:"dev_packages,omitempty"`
+	ScriptsExecuted bool              `json:"scripts_executed,omitempty"`
+	Packages        map[string]string `json:"packages"`
 }

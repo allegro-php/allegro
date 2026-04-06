@@ -1,0 +1,4661 @@
+{
+  "version": 1,
+  "spec": "spec/phase2.md",
+  "created_at": "2026-04-06T06:49:40.379858Z",
+  "updated_at": "2026-04-06T07:32:00.010984Z",
+  "workflow": {},
+  "coverage": {
+    "total_sections": 0,
+    "mapped_sections": 0,
+    "context_only": [],
+    "unmapped": []
+  },
+  "tasks": [
+    {
+      "id": "f1-package-diff-struct",
+      "title": "Add PackageDiff struct type",
+      "description": "TDD: write failing test that instantiates PackageDiff with Added/Removed/Updated/Unchanged slices, then define the struct in internal/orchestrator/diff.go",
+      "status": "wip",
+      "tags": [
+        "types"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. PackageDiff struct compiles with Added, Removed, Updated, Unchanged fields. Test passes.",
+      "source_sections": null,
+      "source_lines": "44-50",
+      "started_at": "2026-04-06T07:32:00.01098Z",
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f1-package-update-struct",
+      "title": "Add PackageUpdate struct type",
+      "description": "TDD: write failing test that instantiates PackageUpdate with Name, OldVersion, NewVersion, then define the struct",
+      "status": "wip",
+      "tags": [
+        "types"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. PackageUpdate struct compiles with Name, OldVersion, NewVersion. Test passes.",
+      "source_sections": null,
+      "source_lines": "52-56",
+      "started_at": "2026-04-06T07:32:00.01098Z",
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f1-compute-added-packages",
+      "title": "Compute added packages from diff",
+      "description": "TDD: write test that given old state map and new lock packages, identifies packages present in new but not old as Added",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f1-package-diff-struct"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Function returns correct Added slice for new packages. Test passes.",
+      "source_sections": null,
+      "source_lines": "46-46,60-60",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f1-compute-removed-packages",
+      "title": "Compute removed packages from diff",
+      "description": "TDD: write test that given old state map and new lock packages, identifies packages present in old but not new as Removed",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f1-package-diff-struct"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Function returns correct Removed slice. Test passes.",
+      "source_sections": null,
+      "source_lines": "47-47,61-61",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f1-compute-updated-packages",
+      "title": "Compute updated packages from diff",
+      "description": "TDD: write test that given old state map and new lock packages, identifies packages in both with different versions as Updated",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f1-package-update-struct",
+        "f1-package-diff-struct"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Function returns correct Updated slice with old/new versions. Test passes.",
+      "source_sections": null,
+      "source_lines": "48-48,62-62",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f1-compute-unchanged-packages",
+      "title": "Compute unchanged packages from diff",
+      "description": "TDD: write test that given old state map and new lock packages, identifies packages in both with same version as Unchanged",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f1-package-diff-struct"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Function returns correct Unchanged slice. Test passes.",
+      "source_sections": null,
+      "source_lines": "49-49,63-63",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f1-diff-case-insensitive-names",
+      "title": "Case-insensitive package name comparison",
+      "description": "TDD: write test that 'Monolog/Monolog' matches 'monolog/monolog' in diff computation",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f1-compute-added-packages"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Diff treats package names case-insensitively. Test passes.",
+      "source_sections": null,
+      "source_lines": "72-72",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f1-compute-full-diff",
+      "title": "Combine diff into PackageDiff result",
+      "description": "TDD: write test calling ComputeDiff with state packages and lock packages, verify complete PackageDiff output",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f1-compute-added-packages",
+        "f1-compute-removed-packages",
+        "f1-compute-updated-packages",
+        "f1-compute-unchanged-packages"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. ComputeDiff returns correct PackageDiff. Test passes.",
+      "source_sections": null,
+      "source_lines": "44-57",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f1-read-lock-hash-from-state",
+      "title": "Read lock_hash from state file",
+      "description": "TDD: write test reading lock_hash field from vendor/.allegro-state.json",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. lock_hash parsed from state JSON. Test passes.",
+      "source_sections": null,
+      "source_lines": "38-38",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f1-compute-lock-file-hash",
+      "title": "Compute SHA-256 of composer.lock",
+      "description": "TDD: write test computing SHA-256 hash of raw lock file bytes",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. SHA-256 of known content matches expected. Test passes.",
+      "source_sections": null,
+      "source_lines": "39-39",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f1-noop-detection-hash-match",
+      "title": "Detect noop when hash matches",
+      "description": "TDD: write test that when lock_hash matches and dev flag matches, returns noop=true",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f1-read-lock-hash-from-state",
+        "f1-compute-lock-file-hash"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Noop detected on matching hash+dev. Test passes.",
+      "source_sections": null,
+      "source_lines": "41-41",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f1-noop-print-message",
+      "title": "Print up-to-date message on noop",
+      "description": "TDD: write test verifying 'Vendor is up to date' output on noop path",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "f1-noop-detection-hash-match"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Noop prints correct message. Test passes.",
+      "source_sections": null,
+      "source_lines": "41-41",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f1-noop-skip-on-dev-mismatch",
+      "title": "Skip noop when dev flag differs",
+      "description": "TDD: write test that when lock_hash matches but dev flag differs, noop is NOT triggered",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f1-noop-detection-hash-match"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Dev flag mismatch triggers diff. Test passes.",
+      "source_sections": null,
+      "source_lines": "42-42",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f1-delete-removed-package-dirs",
+      "title": "Delete removed package directories",
+      "description": "TDD: write test that removed packages have their vendor/ subdirectory deleted",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f1-compute-removed-packages"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Removed package dir deleted from vendor. Test passes.",
+      "source_sections": null,
+      "source_lines": "61-61",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f1-link-added-packages",
+      "title": "Link added packages from CAS",
+      "description": "TDD: write test that added packages are linked from CAS into vendor/",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f1-compute-added-packages"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Added packages linked into vendor. Test passes.",
+      "source_sections": null,
+      "source_lines": "60-60",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f1-update-package-remove-old",
+      "title": "Delete old version for updated packages",
+      "description": "TDD: write test that updated packages have their old vendor dir deleted before re-link",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f1-compute-updated-packages"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Old package dir removed. Test passes.",
+      "source_sections": null,
+      "source_lines": "62-62",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f1-update-package-link-new",
+      "title": "Link new version for updated packages",
+      "description": "TDD: write test that updated packages have their new version linked from CAS",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f1-update-package-remove-old"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. New version linked into vendor. Test passes.",
+      "source_sections": null,
+      "source_lines": "62-62",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f1-skip-unchanged-packages",
+      "title": "Skip unchanged packages in diff",
+      "description": "TDD: write test that unchanged packages are not touched during incremental install",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f1-compute-unchanged-packages"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Unchanged packages not re-linked. Test passes.",
+      "source_sections": null,
+      "source_lines": "63-63",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f1-regenerate-installed-json",
+      "title": "Regenerate installed.json after diff",
+      "description": "TDD: write test that installed.json is regenerated reflecting full state after incremental apply",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f1-link-added-packages"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. installed.json reflects all current packages. Test passes.",
+      "source_sections": null,
+      "source_lines": "64-64",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f1-regenerate-installed-php",
+      "title": "Regenerate installed.php after diff",
+      "description": "TDD: write test that installed.php is regenerated reflecting full state after incremental apply",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f1-link-added-packages"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. installed.php reflects all current packages. Test passes.",
+      "source_sections": null,
+      "source_lines": "64-64",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f1-clear-vendor-bin-on-diff",
+      "title": "Clear vendor/bin/ before regeneration",
+      "description": "TDD: write test that vendor/bin/ is completely cleared during incremental install before proxy regeneration",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f1-link-added-packages"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. vendor/bin/ cleared of stale proxies. Test passes.",
+      "source_sections": null,
+      "source_lines": "64-64",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f1-regenerate-bin-proxies",
+      "title": "Regenerate vendor/bin/ proxies from scratch",
+      "description": "TDD: write test that vendor/bin/ proxies regenerated for all current packages after clear",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f1-clear-vendor-bin-on-diff"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Proxies regenerated correctly. Test passes.",
+      "source_sections": null,
+      "source_lines": "64-64",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f1-dumpautoload-after-diff",
+      "title": "Run dumpautoload after incremental apply",
+      "description": "TDD: write test verifying composer dumpautoload --optimize is called after incremental diff apply",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f1-regenerate-installed-json"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. dumpautoload called post-diff. Test passes.",
+      "source_sections": null,
+      "source_lines": "65-65",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f1-update-state-after-diff",
+      "title": "Write state file after incremental apply",
+      "description": "TDD: write test verifying .allegro-state.json updated with new lock_hash after diff apply",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f1-dumpautoload-after-diff"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. State file written with new hash. Test passes.",
+      "source_sections": null,
+      "source_lines": "66-66",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f1-flock-held-during-steps",
+      "title": "Hold flock during steps 1-9",
+      "description": "TDD: write test verifying flock acquired before diff and released after state write",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f1-update-state-after-diff"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Flock held for steps 1-9. Test passes.",
+      "source_sections": null,
+      "source_lines": "74-81",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f1-flock-released-before-scripts",
+      "title": "Release flock before script execution",
+      "description": "TDD: write test verifying flock released before step 10 (script execution)",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f1-flock-held-during-steps"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Flock released before scripts. Test passes.",
+      "source_sections": null,
+      "source_lines": "68-70,78-78",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f1-incremental-orchestrator-wiring",
+      "title": "Wire incremental install into orchestrator",
+      "description": "TDD: write test that orchestrator chooses incremental path when state exists and no --force",
+      "status": "open",
+      "tags": [
+        "wiring"
+      ],
+      "depends_on": [
+        "f1-compute-full-diff",
+        "f1-flock-released-before-scripts"
+      ],
+      "estimate_minutes": 15,
+      "acceptance": "Test written first. Orchestrator routes to incremental. Test passes.",
+      "source_sections": null,
+      "source_lines": "36-70",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f1-force-flag-type",
+      "title": "Add --force flag definition",
+      "description": "TDD: write test parsing --force flag from CLI args",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. --force flag parsed correctly. Test passes.",
+      "source_sections": null,
+      "source_lines": "83-87",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f1-force-env-var",
+      "title": "Read ALLEGRO_FORCE env var",
+      "description": "TDD: write test that ALLEGRO_FORCE=1 sets force=true",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "f1-force-flag-type"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Env var parsed to force flag. Test passes.",
+      "source_sections": null,
+      "source_lines": "87-87",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f1-force-triggers-full-rebuild",
+      "title": "Force flag triggers full rebuild",
+      "description": "TDD: write test that --force skips incremental and uses Phase 1 atomic swap",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f1-force-flag-type",
+        "f1-incremental-orchestrator-wiring"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. --force routes to full rebuild. Test passes.",
+      "source_sections": null,
+      "source_lines": "82-87",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f2-dev-flag-definition",
+      "title": "Add --dev flag definition",
+      "description": "TDD: write test parsing --dev flag from CLI args",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. --dev flag parsed. Test passes.",
+      "source_sections": null,
+      "source_lines": "101-103",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f2-nodev-flag-definition",
+      "title": "Add --no-dev flag definition",
+      "description": "TDD: write test parsing --no-dev flag from CLI args",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. --no-dev flag parsed. Test passes.",
+      "source_sections": null,
+      "source_lines": "101-104",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f2-nodev-env-var",
+      "title": "Read ALLEGRO_NO_DEV env var",
+      "description": "TDD: write test that ALLEGRO_NO_DEV=1 sets no_dev=true",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "f2-nodev-flag-definition"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Env var parsed to no_dev. Test passes.",
+      "source_sections": null,
+      "source_lines": "129-131",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f2-dev-mode-precedence",
+      "title": "Resolve dev mode via precedence",
+      "description": "TDD: write test that dev mode resolves: flag \u003e env \u003e config \u003e default(true)",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f2-dev-flag-definition",
+        "f2-nodev-flag-definition",
+        "f2-nodev-env-var"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Precedence chain correct. Test passes.",
+      "source_sections": null,
+      "source_lines": "40-40,131-131",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f2-state-dev-field",
+      "title": "Add dev field to state file",
+      "description": "TDD: write test that state file includes 'dev' boolean field",
+      "status": "wip",
+      "tags": [
+        "types"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. dev field written to state. Test passes.",
+      "source_sections": null,
+      "source_lines": "108-110,563-563,575-575",
+      "started_at": "2026-04-06T07:32:00.01098Z",
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f2-state-dev-packages-field",
+      "title": "Add dev_packages field to state file",
+      "description": "TDD: write test that state file includes 'dev_packages' string array listing all dev package names",
+      "status": "wip",
+      "tags": [
+        "types"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. dev_packages always written. Test passes.",
+      "source_sections": null,
+      "source_lines": "108-110,564-564,576-576",
+      "started_at": "2026-04-06T07:32:00.01098Z",
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f2-dev-packages-always-written",
+      "title": "Write dev_packages in both modes",
+      "description": "TDD: write test that dev_packages written even when dev=false",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f2-state-dev-packages-field"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. dev_packages populated regardless of mode. Test passes.",
+      "source_sections": null,
+      "source_lines": "110-110",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f2-nodev-exclude-packages-dev",
+      "title": "Exclude packages-dev from install plan",
+      "description": "TDD: write test that --no-dev excludes packages-dev from the install plan",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f2-dev-mode-precedence"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Dev packages excluded from plan. Test passes.",
+      "source_sections": null,
+      "source_lines": "114-114",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f2-nodev-installed-json-fields",
+      "title": "Set installed.json dev fields for --no-dev",
+      "description": "TDD: write test that installed.json has dev:false, dev-package-names:[] under --no-dev",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f2-nodev-exclude-packages-dev"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. installed.json fields correct. Test passes.",
+      "source_sections": null,
+      "source_lines": "115-115",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f2-nodev-installed-php-fields",
+      "title": "Set installed.php dev fields for --no-dev",
+      "description": "TDD: write test that installed.php has dev=\u003efalse and excludes dev packages from versions",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f2-nodev-exclude-packages-dev"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. installed.php fields correct. Test passes.",
+      "source_sections": null,
+      "source_lines": "116-116",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f2-nodev-state-file-dev-false",
+      "title": "Set state dev:false under --no-dev",
+      "description": "TDD: write test that state file has dev:false but dev_packages still populated",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f2-state-dev-field",
+        "f2-dev-packages-always-written"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. State reflects dev:false. Test passes.",
+      "source_sections": null,
+      "source_lines": "117-117",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f2-nodev-skip-bin-proxies",
+      "title": "Skip bin proxies for dev packages",
+      "description": "TDD: write test that vendor/bin/ proxies for dev packages NOT generated under --no-dev",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f2-nodev-exclude-packages-dev"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Dev package proxies absent. Test passes.",
+      "source_sections": null,
+      "source_lines": "118-118",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f2-nodev-dumpautoload-flag",
+      "title": "Append --no-dev to dumpautoload call",
+      "description": "TDD: write test that dumpautoload called with --no-dev when active",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f2-nodev-exclude-packages-dev"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. --no-dev appended to dumpautoload. Test passes.",
+      "source_sections": null,
+      "source_lines": "119-119",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f2-switch-dev-to-nodev",
+      "title": "Dev to no-dev removes dev packages",
+      "description": "TDD: write test that switching from dev to no-dev puts dev packages in Removed diff",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f2-state-dev-packages-field",
+        "f1-compute-full-diff"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Dev packages appear as removed. Test passes.",
+      "source_sections": null,
+      "source_lines": "121-127",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f2-switch-nodev-to-dev",
+      "title": "No-dev to dev adds dev packages",
+      "description": "TDD: write test that switching from no-dev to dev puts dev packages in Added diff",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f2-state-dev-packages-field",
+        "f1-compute-full-diff"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Dev packages appear as added. Test passes.",
+      "source_sections": null,
+      "source_lines": "121-127",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f2-dev-flags-on-all-commands",
+      "title": "Accept dev flags on four commands",
+      "description": "TDD: write test that install/update/require/remove all accept --dev/--no-dev",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "f2-dev-flag-definition",
+        "f2-nodev-flag-definition"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. All four commands accept flags. Test passes.",
+      "source_sections": null,
+      "source_lines": "106-106",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f3-verify-command-definition",
+      "title": "Add verify command skeleton",
+      "description": "TDD: write test that 'allegro verify' is a valid CLI command",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Verify command registered. Test passes.",
+      "source_sections": null,
+      "source_lines": "139-143",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f3-verify-fix-flag",
+      "title": "Add --fix flag to verify command",
+      "description": "TDD: write test parsing --fix flag on verify command",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "f3-verify-command-definition"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. --fix flag parsed. Test passes.",
+      "source_sections": null,
+      "source_lines": "142-142",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f3-verify-reads-state-dev",
+      "title": "Verify reads dev flag from state",
+      "description": "TDD: write test that verify reads dev flag from state file, not CLI",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f3-verify-command-definition"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Dev flag from state used. Test passes.",
+      "source_sections": null,
+      "source_lines": "145-145",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f3-verify-no-dev-flag-rejected",
+      "title": "Verify rejects --dev/--no-dev flags",
+      "description": "TDD: write test that verify does NOT accept --no-dev or --dev flags",
+      "status": "open",
+      "tags": [
+        "validation"
+      ],
+      "depends_on": [
+        "f3-verify-command-definition"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Flags rejected on verify. Test passes.",
+      "source_sections": null,
+      "source_lines": "145-145",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f3-verify-iterate-state-packages",
+      "title": "Iterate packages from state map",
+      "description": "TDD: write test that verify iterates only packages in state's packages map",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f3-verify-reads-state-dev"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Only linked packages verified. Test passes.",
+      "source_sections": null,
+      "source_lines": "149-150",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f3-verify-read-cas-manifest",
+      "title": "Read CAS manifest for each package",
+      "description": "TDD: write test that verify reads CAS manifest for each package",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f3-verify-iterate-state-packages"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Manifest read per package. Test passes.",
+      "source_sections": null,
+      "source_lines": "151-151",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f3-verify-missing-manifest-handling",
+      "title": "Handle missing CAS manifest in verify",
+      "description": "TDD: write test that missing manifest treats all files as missing",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f3-verify-read-cas-manifest"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Missing manifest reports all files missing. Test passes.",
+      "source_sections": null,
+      "source_lines": "151-151",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f3-verify-check-file-exists",
+      "title": "Check vendor file existence in verify",
+      "description": "TDD: write test that verify detects missing vendor files",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f3-verify-read-cas-manifest"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Missing files detected. Test passes.",
+      "source_sections": null,
+      "source_lines": "154-154",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f3-verify-hash-comparison",
+      "title": "Compare file SHA-256 with manifest",
+      "description": "TDD: write test that verify computes SHA-256 of vendor file and compares with manifest hash",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f3-verify-check-file-exists"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Modified files detected by hash. Test passes.",
+      "source_sections": null,
+      "source_lines": "155-156",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f3-verify-permission-check",
+      "title": "Check file permissions in verify",
+      "description": "TDD: write test that verify checks permissions match expected values based on link_strategy",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f3-verify-check-file-exists"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Permission mismatches detected. Test passes.",
+      "source_sections": null,
+      "source_lines": "152-157",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f3-verify-expected-perms-hardlink",
+      "title": "Expected permissions for hardlink strategy",
+      "description": "TDD: write test that hardlink expects 0444/0555 permissions",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f3-verify-permission-check"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Hardlink perms 0444/0555. Test passes.",
+      "source_sections": null,
+      "source_lines": "152-152",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f3-verify-expected-perms-reflink",
+      "title": "Expected permissions for reflink/copy strategy",
+      "description": "TDD: write test that reflink/copy expects 0644/0755 permissions",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f3-verify-permission-check"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Reflink/copy perms 0644/0755. Test passes.",
+      "source_sections": null,
+      "source_lines": "152-152",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f3-verify-output-ok-package",
+      "title": "Print OK status for clean packages",
+      "description": "TDD: write test that verified-clean packages print checkmark and OK",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "f3-verify-hash-comparison"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. OK output matches spec format. Test passes.",
+      "source_sections": null,
+      "source_lines": "162-175",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f3-verify-output-failed-package",
+      "title": "Print failure details for bad packages",
+      "description": "TDD: write test that failed packages show issue list (modified/missing)",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "f3-verify-hash-comparison"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Failure output matches spec format. Test passes.",
+      "source_sections": null,
+      "source_lines": "162-175",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f3-verify-output-summary",
+      "title": "Print verify summary line",
+      "description": "TDD: write test that summary shows 'X OK, Y failed' counts",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "f3-verify-output-ok-package",
+        "f3-verify-output-failed-package"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Summary format correct. Test passes.",
+      "source_sections": null,
+      "source_lines": "173-173",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f3-verify-output-fix-hint",
+      "title": "Print fix hint on failure",
+      "description": "TDD: write test that failure summary suggests 'allegro verify --fix'",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "f3-verify-output-summary"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Fix hint printed on failure. Test passes.",
+      "source_sections": null,
+      "source_lines": "174-174",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f3-fix-relink-missing-files",
+      "title": "Fix mode relinks missing files",
+      "description": "TDD: write test that --fix re-links missing files from CAS",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f3-verify-fix-flag",
+        "f3-verify-check-file-exists"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Missing files re-linked. Test passes.",
+      "source_sections": null,
+      "source_lines": "179-179",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f3-fix-redownload-missing-cas",
+      "title": "Fix re-downloads when CAS missing",
+      "description": "TDD: write test that --fix re-downloads package when CAS file missing",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f3-fix-relink-missing-files"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Missing CAS triggers re-download. Test passes.",
+      "source_sections": null,
+      "source_lines": "179-179",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f3-fix-missing-manifest-redownload",
+      "title": "Fix re-downloads on missing manifest",
+      "description": "TDD: write test that --fix re-downloads entire package when manifest missing",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f3-verify-missing-manifest-handling"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Missing manifest triggers full re-download. Test passes.",
+      "source_sections": null,
+      "source_lines": "180-180",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f3-fix-replace-modified-files",
+      "title": "Fix replaces modified files",
+      "description": "TDD: write test that --fix deletes and re-links modified files",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f3-verify-hash-comparison"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Modified files replaced. Test passes.",
+      "source_sections": null,
+      "source_lines": "181-181",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f3-fix-chmod-permissions",
+      "title": "Fix corrects permission mismatches",
+      "description": "TDD: write test that --fix chmods files to correct permissions",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f3-verify-permission-check"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Permissions corrected. Test passes.",
+      "source_sections": null,
+      "source_lines": "182-182",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f3-fix-dumpautoload-after",
+      "title": "Fix runs dumpautoload after repairs",
+      "description": "TDD: write test that --fix runs composer dumpautoload after fixes, with --no-dev if state.dev==false",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f3-fix-replace-modified-files"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. dumpautoload called after fix. Test passes.",
+      "source_sections": null,
+      "source_lines": "183-183",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f3-verify-exit-code-0",
+      "title": "Verify exits 0 when all OK",
+      "description": "TDD: write test that verify exits 0 when no issues found",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "f3-verify-output-summary"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Exit 0 on clean verify. Test passes.",
+      "source_sections": null,
+      "source_lines": "190-195",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f3-verify-exit-code-1",
+      "title": "Verify exits 1 when issues found",
+      "description": "TDD: write test that verify exits 1 when issues detected",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "f3-verify-output-summary"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Exit 1 on issues. Test passes.",
+      "source_sections": null,
+      "source_lines": "190-195",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f3-fix-exit-code-0",
+      "title": "Fix exits 0 when all repaired",
+      "description": "TDD: write test that --fix exits 0 when all issues repaired",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "f3-fix-replace-modified-files"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Exit 0 on full repair. Test passes.",
+      "source_sections": null,
+      "source_lines": "184-184",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f3-fix-exit-code-1-partial",
+      "title": "Fix exits 1 when repair fails",
+      "description": "TDD: write test that --fix exits 1 when some issues cannot be repaired",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "f3-fix-replace-modified-files"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Exit 1 on partial fix. Test passes.",
+      "source_sections": null,
+      "source_lines": "184-184",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f3-parallel-hashing-pool",
+      "title": "Parallel SHA-256 hashing goroutine pool",
+      "description": "TDD: write test that file hashing uses goroutine pool with --workers count",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f3-verify-hash-comparison"
+      ],
+      "estimate_minutes": 15,
+      "acceptance": "Test written first. Parallel hashing uses worker pool. Test passes.",
+      "source_sections": null,
+      "source_lines": "186-188",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f3-verify-header-output",
+      "title": "Print package count header in verify",
+      "description": "TDD: write test that verify prints 'Checking N packages (M files)...'",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "f3-verify-iterate-state-packages"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Header format matches spec. Test passes.",
+      "source_sections": null,
+      "source_lines": "165-165",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f4-status-diff-display",
+      "title": "Show package diff in status output",
+      "description": "TDD: write test that status shows added/updated/removed packages when outdated",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "f1-compute-full-diff"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Diff displayed in status. Test passes.",
+      "source_sections": null,
+      "source_lines": "199-215",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f4-status-added-format",
+      "title": "Format added packages with green prefix",
+      "description": "TDD: write test that added packages show '+ name version (new)'",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "f4-status-diff-display"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Added format correct. Test passes.",
+      "source_sections": null,
+      "source_lines": "208-208",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f4-status-updated-format",
+      "title": "Format updated packages with arrow",
+      "description": "TDD: write test that updated packages show 'arrow name old -\u003e new (updated)'",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "f4-status-diff-display"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Updated format correct. Test passes.",
+      "source_sections": null,
+      "source_lines": "209-209",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f4-status-removed-format",
+      "title": "Format removed packages with - prefix",
+      "description": "TDD: write test that removed packages show '- name version (removed)'",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "f4-status-diff-display"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Removed format correct. Test passes.",
+      "source_sections": null,
+      "source_lines": "210-210",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f4-status-outdated-header",
+      "title": "Print outdated header with change count",
+      "description": "TDD: write test that status prints 'Vendor is outdated -- N changes detected:'",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "f4-status-diff-display"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Outdated header correct. Test passes.",
+      "source_sections": null,
+      "source_lines": "206-206",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f4-status-run-hint",
+      "title": "Print install hint after diff",
+      "description": "TDD: write test that status prints 'Run allegro install to apply changes.'",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "f4-status-diff-display"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Hint printed. Test passes.",
+      "source_sections": null,
+      "source_lines": "212-212",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f4-color-green-added",
+      "title": "Color added lines green",
+      "description": "TDD: write test that + lines render with green ANSI escape when TTY",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "f4-status-added-format"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Green color applied. Test passes.",
+      "source_sections": null,
+      "source_lines": "217-223",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f4-color-yellow-updated",
+      "title": "Color updated lines yellow",
+      "description": "TDD: write test that arrow lines render with yellow ANSI escape when TTY",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "f4-status-updated-format"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Yellow color applied. Test passes.",
+      "source_sections": null,
+      "source_lines": "217-223",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f4-color-red-removed",
+      "title": "Color removed lines red",
+      "description": "TDD: write test that - lines render with red ANSI escape when TTY",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "f4-status-removed-format"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Red color applied. Test passes.",
+      "source_sections": null,
+      "source_lines": "217-223",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f4-nocolor-flag",
+      "title": "Add --no-color global flag",
+      "description": "TDD: write test parsing --no-color flag",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. --no-color flag parsed. Test passes.",
+      "source_sections": null,
+      "source_lines": "228-228",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f4-nocolor-env-var",
+      "title": "Read NO_COLOR env var",
+      "description": "TDD: write test that NO_COLOR env var disables colors",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "f4-nocolor-flag"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. NO_COLOR disables color. Test passes.",
+      "source_sections": null,
+      "source_lines": "229-229",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f4-nocolor-config-key",
+      "title": "Read no_color from config file",
+      "description": "TDD: write test that no_color:true in config disables colors",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "f4-nocolor-flag",
+        "f5-config-read"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Config disables color. Test passes.",
+      "source_sections": null,
+      "source_lines": "230-230",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f4-nocolor-tty-detection",
+      "title": "Disable color when not TTY",
+      "description": "TDD: write test that piped stdout disables colors",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "f4-nocolor-flag"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Non-TTY disables color. Test passes.",
+      "source_sections": null,
+      "source_lines": "231-231",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f4-phase1-status-preserved",
+      "title": "Preserve Phase 1 status conditions",
+      "description": "TDD: write test that no-vendor/no-lock/corrupt-state conditions still work",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f4-status-diff-display"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Phase 1 conditions unchanged. Test passes.",
+      "source_sections": null,
+      "source_lines": "215-215",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f5-config-struct",
+      "title": "Add Config struct type",
+      "description": "TDD: write test instantiating Config struct with all valid keys",
+      "status": "wip",
+      "tags": [
+        "types"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Config struct has all 9 fields. Test passes.",
+      "source_sections": null,
+      "source_lines": "239-253",
+      "started_at": "2026-04-06T07:31:38.517856Z",
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f5-config-file-path",
+      "title": "Resolve config file path",
+      "description": "TDD: write test that config path is ~/.allegro/config.json",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Path resolves correctly. Test passes.",
+      "source_sections": null,
+      "source_lines": "235-237",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f5-config-read",
+      "title": "Read config file JSON",
+      "description": "TDD: write test reading config.json and parsing all fields",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f5-config-struct",
+        "f5-config-file-path"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Config parsed from JSON. Test passes.",
+      "source_sections": null,
+      "source_lines": "239-253",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f5-config-defaults",
+      "title": "Return defaults when file absent",
+      "description": "TDD: write test that missing config file returns all defaults",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f5-config-read"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Defaults returned. Test passes.",
+      "source_sections": null,
+      "source_lines": "293-293",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f5-config-write",
+      "title": "Write config file JSON",
+      "description": "TDD: write test writing config values to config.json",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f5-config-file-path"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Config written to file. Test passes.",
+      "source_sections": null,
+      "source_lines": "267-267",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f5-config-create-on-set",
+      "title": "Create config file on first set",
+      "description": "TDD: write test that config file created when 'config set' used and file absent",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f5-config-write"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. File created on first set. Test passes.",
+      "source_sections": null,
+      "source_lines": "237-237",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f5-config-precedence-chain",
+      "title": "Implement config precedence chain",
+      "description": "TDD: write test that precedence is flag \u003e env \u003e config \u003e default",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f5-config-read"
+      ],
+      "estimate_minutes": 15,
+      "acceptance": "Test written first. Precedence chain correct. Test passes.",
+      "source_sections": null,
+      "source_lines": "255-259",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f5-config-list-command",
+      "title": "Add config list subcommand",
+      "description": "TDD: write test that 'allegro config list' shows all values with source",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "f5-config-precedence-chain"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. List shows value+source. Test passes.",
+      "source_sections": null,
+      "source_lines": "265-265",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f5-config-get-command",
+      "title": "Add config get subcommand",
+      "description": "TDD: write test that 'allegro config get \u003ckey\u003e' shows single value",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "f5-config-read"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Single value returned. Test passes.",
+      "source_sections": null,
+      "source_lines": "266-266",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f5-config-set-command",
+      "title": "Add config set subcommand",
+      "description": "TDD: write test that 'allegro config set \u003ckey\u003e \u003cvalue\u003e' writes value",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "f5-config-write"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Value written to config. Test passes.",
+      "source_sections": null,
+      "source_lines": "267-267",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f5-config-unset-command",
+      "title": "Add config unset subcommand",
+      "description": "TDD: write test that 'allegro config unset \u003ckey\u003e' removes override",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "f5-config-write"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Override removed from config. Test passes.",
+      "source_sections": null,
+      "source_lines": "268-268",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f5-config-path-command",
+      "title": "Add config path subcommand",
+      "description": "TDD: write test that 'allegro config path' prints file path",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "f5-config-file-path"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Path printed correctly. Test passes.",
+      "source_sections": null,
+      "source_lines": "269-269",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f5-validate-store-path",
+      "title": "Validate store_path config value",
+      "description": "TDD: write test that store_path must be a directory path string",
+      "status": "open",
+      "tags": [
+        "validation"
+      ],
+      "depends_on": [
+        "f5-config-struct"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. store_path validated. Test passes.",
+      "source_sections": null,
+      "source_lines": "275-275",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f5-validate-workers",
+      "title": "Validate workers config value 1-32",
+      "description": "TDD: write test that workers must be integer 1-32",
+      "status": "open",
+      "tags": [
+        "validation"
+      ],
+      "depends_on": [
+        "f5-config-struct"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Workers range validated. Test passes.",
+      "source_sections": null,
+      "source_lines": "276-276",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f5-validate-link-strategy",
+      "title": "Validate link_strategy config value",
+      "description": "TDD: write test that link_strategy must be auto/reflink/hardlink/copy",
+      "status": "open",
+      "tags": [
+        "validation"
+      ],
+      "depends_on": [
+        "f5-config-struct"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Strategy enum validated. Test passes.",
+      "source_sections": null,
+      "source_lines": "277-277",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f5-validate-boolean-keys",
+      "title": "Validate boolean config keys",
+      "description": "TDD: write test that no_progress/no_color/no_dev/no_scripts accept true/false case-insensitive",
+      "status": "open",
+      "tags": [
+        "validation"
+      ],
+      "depends_on": [
+        "f5-config-struct"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Boolean parsing validated. Test passes.",
+      "source_sections": null,
+      "source_lines": "278-282",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f5-validate-prune-stale-days",
+      "title": "Validate prune_stale_days 1-365",
+      "description": "TDD: write test that prune_stale_days must be integer 1-365",
+      "status": "open",
+      "tags": [
+        "validation"
+      ],
+      "depends_on": [
+        "f5-config-struct"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Range validated. Test passes.",
+      "source_sections": null,
+      "source_lines": "283-283",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f5-error-malformed-json",
+      "title": "Warn on malformed config JSON",
+      "description": "TDD: write test that malformed JSON warns to stderr and uses defaults",
+      "status": "open",
+      "tags": [
+        "validation"
+      ],
+      "depends_on": [
+        "f5-config-read"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Warning printed, defaults used. Test passes.",
+      "source_sections": null,
+      "source_lines": "289-289",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f5-error-unknown-key",
+      "title": "Warn on unknown config key",
+      "description": "TDD: write test that unknown keys in config file warn to stderr",
+      "status": "open",
+      "tags": [
+        "validation"
+      ],
+      "depends_on": [
+        "f5-config-read"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Unknown key warned. Test passes.",
+      "source_sections": null,
+      "source_lines": "290-290",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f5-error-invalid-value-load",
+      "title": "Warn on invalid value at load time",
+      "description": "TDD: write test that invalid value at load warns and uses default",
+      "status": "open",
+      "tags": [
+        "validation"
+      ],
+      "depends_on": [
+        "f5-config-read"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Invalid value warned, default used. Test passes.",
+      "source_sections": null,
+      "source_lines": "291-291",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f5-error-invalid-value-set",
+      "title": "Reject invalid value at set time",
+      "description": "TDD: write test that 'config set' rejects invalid values with error",
+      "status": "open",
+      "tags": [
+        "validation"
+      ],
+      "depends_on": [
+        "f5-config-set-command"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Invalid set rejected. Test passes.",
+      "source_sections": null,
+      "source_lines": "292-292",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f6-composer-runner-interface",
+      "title": "Add ComposerRunner script interface",
+      "description": "TDD: write test for ComposerRunner interface with RunScript method",
+      "status": "open",
+      "tags": [
+        "types"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Interface defined with RunScript. Test passes.",
+      "source_sections": null,
+      "source_lines": "297-303",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f6-run-post-install-cmd",
+      "title": "Execute post-install-cmd via Composer",
+      "description": "TDD: write test that post-install-cmd fires after allegro install (non-noop)",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f6-composer-runner-interface"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. post-install-cmd triggered. Test passes.",
+      "source_sections": null,
+      "source_lines": "309-309",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f6-run-post-update-cmd",
+      "title": "Execute post-update-cmd via Composer",
+      "description": "TDD: write test that post-update-cmd fires after allegro update/require/remove",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f6-composer-runner-interface"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. post-update-cmd triggered. Test passes.",
+      "source_sections": null,
+      "source_lines": "310-310",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f6-skip-scripts-on-noop",
+      "title": "Skip scripts on noop install",
+      "description": "TDD: write test that noop install does not fire any script events",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f6-run-post-install-cmd",
+        "f1-noop-detection-hash-match"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Noop skips scripts. Test passes.",
+      "source_sections": null,
+      "source_lines": "330-330",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f6-scripts-after-flock-release",
+      "title": "Run scripts after flock release",
+      "description": "TDD: write test that scripts execute after flock is released (step 10)",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f6-run-post-install-cmd",
+        "f1-flock-released-before-scripts"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Scripts run outside flock. Test passes.",
+      "source_sections": null,
+      "source_lines": "327-328",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f6-noscripts-flag",
+      "title": "Add --no-scripts flag definition",
+      "description": "TDD: write test parsing --no-scripts flag from CLI",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. --no-scripts flag parsed. Test passes.",
+      "source_sections": null,
+      "source_lines": "332-338",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f6-noscripts-env-var",
+      "title": "Read ALLEGRO_NO_SCRIPTS env var",
+      "description": "TDD: write test that ALLEGRO_NO_SCRIPTS=1 skips scripts",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "f6-noscripts-flag"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Env var skips scripts. Test passes.",
+      "source_sections": null,
+      "source_lines": "336-336",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f6-noscripts-on-all-commands",
+      "title": "Accept --no-scripts on four commands",
+      "description": "TDD: write test that install/update/require/remove accept --no-scripts",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "f6-noscripts-flag"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. All four commands accept flag. Test passes.",
+      "source_sections": null,
+      "source_lines": "338-338",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f6-noscripts-skips-execution",
+      "title": "No-scripts flag skips script execution",
+      "description": "TDD: write test that --no-scripts prevents composer run-script call",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f6-noscripts-flag",
+        "f6-run-post-install-cmd"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Script execution skipped. Test passes.",
+      "source_sections": null,
+      "source_lines": "332-338",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f6-script-failure-warning",
+      "title": "Warn on script failure to stderr",
+      "description": "TDD: write test that non-zero script exit prints warning to stderr",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f6-run-post-install-cmd"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Warning printed on failure. Test passes.",
+      "source_sections": null,
+      "source_lines": "340-344",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f6-script-failure-no-install-fail",
+      "title": "Script failure does not fail install",
+      "description": "TDD: write test that install succeeds even when script fails",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f6-script-failure-warning"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Install exit 0 despite script fail. Test passes.",
+      "source_sections": null,
+      "source_lines": "344-344",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f6-scripts-executed-true",
+      "title": "Set scripts_executed true on success",
+      "description": "TDD: write test that state has scripts_executed:true when script succeeds",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f6-run-post-install-cmd"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Field set true. Test passes.",
+      "source_sections": null,
+      "source_lines": "347-347",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f6-scripts-executed-false-fail",
+      "title": "Set scripts_executed false on failure",
+      "description": "TDD: write test that state has scripts_executed:false when script fails",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f6-script-failure-warning"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Field set false on fail. Test passes.",
+      "source_sections": null,
+      "source_lines": "345-345",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f6-scripts-executed-false-skip",
+      "title": "Set scripts_executed false when skipped",
+      "description": "TDD: write test that state has scripts_executed:false when --no-scripts set",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f6-noscripts-skips-execution"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Field set false on skip. Test passes.",
+      "source_sections": null,
+      "source_lines": "348-348",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f6-hardlink-warning-before-scripts",
+      "title": "Print hardlink warning before scripts",
+      "description": "TDD: write test that hardlink strategy prints CAS safety warning to stderr before running scripts",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f6-run-post-install-cmd"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Warning printed for hardlink. Test passes.",
+      "source_sections": null,
+      "source_lines": "352-359",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f6-hardlink-verify-suggestion",
+      "title": "Suggest verify after hardlink scripts",
+      "description": "TDD: write test that after scripts with hardlink, suggest 'allegro verify --fix'",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "f6-hardlink-warning-before-scripts"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Suggestion printed. Test passes.",
+      "source_sections": null,
+      "source_lines": "361-363",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f7-project-registry-struct",
+      "title": "Add ProjectRegistry struct type",
+      "description": "TDD: write test instantiating ProjectRegistry with projects array",
+      "status": "wip",
+      "tags": [
+        "types"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. ProjectRegistry struct defined. Test passes.",
+      "source_sections": null,
+      "source_lines": "367-381",
+      "started_at": "2026-04-06T07:32:00.01098Z",
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f7-project-entry-struct",
+      "title": "Add ProjectEntry struct type",
+      "description": "TDD: write test instantiating ProjectEntry with path/last_install/lock_hash/packages",
+      "status": "wip",
+      "tags": [
+        "types"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. ProjectEntry struct defined. Test passes.",
+      "source_sections": null,
+      "source_lines": "374-379",
+      "started_at": "2026-04-06T07:32:00.01098Z",
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f7-registry-file-path",
+      "title": "Resolve projects.json file path",
+      "description": "TDD: write test that registry path is ~/.allegro/projects.json",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Path correct. Test passes.",
+      "source_sections": null,
+      "source_lines": "369-369",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f7-register-project",
+      "title": "Register project in projects.json",
+      "description": "TDD: write test that install writes/updates project entry in registry",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f7-project-registry-struct",
+        "f7-project-entry-struct",
+        "f7-registry-file-path"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Project registered. Test passes.",
+      "source_sections": null,
+      "source_lines": "384-384",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f7-update-last-install-timestamp",
+      "title": "Update last_install on every invocation",
+      "description": "TDD: write test that last_install updated even on noop",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f7-register-project"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Timestamp always updated. Test passes.",
+      "source_sections": null,
+      "source_lines": "384-384",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f7-registry-flock",
+      "title": "Flock projects.json for concurrent writes",
+      "description": "TDD: write test that projects.json writes are protected by flock on projects.lock",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f7-register-project"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Flock acquired for registry write. Test passes.",
+      "source_sections": null,
+      "source_lines": "386-386",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f7-auto-register-on-install",
+      "title": "Auto-register on allegro install",
+      "description": "TDD: write test that allegro install auto-registers current project",
+      "status": "open",
+      "tags": [
+        "wiring"
+      ],
+      "depends_on": [
+        "f7-register-project"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Install triggers registration. Test passes.",
+      "source_sections": null,
+      "source_lines": "384-384",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f7-auto-register-on-update",
+      "title": "Auto-register on allegro update",
+      "description": "TDD: write test that allegro update auto-registers current project",
+      "status": "open",
+      "tags": [
+        "wiring"
+      ],
+      "depends_on": [
+        "f7-auto-register-on-install"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Update triggers registration. Test passes.",
+      "source_sections": null,
+      "source_lines": "384-384",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f7-auto-register-on-require",
+      "title": "Auto-register on allegro require",
+      "description": "TDD: write test that allegro require auto-registers current project",
+      "status": "open",
+      "tags": [
+        "wiring"
+      ],
+      "depends_on": [
+        "f7-auto-register-on-install"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Require triggers registration. Test passes.",
+      "source_sections": null,
+      "source_lines": "384-384",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f7-auto-register-on-remove",
+      "title": "Auto-register on allegro remove",
+      "description": "TDD: write test that allegro remove auto-registers current project",
+      "status": "open",
+      "tags": [
+        "wiring"
+      ],
+      "depends_on": [
+        "f7-auto-register-on-install"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Remove triggers registration. Test passes.",
+      "source_sections": null,
+      "source_lines": "384-384",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f7-gc-flag",
+      "title": "Add --gc flag to store prune",
+      "description": "TDD: write test parsing --gc flag on store prune command",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. --gc flag parsed. Test passes.",
+      "source_sections": null,
+      "source_lines": "392-392",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f7-gc-dry-run-flag",
+      "title": "Add --dry-run flag to gc mode",
+      "description": "TDD: write test parsing --dry-run flag on store prune --gc",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "f7-gc-flag"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. --dry-run flag parsed. Test passes.",
+      "source_sections": null,
+      "source_lines": "404-404",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f7-default-prune-unchanged",
+      "title": "Default prune uses Phase 1 behavior",
+      "description": "TDD: write test that store prune without --gc uses Phase 1 orphan deletion",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Default prune unchanged. Test passes.",
+      "source_sections": null,
+      "source_lines": "390-390",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f7-gc-read-registry",
+      "title": "GC reads projects.json registry",
+      "description": "TDD: write test that --gc reads and parses projects.json",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f7-gc-flag",
+        "f7-project-registry-struct"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Registry read by GC. Test passes.",
+      "source_sections": null,
+      "source_lines": "394-394",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f7-gc-remove-deleted-projects",
+      "title": "GC removes deleted project entries",
+      "description": "TDD: write test that projects with non-existent dirs removed from registry",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f7-gc-read-registry"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Deleted projects evicted. Test passes.",
+      "source_sections": null,
+      "source_lines": "395-395",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f7-gc-warn-stale-projects",
+      "title": "GC warns on stale project entries",
+      "description": "TDD: write test that projects older than prune_stale_days get warning but are kept",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f7-gc-read-registry"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Stale warning printed, entry preserved. Test passes.",
+      "source_sections": null,
+      "source_lines": "396-396",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f7-gc-collect-referenced-packages",
+      "title": "GC collects referenced package set",
+      "description": "TDD: write test that GC builds set of name+version pairs from remaining projects",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f7-gc-remove-deleted-projects"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Referenced set built. Test passes.",
+      "source_sections": null,
+      "source_lines": "397-397",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f7-gc-delete-unreferenced-manifests",
+      "title": "GC deletes unreferenced manifests",
+      "description": "TDD: write test that manifests not in referenced set are deleted",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f7-gc-collect-referenced-packages"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Unreferenced manifests deleted. Test passes.",
+      "source_sections": null,
+      "source_lines": "398-398",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f7-gc-delete-orphan-cas-files",
+      "title": "GC deletes orphaned CAS files",
+      "description": "TDD: write test that CAS files not referenced by any manifest are deleted",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f7-gc-delete-unreferenced-manifests"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Orphan files deleted. Test passes.",
+      "source_sections": null,
+      "source_lines": "399-399",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f7-gc-report-output",
+      "title": "GC prints prune summary report",
+      "description": "TDD: write test that GC prints 'Pruned X manifests, Y files. Freed N MiB. Z stale.'",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "f7-gc-delete-orphan-cas-files"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Report format correct. Test passes.",
+      "source_sections": null,
+      "source_lines": "400-400",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f7-gc-dry-run-no-delete",
+      "title": "GC dry-run previews without deleting",
+      "description": "TDD: write test that --gc --dry-run shows what would be deleted but does not delete",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f7-gc-dry-run-flag",
+        "f7-gc-delete-orphan-cas-files"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Dry run does not modify. Test passes.",
+      "source_sections": null,
+      "source_lines": "404-404",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f7-store-status-projects-count",
+      "title": "Show projects count in store status",
+      "description": "TDD: write test that store status shows 'Projects: N (M stale)'",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "f7-gc-read-registry"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Project count displayed. Test passes.",
+      "source_sections": null,
+      "source_lines": "406-414",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f7-store-status-most-shared",
+      "title": "Show most shared package in store status",
+      "description": "TDD: write test that store status shows 'Most shared: pkg@ver (used by N projects)'",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "f7-gc-read-registry"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Most shared displayed. Test passes.",
+      "source_sections": null,
+      "source_lines": "413-413",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f8-update-command-skeleton",
+      "title": "Add update command skeleton",
+      "description": "TDD: write test that 'allegro update' is a valid CLI command",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Update command registered. Test passes.",
+      "source_sections": null,
+      "source_lines": "427-427",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f8-update-accepts-package-args",
+      "title": "Update accepts optional package args",
+      "description": "TDD: write test that 'allegro update monolog/monolog' passes package names",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "f8-update-command-skeleton"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Package args parsed. Test passes.",
+      "source_sections": null,
+      "source_lines": "427-427",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f8-require-command-skeleton",
+      "title": "Add require command skeleton",
+      "description": "TDD: write test that 'allegro require' is a valid CLI command",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Require command registered. Test passes.",
+      "source_sections": null,
+      "source_lines": "428-428",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f8-require-accepts-constraint",
+      "title": "Require accepts package with constraint",
+      "description": "TDD: write test that 'allegro require pkg ^3.0' parses package and constraint",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "f8-require-command-skeleton"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Constraint parsed. Test passes.",
+      "source_sections": null,
+      "source_lines": "428-428",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f8-remove-command-skeleton",
+      "title": "Add remove command skeleton",
+      "description": "TDD: write test that 'allegro remove' is a valid CLI command",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Remove command registered. Test passes.",
+      "source_sections": null,
+      "source_lines": "429-429",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f8-update-delegates-to-composer",
+      "title": "Update delegates to composer update",
+      "description": "TDD: write test that 'allegro update' calls 'composer update --no-install --no-scripts --no-interaction'",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f8-update-command-skeleton"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Correct composer command built. Test passes.",
+      "source_sections": null,
+      "source_lines": "439-439",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f8-update-single-pkg-delegation",
+      "title": "Update single package delegation",
+      "description": "TDD: write test that 'allegro update pkg' delegates with package name",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f8-update-delegates-to-composer"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Package name forwarded. Test passes.",
+      "source_sections": null,
+      "source_lines": "440-440",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f8-require-delegates-to-composer",
+      "title": "Require delegates to composer require",
+      "description": "TDD: write test that 'allegro require pkg ^3.0' calls 'composer require pkg ^3.0 --no-install --no-scripts --no-interaction'",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f8-require-command-skeleton"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Correct composer command built. Test passes.",
+      "source_sections": null,
+      "source_lines": "441-441",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f8-remove-delegates-to-composer",
+      "title": "Remove delegates to composer remove",
+      "description": "TDD: write test that 'allegro remove pkg' calls 'composer remove pkg --no-install --no-scripts --no-interaction'",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f8-remove-command-skeleton"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Correct composer command built. Test passes.",
+      "source_sections": null,
+      "source_lines": "442-442",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f8-update-forwards-nodev",
+      "title": "Update forwards --no-dev to composer",
+      "description": "TDD: write test that 'allegro update --no-dev' adds --no-dev to composer update call",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f8-update-delegates-to-composer"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. --no-dev forwarded to composer update. Test passes.",
+      "source_sections": null,
+      "source_lines": "444-445",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f8-require-no-forward-nodev",
+      "title": "Require does NOT forward --no-dev",
+      "description": "TDD: write test that 'allegro require --no-dev' does NOT add --no-dev to composer require",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f8-require-delegates-to-composer"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. --no-dev not forwarded to require. Test passes.",
+      "source_sections": null,
+      "source_lines": "446-446",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f8-remove-no-forward-nodev",
+      "title": "Remove does NOT forward --no-dev",
+      "description": "TDD: write test that 'allegro remove --no-dev' does NOT add --no-dev to composer remove",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f8-remove-delegates-to-composer"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. --no-dev not forwarded to remove. Test passes.",
+      "source_sections": null,
+      "source_lines": "447-447",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f8-resolution-then-install",
+      "title": "Install after composer resolution completes",
+      "description": "TDD: write test that after composer writes lock, Allegro runs CAS download/link/autoload pipeline",
+      "status": "open",
+      "tags": [
+        "wiring"
+      ],
+      "depends_on": [
+        "f8-update-delegates-to-composer",
+        "f8-require-delegates-to-composer",
+        "f8-remove-delegates-to-composer"
+      ],
+      "estimate_minutes": 15,
+      "acceptance": "Test written first. CAS pipeline runs post-resolution. Test passes.",
+      "source_sections": null,
+      "source_lines": "449-449",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f8-update-fires-post-update-cmd",
+      "title": "Update fires post-update-cmd script",
+      "description": "TDD: write test that allegro update triggers post-update-cmd, not post-install-cmd",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f6-run-post-update-cmd",
+        "f8-update-delegates-to-composer"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Correct event fired. Test passes.",
+      "source_sections": null,
+      "source_lines": "310-310,328-328",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f8-require-fires-post-update-cmd",
+      "title": "Require fires post-update-cmd script",
+      "description": "TDD: write test that allegro require triggers post-update-cmd",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f8-update-fires-post-update-cmd"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Correct event fired. Test passes.",
+      "source_sections": null,
+      "source_lines": "310-310,328-328",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f8-remove-fires-post-update-cmd",
+      "title": "Remove fires post-update-cmd script",
+      "description": "TDD: write test that allegro remove triggers post-update-cmd",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f8-update-fires-post-update-cmd"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Correct event fired. Test passes.",
+      "source_sections": null,
+      "source_lines": "310-310,328-328",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f8-all-commands-accept-flags",
+      "title": "Resolution commands accept shared flags",
+      "description": "TDD: write test that update/require/remove accept --no-dev/--no-scripts/--force/--no-autoload",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "f8-update-command-skeleton",
+        "f8-require-command-skeleton",
+        "f8-remove-command-skeleton"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. All flags accepted. Test passes.",
+      "source_sections": null,
+      "source_lines": "431-431",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f8-frozen-only-on-install",
+      "title": "Frozen-lockfile only valid on install",
+      "description": "TDD: write test that --frozen-lockfile on update/require/remove warns and is ignored",
+      "status": "open",
+      "tags": [
+        "validation"
+      ],
+      "depends_on": [
+        "f8-update-command-skeleton"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Warning printed, flag ignored. Test passes.",
+      "source_sections": null,
+      "source_lines": "431-431",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f9-auto-resolve-when-no-lock",
+      "title": "Auto-resolve when composer.lock absent",
+      "description": "TDD: write test that missing lock + present composer.json triggers 'composer update --no-install'",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Auto-resolve triggered. Test passes.",
+      "source_sections": null,
+      "source_lines": "451-469",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f9-auto-resolve-then-install",
+      "title": "Install after auto-resolve generates lock",
+      "description": "TDD: write test that after auto-resolve creates lock, normal install proceeds",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f9-auto-resolve-when-no-lock"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Install follows auto-resolve. Test passes.",
+      "source_sections": null,
+      "source_lines": "468-468",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f9-error-no-lock-no-json",
+      "title": "Error when neither lock nor json exists",
+      "description": "TDD: write test that missing lock AND missing json exits 2 with error message",
+      "status": "open",
+      "tags": [
+        "validation"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Exit 2 with message. Test passes.",
+      "source_sections": null,
+      "source_lines": "469-469",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f9-frozen-lockfile-flag",
+      "title": "Add --frozen-lockfile flag definition",
+      "description": "TDD: write test parsing --frozen-lockfile flag",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Flag parsed. Test passes.",
+      "source_sections": null,
+      "source_lines": "476-483",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f9-frozen-lockfile-env-var",
+      "title": "Read ALLEGRO_FROZEN_LOCKFILE env var",
+      "description": "TDD: write test that ALLEGRO_FROZEN_LOCKFILE=1 activates frozen mode",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "f9-frozen-lockfile-flag"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Env var activates frozen. Test passes.",
+      "source_sections": null,
+      "source_lines": "482-482",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f9-frozen-no-lock-exit-2",
+      "title": "Frozen exits 2 when lock absent",
+      "description": "TDD: write test that --frozen-lockfile with no lock exits 2",
+      "status": "open",
+      "tags": [
+        "validation"
+      ],
+      "depends_on": [
+        "f9-frozen-lockfile-flag"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Exit 2 on missing lock. Test passes.",
+      "source_sections": null,
+      "source_lines": "457-457",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f9-frozen-hash-mismatch-exit-2",
+      "title": "Frozen exits 2 on hash mismatch",
+      "description": "TDD: write test that --frozen-lockfile exits 2 when lock hash differs from state",
+      "status": "open",
+      "tags": [
+        "validation"
+      ],
+      "depends_on": [
+        "f9-frozen-lockfile-flag"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Exit 2 on hash mismatch. Test passes.",
+      "source_sections": null,
+      "source_lines": "458-458",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f9-frozen-dev-mismatch-exit-2",
+      "title": "Frozen exits 2 on dev mode mismatch",
+      "description": "TDD: write test that --frozen-lockfile exits 2 when dev flag differs from state",
+      "status": "open",
+      "tags": [
+        "validation"
+      ],
+      "depends_on": [
+        "f9-frozen-lockfile-flag"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Exit 2 on dev mismatch. Test passes.",
+      "source_sections": null,
+      "source_lines": "459-459",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f9-frozen-fresh-deploy-proceeds",
+      "title": "Frozen proceeds on fresh deploy",
+      "description": "TDD: write test that --frozen-lockfile with lock present but no state proceeds with full install",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f9-frozen-lockfile-flag"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Fresh deploy installs. Test passes.",
+      "source_sections": null,
+      "source_lines": "460-460",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f9-frozen-noop-when-synced",
+      "title": "Frozen noops when fully synced",
+      "description": "TDD: write test that --frozen-lockfile noops when hash+dev match",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f9-frozen-lockfile-flag",
+        "f1-noop-detection-hash-match"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Noop on sync. Test passes.",
+      "source_sections": null,
+      "source_lines": "461-461",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f9-frozen-check-before-install",
+      "title": "Frozen checks run before install logic",
+      "description": "TDD: write test that frozen-lockfile checks execute before auto-resolve or install",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f9-frozen-no-lock-exit-2"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Checks precede install. Test passes.",
+      "source_sections": null,
+      "source_lines": "484-484",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f10-link-op-struct",
+      "title": "Add LinkOp struct type",
+      "description": "TDD: write test instantiating LinkOp with src/dst/executable fields",
+      "status": "wip",
+      "tags": [
+        "types"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. LinkOp struct defined. Test passes.",
+      "source_sections": null,
+      "source_lines": "529-529",
+      "started_at": "2026-04-06T07:32:00.01098Z",
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f10-collect-directories",
+      "title": "Collect directories for pre-creation",
+      "description": "TDD: write test that collects unique parent directories from link operations",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f10-link-op-struct"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Unique dirs collected. Test passes.",
+      "source_sections": null,
+      "source_lines": "528-528",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f10-create-dirs-sequential",
+      "title": "Create directories sequentially",
+      "description": "TDD: write test that directories created sequentially to avoid MkdirAll races",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f10-collect-directories"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Dirs created without races. Test passes.",
+      "source_sections": null,
+      "source_lines": "528-528",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f10-collect-link-operations",
+      "title": "Collect all link operations into slice",
+      "description": "TDD: write test that all file link ops collected as []LinkOp",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f10-link-op-struct"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Link ops collected. Test passes.",
+      "source_sections": null,
+      "source_lines": "529-529",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f10-buffered-channel-dispatch",
+      "title": "Dispatch link ops via buffered channel",
+      "description": "TDD: write test that link ops sent to buffered channel for worker consumption",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f10-collect-link-operations"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Channel dispatch works. Test passes.",
+      "source_sections": null,
+      "source_lines": "530-530",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f10-worker-pool-goroutines",
+      "title": "Create N worker goroutines for linking",
+      "description": "TDD: write test that N goroutines (per --workers) consume and execute link ops",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f10-buffered-channel-dispatch"
+      ],
+      "estimate_minutes": 15,
+      "acceptance": "Test written first. Worker pool processes ops. Test passes.",
+      "source_sections": null,
+      "source_lines": "531-531",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f10-worker-link-and-chmod",
+      "title": "Worker links file then chmods",
+      "description": "TDD: write test that each worker calls LinkFile then chmod if needed",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f10-worker-pool-goroutines"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Link+chmod per worker. Test passes.",
+      "source_sections": null,
+      "source_lines": "532-532",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f10-error-collection-channel",
+      "title": "Collect errors via error channel",
+      "description": "TDD: write test that linking errors collected from workers via error channel",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f10-worker-pool-goroutines"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Errors collected correctly. Test passes.",
+      "source_sections": null,
+      "source_lines": "533-533",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f10-parallel-full-rebuild",
+      "title": "Apply parallel linking to full rebuild",
+      "description": "TDD: write test that Phase 1 full rebuild uses parallel linker",
+      "status": "open",
+      "tags": [
+        "wiring"
+      ],
+      "depends_on": [
+        "f10-worker-pool-goroutines"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Full rebuild uses parallel. Test passes.",
+      "source_sections": null,
+      "source_lines": "538-538",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f10-parallel-incremental-added",
+      "title": "Apply parallel linking to added packages",
+      "description": "TDD: write test that added packages in incremental install use parallel linker",
+      "status": "open",
+      "tags": [
+        "wiring"
+      ],
+      "depends_on": [
+        "f10-worker-pool-goroutines",
+        "f1-link-added-packages"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Added packages linked in parallel. Test passes.",
+      "source_sections": null,
+      "source_lines": "539-539",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f10-parallel-incremental-updated",
+      "title": "Apply parallel linking to updated packages",
+      "description": "TDD: write test that updated packages in incremental install use parallel linker",
+      "status": "open",
+      "tags": [
+        "wiring"
+      ],
+      "depends_on": [
+        "f10-worker-pool-goroutines",
+        "f1-update-package-link-new"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Updated packages linked in parallel. Test passes.",
+      "source_sections": null,
+      "source_lines": "539-539",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f10-parallel-verify-fix",
+      "title": "Apply parallel linking to verify fix",
+      "description": "TDD: write test that verify --fix re-linking uses parallel linker",
+      "status": "open",
+      "tags": [
+        "wiring"
+      ],
+      "depends_on": [
+        "f10-worker-pool-goroutines",
+        "f3-fix-relink-missing-files"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Verify fix uses parallel. Test passes.",
+      "source_sections": null,
+      "source_lines": "540-540",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f10-manifest-reads-sequential",
+      "title": "Keep manifest reads sequential",
+      "description": "TDD: write test that manifest reads are not parallelized",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f10-worker-pool-goroutines"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Manifests read sequentially. Test passes.",
+      "source_sections": null,
+      "source_lines": "544-544",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f12-state-schema-version-field",
+      "title": "Add schema_version field to state",
+      "description": "TDD: write test that state file includes schema_version:2",
+      "status": "wip",
+      "tags": [
+        "types"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. schema_version=2 written. Test passes.",
+      "source_sections": null,
+      "source_lines": "559-559,574-574",
+      "started_at": "2026-04-06T07:32:00.01098Z",
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f12-state-scripts-executed-field",
+      "title": "Add scripts_executed field to state",
+      "description": "TDD: write test that state file includes scripts_executed boolean",
+      "status": "wip",
+      "tags": [
+        "types"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. scripts_executed written. Test passes.",
+      "source_sections": null,
+      "source_lines": "565-565,577-577",
+      "started_at": "2026-04-06T07:32:00.01098Z",
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f12-compat-missing-schema-version",
+      "title": "Treat missing schema_version as 1",
+      "description": "TDD: write test that absent schema_version defaults to 1",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f12-state-schema-version-field"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Default 1 applied. Test passes.",
+      "source_sections": null,
+      "source_lines": "581-581",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f12-compat-missing-dev-field",
+      "title": "Treat missing dev field as true",
+      "description": "TDD: write test that absent dev field defaults to true",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f2-state-dev-field"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Default true applied. Test passes.",
+      "source_sections": null,
+      "source_lines": "582-582",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f12-compat-missing-dev-packages",
+      "title": "Handle missing dev_packages field",
+      "description": "TDD: write test that missing dev_packages with dev flag change triggers full rebuild",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f2-state-dev-packages-field"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Full rebuild on missing dev_packages. Test passes.",
+      "source_sections": null,
+      "source_lines": "583-583",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f12-compat-missing-dev-packages-unchanged",
+      "title": "Missing dev_packages with same dev flag",
+      "description": "TDD: write test that missing dev_packages with unchanged dev flag treats as empty array",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f12-compat-missing-dev-packages"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Empty array used. Test passes.",
+      "source_sections": null,
+      "source_lines": "583-583",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f12-compat-missing-scripts-executed",
+      "title": "Treat missing scripts_executed as false",
+      "description": "TDD: write test that absent scripts_executed defaults to false",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f12-state-scripts-executed-field"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Default false applied. Test passes.",
+      "source_sections": null,
+      "source_lines": "584-584",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f0-composer-version-check",
+      "title": "Check Composer version at startup",
+      "description": "TDD: write test that Allegro checks 'composer --version' and exits 5 if \u003c 2.0",
+      "status": "open",
+      "tags": [
+        "validation"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Version check runs at startup. Test passes.",
+      "source_sections": null,
+      "source_lines": "7-7",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f0-composer-version-error-message",
+      "title": "Composer version error message format",
+      "description": "TDD: write test that error message is 'Composer \u003e= 2.0 required, found {version}'",
+      "status": "open",
+      "tags": [
+        "validation"
+      ],
+      "depends_on": [
+        "f0-composer-version-check"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Error message matches spec. Test passes.",
+      "source_sections": null,
+      "source_lines": "7-7",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f0-composer-version-exit-code-5",
+      "title": "Exit code 5 on Composer version fail",
+      "description": "TDD: write test that exit code 5 returned for old Composer",
+      "status": "open",
+      "tags": [
+        "validation"
+      ],
+      "depends_on": [
+        "f0-composer-version-check"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Exit 5 on old version. Test passes.",
+      "source_sections": null,
+      "source_lines": "7-7",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f8-install-fires-post-install-cmd",
+      "title": "Install fires post-install-cmd script",
+      "description": "TDD: write test that allegro install triggers post-install-cmd, not post-update-cmd",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f6-run-post-install-cmd"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Correct event fired for install. Test passes.",
+      "source_sections": null,
+      "source_lines": "309-309,328-328",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f1-download-if-not-in-cas",
+      "title": "Download added packages not in CAS",
+      "description": "TDD: write test that added packages not in CAS are downloaded before linking",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f1-link-added-packages"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Missing CAS files downloaded. Test passes.",
+      "source_sections": null,
+      "source_lines": "60-60",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f9-lock-format-standard-composer",
+      "title": "Use standard composer.lock format",
+      "description": "TDD: write test verifying no custom lock file format is used",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Standard composer.lock used. Test passes.",
+      "source_sections": null,
+      "source_lines": "486-492",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f9-auto-resolve-composer-command",
+      "title": "Auto-resolve uses correct composer flags",
+      "description": "TDD: write test that auto-resolve calls 'composer update --no-install --no-scripts --no-interaction'",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f9-auto-resolve-when-no-lock"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Correct flags used. Test passes.",
+      "source_sections": null,
+      "source_lines": "467-467",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f5-config-list-shows-source",
+      "title": "Config list shows value source",
+      "description": "TDD: write test that config list annotates each value with source (flag/env/config/default)",
+      "status": "open",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "f5-config-list-command"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Source labels correct. Test passes.",
+      "source_sections": null,
+      "source_lines": "265-265",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f5-validate-composer-path",
+      "title": "Validate composer_path config value",
+      "description": "TDD: write test that composer_path must be a valid binary path string",
+      "status": "open",
+      "tags": [
+        "validation"
+      ],
+      "depends_on": [
+        "f5-config-struct"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. composer_path validated. Test passes.",
+      "source_sections": null,
+      "source_lines": "280-280",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f1-incremental-in-place-modify",
+      "title": "Incremental modifies vendor in-place",
+      "description": "TDD: write test that incremental install modifies vendor/ directly, no tmp staging",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f1-incremental-orchestrator-wiring"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. No vendor.allegro.tmp/ created. Test passes.",
+      "source_sections": null,
+      "source_lines": "82-82",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f16-phase1-state-migration",
+      "title": "Gracefully handle Phase 1 state files",
+      "description": "TDD: write test that Phase 1 state (missing new fields) loads without error",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f12-compat-missing-schema-version",
+        "f12-compat-missing-dev-field",
+        "f12-compat-missing-scripts-executed"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Phase 1 state loads cleanly. Test passes.",
+      "source_sections": null,
+      "source_lines": "671-679",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f16-existing-project-auto-register",
+      "title": "Auto-register existing projects on install",
+      "description": "TDD: write test that existing projects without registry entry get registered on next install",
+      "status": "open",
+      "tags": [
+        "wiring"
+      ],
+      "depends_on": [
+        "f7-auto-register-on-install"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Existing project registered. Test passes.",
+      "source_sections": null,
+      "source_lines": "678-678",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f1-force-uses-atomic-swap",
+      "title": "Force flag uses atomic swap path",
+      "description": "TDD: write test that --force uses Phase 1 vendor.allegro.tmp atomic swap",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f1-force-triggers-full-rebuild"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Atomic swap used with --force. Test passes.",
+      "source_sections": null,
+      "source_lines": "82-82,676-676",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f6-select-event-by-command",
+      "title": "Select script event by command type",
+      "description": "TDD: write test that install selects post-install-cmd while update/require/remove select post-update-cmd",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f6-run-post-install-cmd",
+        "f6-run-post-update-cmd"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Event selection correct per command. Test passes.",
+      "source_sections": null,
+      "source_lines": "313-313",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f6-script-subprocess-call",
+      "title": "Build composer run-script subprocess",
+      "description": "TDD: write test that script execution calls 'composer run-script \u003cevent\u003e --no-interaction'",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f6-composer-runner-interface"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Correct subprocess command built. Test passes.",
+      "source_sections": null,
+      "source_lines": "301-302",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f3-verify-wiring-to-cli",
+      "title": "Wire verify logic to CLI command",
+      "description": "TDD: write test that 'allegro verify' invokes the verify algorithm end-to-end",
+      "status": "open",
+      "tags": [
+        "wiring"
+      ],
+      "depends_on": [
+        "f3-verify-command-definition",
+        "f3-verify-hash-comparison",
+        "f3-verify-permission-check"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. CLI wired to verify logic. Test passes.",
+      "source_sections": null,
+      "source_lines": "619-619",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f5-config-wiring-to-cli",
+      "title": "Wire config subcommands to CLI",
+      "description": "TDD: write test that 'allegro config' routes to list/get/set/unset/path subcommands",
+      "status": "open",
+      "tags": [
+        "wiring"
+      ],
+      "depends_on": [
+        "f5-config-list-command",
+        "f5-config-get-command",
+        "f5-config-set-command",
+        "f5-config-unset-command",
+        "f5-config-path-command"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Config routing correct. Test passes.",
+      "source_sections": null,
+      "source_lines": "620-620",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f8-update-wiring-to-cli",
+      "title": "Wire update command to CLI",
+      "description": "TDD: write test that 'allegro update' invokes resolution then install pipeline",
+      "status": "open",
+      "tags": [
+        "wiring"
+      ],
+      "depends_on": [
+        "f8-update-delegates-to-composer",
+        "f8-resolution-then-install"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Update wired end-to-end. Test passes.",
+      "source_sections": null,
+      "source_lines": "621-621",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f8-require-wiring-to-cli",
+      "title": "Wire require command to CLI",
+      "description": "TDD: write test that 'allegro require' invokes resolution then install pipeline",
+      "status": "open",
+      "tags": [
+        "wiring"
+      ],
+      "depends_on": [
+        "f8-require-delegates-to-composer",
+        "f8-resolution-then-install"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Require wired end-to-end. Test passes.",
+      "source_sections": null,
+      "source_lines": "622-622",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f8-remove-wiring-to-cli",
+      "title": "Wire remove command to CLI",
+      "description": "TDD: write test that 'allegro remove' invokes resolution then install pipeline",
+      "status": "open",
+      "tags": [
+        "wiring"
+      ],
+      "depends_on": [
+        "f8-remove-delegates-to-composer",
+        "f8-resolution-then-install"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Remove wired end-to-end. Test passes.",
+      "source_sections": null,
+      "source_lines": "623-623",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f7-gc-wiring-to-cli",
+      "title": "Wire GC to store prune CLI",
+      "description": "TDD: write test that 'allegro store prune --gc' invokes GC algorithm",
+      "status": "open",
+      "tags": [
+        "wiring"
+      ],
+      "depends_on": [
+        "f7-gc-flag",
+        "f7-gc-delete-orphan-cas-files"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. GC wired to CLI. Test passes.",
+      "source_sections": null,
+      "source_lines": "632-632",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f5-nodev-config-key",
+      "title": "Read no_dev from config file",
+      "description": "TDD: write test that no_dev:true in config acts as default for dev mode",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f5-config-read",
+        "f2-dev-mode-precedence"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Config no_dev respected. Test passes.",
+      "source_sections": null,
+      "source_lines": "249-249,281-281",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f5-noscripts-config-key",
+      "title": "Read no_scripts from config file",
+      "description": "TDD: write test that no_scripts:true in config skips scripts by default",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f5-config-read",
+        "f6-noscripts-flag"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Test written first. Config no_scripts respected. Test passes.",
+      "source_sections": null,
+      "source_lines": "250-250,282-282",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f9-composer-json-required",
+      "title": "Require composer.json unless --no-autoload",
+      "description": "TDD: write test that missing composer.json errors unless --no-autoload set",
+      "status": "open",
+      "tags": [
+        "validation"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. composer.json requirement enforced. Test passes.",
+      "source_sections": null,
+      "source_lines": "472-472",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    },
+    {
+      "id": "f4-status-dev-flag-diff-trigger",
+      "title": "Status diff triggers on dev flag change",
+      "description": "TDD: write test that status shows diff when dev flag differs from state",
+      "status": "open",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "f4-status-diff-display"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Test written first. Dev mismatch triggers diff display. Test passes.",
+      "source_sections": null,
+      "source_lines": "201-201",
+      "started_at": null,
+      "closed_at": null,
+      "closed_reason": null,
+      "gate_passed_at": null,
+      "commit_sha": null
+    }
+  ]
+}
