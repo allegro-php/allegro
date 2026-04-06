@@ -124,6 +124,7 @@ func (o *Orchestrator) Install(ctx context.Context) error {
 	// Atomic swap
 	vendorDir := filepath.Join(o.config.ProjectDir, "vendor")
 	if err := o.atomicSwap(vendorDir, vendorTmp); err != nil {
+		os.RemoveAll(vendorTmp) // clean up on swap failure
 		return err
 	}
 
@@ -376,7 +377,9 @@ func (o *Orchestrator) buildVendorTree(ctx context.Context, vendorTmp string, pa
 				if f.Executable {
 					perm = 0755
 				}
-				os.Chmod(dstPath, perm)
+				if chErr := os.Chmod(dstPath, perm); chErr != nil {
+					log.Printf("warning: chmod %s: %v", dstPath, chErr)
+				}
 			}
 		}
 	}
@@ -459,7 +462,9 @@ func (o *Orchestrator) atomicSwap(vendorDir, vendorTmp string) error {
 	if err := os.Rename(vendorTmp, vendorDir); err != nil {
 		// Try to restore old vendor
 		if _, statErr := os.Stat(vendorOld); statErr == nil {
-			os.Rename(vendorOld, vendorDir)
+			if rbErr := os.Rename(vendorOld, vendorDir); rbErr != nil {
+				log.Printf("warning: failed to restore old vendor: %v", rbErr)
+			}
 		}
 		return fmt.Errorf("rename tmp to vendor: %w", err)
 	}

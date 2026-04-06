@@ -1,6 +1,7 @@
 package orchestrator
 
 import (
+	"log"
 	"os"
 	"path/filepath"
 	"sort"
@@ -85,7 +86,9 @@ func ParallelLink(ops []LinkOp, lnk linker.Linker, strategy linker.Strategy, wor
 					if op.Executable {
 						perm = 0755
 					}
-					os.Chmod(op.Dst, perm)
+					if chErr := os.Chmod(op.Dst, perm); chErr != nil {
+						log.Printf("warning: chmod %s: %v", op.Dst, chErr)
+					}
 				}
 			}
 		}()

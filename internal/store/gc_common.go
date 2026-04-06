@@ -79,7 +79,11 @@ func garbageCollectImpl(storePath, registryPath string, staleDays int, dryRun bo
 				return fmt.Errorf("read manifest %s: %w", path, readErr)
 			}
 			var m Manifest
-			if json.Unmarshal(data, &m) != nil { return nil } // skip corrupt manifests
+			if err := json.Unmarshal(data, &m); err != nil {
+				// Corrupt manifest: abort GC to prevent deleting CAS files
+				// that may still be referenced by this package
+				return fmt.Errorf("corrupt manifest %s: %w (aborting GC to prevent data loss)", path, err)
+			}
 
 			key := m.Name + "@" + m.Version
 			if !referencedPkgs[key] {
