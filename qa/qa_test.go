@@ -212,7 +212,7 @@ func TestQA_StaleCleanup(t *testing.T) {
 
 func TestQA_FlockPersists(t *testing.T) {
 	dir := t.TempDir()
-	lock, _ := linker.AcquireLock(dir)
+	lock, _ := linker.AcquireLock(context.Background(), dir)
 	lock.Release()
 	if _, err := os.Stat(filepath.Join(dir, ".allegro.lock")); err != nil { t.Error("lock file deleted") }
 }

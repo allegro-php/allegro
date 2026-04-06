@@ -91,7 +91,7 @@ func (o *Orchestrator) Install(ctx context.Context) error {
 	}
 
 	// Step 6: Acquire lock and build vendor
-	fl, err := linker.AcquireLock(o.config.ProjectDir)
+	fl, err := linker.AcquireLock(ctx, o.config.ProjectDir)
 	if err != nil {
 		return fmt.Errorf("lock: %w", err)
 	}

@@ -3,6 +3,7 @@
 package linker
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -21,8 +22,8 @@ type FileLock struct {
 }
 
 // AcquireLock creates/opens the lock file and acquires an exclusive flock.
-// Returns error if lock cannot be acquired within 30 seconds.
-func AcquireLock(projectDir string) (*FileLock, error) {
+// Respects context cancellation. Returns error if lock cannot be acquired within 30 seconds.
+func AcquireLock(ctx context.Context, projectDir string) (*FileLock, error) {
 	lockPath := filepath.Join(projectDir, lockFileName)
 
 	f, err := os.OpenFile(lockPath, os.O_CREATE|os.O_RDWR, 0644)
@@ -44,7 +45,12 @@ func AcquireLock(projectDir string) (*FileLock, error) {
 			f.Close()
 			return nil, fmt.Errorf("another allegro process is running")
 		}
-		time.Sleep(200 * time.Millisecond)
+		select {
+		case <-ctx.Done():
+			f.Close()
+			return nil, ctx.Err()
+		case <-time.After(200 * time.Millisecond):
+		}
 	}
 }
 

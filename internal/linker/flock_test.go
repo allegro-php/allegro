@@ -1,13 +1,14 @@
 package linker
 
 import (
+	"context"
 	"testing"
 )
 
 func TestAcquireAndReleaseLock(t *testing.T) {
 	dir := t.TempDir()
 
-	lock, err := AcquireLock(dir)
+	lock, err := AcquireLock(context.Background(), dir)
 	if err != nil {
 		t.Fatalf("AcquireLock: %v", err)
 	}
@@ -20,13 +21,12 @@ func TestAcquireAndReleaseLock(t *testing.T) {
 func TestAcquireLockCreatesFile(t *testing.T) {
 	dir := t.TempDir()
 
-	lock, err := AcquireLock(dir)
+	lock, err := AcquireLock(context.Background(), dir)
 	if err != nil {
 		t.Fatalf("AcquireLock: %v", err)
 	}
 	defer lock.Release()
 
-	// Lock file should exist
 	if lock.file == nil {
 		t.Error("lock file is nil")
 	}
@@ -35,13 +35,9 @@ func TestAcquireLockCreatesFile(t *testing.T) {
 func TestAcquireLockReentrant(t *testing.T) {
 	dir := t.TempDir()
 
-	lock1, err := AcquireLock(dir)
+	lock1, err := AcquireLock(context.Background(), dir)
 	if err != nil {
 		t.Fatalf("AcquireLock 1: %v", err)
 	}
 	defer lock1.Release()
-
-	// Second lock from same process should fail quickly (different fd)
-	// On macOS/Linux, flock is per-fd, so a second open+flock from same process
-	// may or may not block depending on OS. Just verify it doesn't crash.
 }
