@@ -40,4 +40,5 @@ type VendorState struct {
 	DevPackages     []string          `json:"dev_packages"`
 	ScriptsExecuted bool              `json:"scripts_executed"`
 	Packages        map[string]string `json:"packages"`
+	PluginPackages  []string          `json:"plugin_packages,omitempty"`
 }

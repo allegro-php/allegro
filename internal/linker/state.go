@@ -20,6 +20,7 @@ type WriteVendorStateOpts struct {
 	Dev             bool
 	DevPackages     []string
 	ScriptsExecuted bool
+	PluginPackages  []string
 }
 
 // WriteVendorState writes vendor/.allegro-state.json with all Phase 2 fields.
@@ -34,6 +35,7 @@ func WriteVendorState(vendorDir string, opts WriteVendorStateOpts) error {
 		DevPackages:     opts.DevPackages,
 		ScriptsExecuted: opts.ScriptsExecuted,
 		Packages:        opts.Packages,
+		PluginPackages:  opts.PluginPackages,
 	}
 
 	data, err := json.MarshalIndent(state, "", "  ")

@@ -42,8 +42,21 @@ func VerifyVendor(vendorDir string, s *store.Store, state *linker.VendorState, w
 		regPerm, execPerm = 0644, 0755
 	}
 
+	// Build plugin package set for skipping (copy-linked, expected to be modified)
+	pluginPkgs := make(map[string]bool, len(state.PluginPackages))
+	for _, name := range state.PluginPackages {
+		pluginPkgs[name] = true
+	}
+
 	for pkgName, pkgVersion := range state.Packages {
 		result.TotalPackages++
+
+		// Skip composer-plugin packages — they are copy-linked and
+		// may modify their own files at runtime (e.g. GeneratedConfig.php).
+		if pluginPkgs[pkgName] {
+			result.OKPackages++
+			continue
+		}
 
 		manifest, err := s.ReadManifest(pkgName, pkgVersion)
 		if err != nil {
