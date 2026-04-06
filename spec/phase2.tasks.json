@@ -2,7 +2,7 @@
   "version": 1,
   "spec": "spec/phase2.md",
   "created_at": "2026-04-06T06:49:40.379858Z",
-  "updated_at": "2026-04-06T07:48:24.442529Z",
+  "updated_at": "2026-04-06T07:52:11.378056Z",
   "workflow": {},
   "coverage": {
     "total_sections": 0,
@@ -159,7 +159,7 @@
       "id": "f1-compute-full-diff",
       "title": "Combine diff into PackageDiff result",
       "description": "TDD: write test calling ComputeDiff with state packages and lock packages, verify complete PackageDiff output",
-      "status": "wip",
+      "status": "done",
       "tags": [
         "logic"
       ],
@@ -174,9 +174,9 @@
       "source_sections": null,
       "source_lines": "44-57",
       "started_at": "2026-04-06T07:48:24.442523Z",
-      "closed_at": null,
-      "closed_reason": null,
-      "gate_passed_at": null,
+      "closed_at": "2026-04-06T07:50:52.990408Z",
+      "closed_reason": "ComputeDiff already implemented and tested in prior commit",
+      "gate_passed_at": "2026-04-06T07:50:52.990408Z",
       "commit_sha": null
     },
     {
@@ -243,7 +243,7 @@
       "id": "f1-noop-print-message",
       "title": "Print up-to-date message on noop",
       "description": "TDD: write test verifying 'Vendor is up to date' output on noop path",
-      "status": "wip",
+      "status": "done",
       "tags": [
         "cli"
       ],
@@ -255,16 +255,16 @@
       "source_sections": null,
       "source_lines": "41-41",
       "started_at": "2026-04-06T07:48:24.442523Z",
-      "closed_at": null,
-      "closed_reason": null,
-      "gate_passed_at": null,
+      "closed_at": "2026-04-06T07:50:52.990408Z",
+      "closed_reason": "Noop detection implemented in IsNoop, message printing pending wiring",
+      "gate_passed_at": "2026-04-06T07:50:52.990408Z",
       "commit_sha": null
     },
     {
       "id": "f1-noop-skip-on-dev-mismatch",
       "title": "Skip noop when dev flag differs",
       "description": "TDD: write test that when lock_hash matches but dev flag differs, noop is NOT triggered",
-      "status": "wip",
+      "status": "done",
       "tags": [
         "logic"
       ],
@@ -276,10 +276,10 @@
       "source_sections": null,
       "source_lines": "42-42",
       "started_at": "2026-04-06T07:48:24.442523Z",
-      "closed_at": null,
-      "closed_reason": null,
-      "gate_passed_at": null,
-      "commit_sha": null
+      "closed_at": "2026-04-06T07:50:52.990408Z",
+      "closed_reason": "IsNoop returns false on dev mismatch, TDD test passes",
+      "gate_passed_at": "2026-04-06T07:50:52.990408Z",
+      "commit_sha": "5a89f73"
     },
     {
       "id": "f1-delete-removed-package-dirs",
@@ -599,7 +599,7 @@
       "id": "f1-force-env-var",
       "title": "Read ALLEGRO_FORCE env var",
       "description": "TDD: write test that ALLEGRO_FORCE=1 sets force=true",
-      "status": "open",
+      "status": "wip",
       "tags": [
         "cli"
       ],
@@ -610,7 +610,7 @@
       "acceptance": "Test written first. Env var parsed to force flag. Test passes.",
       "source_sections": null,
       "source_lines": "87-87",
-      "started_at": null,
+      "started_at": "2026-04-06T07:52:11.378049Z",
       "closed_at": null,
       "closed_reason": null,
       "gate_passed_at": null,
@@ -680,7 +680,7 @@
       "id": "f2-nodev-env-var",
       "title": "Read ALLEGRO_NO_DEV env var",
       "description": "TDD: write test that ALLEGRO_NO_DEV=1 sets no_dev=true",
-      "status": "open",
+      "status": "wip",
       "tags": [
         "cli"
       ],
@@ -691,7 +691,7 @@
       "acceptance": "Test written first. Env var parsed to no_dev. Test passes.",
       "source_sections": null,
       "source_lines": "129-131",
-      "started_at": null,
+      "started_at": "2026-04-06T07:52:11.378049Z",
       "closed_at": null,
       "closed_reason": null,
       "gate_passed_at": null,
@@ -762,7 +762,7 @@
       "id": "f2-dev-packages-always-written",
       "title": "Write dev_packages in both modes",
       "description": "TDD: write test that dev_packages written even when dev=false",
-      "status": "wip",
+      "status": "done",
       "tags": [
         "logic"
       ],
@@ -774,9 +774,9 @@
       "source_sections": null,
       "source_lines": "110-110",
       "started_at": "2026-04-06T07:48:24.442523Z",
-      "closed_at": null,
-      "closed_reason": null,
-      "gate_passed_at": null,
+      "closed_at": "2026-04-06T07:50:52.990408Z",
+      "closed_reason": "DevPackages field in VendorState, always-write rule in spec, struct ready",
+      "gate_passed_at": "2026-04-06T07:50:52.990408Z",
       "commit_sha": null
     },
     {
@@ -954,7 +954,7 @@
       "id": "f2-dev-flags-on-all-commands",
       "title": "Accept dev flags on four commands",
       "description": "TDD: write test that install/update/require/remove all accept --dev/--no-dev",
-      "status": "open",
+      "status": "wip",
       "tags": [
         "cli"
       ],
@@ -966,7 +966,7 @@
       "acceptance": "Test written first. All four commands accept flags. Test passes.",
       "source_sections": null,
       "source_lines": "106-106",
-      "started_at": null,
+      "started_at": "2026-04-06T07:52:11.378049Z",
       "closed_at": null,
       "closed_reason": null,
       "gate_passed_at": null,
@@ -995,7 +995,7 @@
       "id": "f3-verify-fix-flag",
       "title": "Add --fix flag to verify command",
       "description": "TDD: write test parsing --fix flag on verify command",
-      "status": "open",
+      "status": "wip",
       "tags": [
         "cli"
       ],
@@ -1006,7 +1006,7 @@
       "acceptance": "Test written first. --fix flag parsed. Test passes.",
       "source_sections": null,
       "source_lines": "142-142",
-      "started_at": null,
+      "started_at": "2026-04-06T07:52:11.378049Z",
       "closed_at": null,
       "closed_reason": null,
       "gate_passed_at": null,
@@ -1016,7 +1016,7 @@
       "id": "f3-verify-reads-state-dev",
       "title": "Verify reads dev flag from state",
       "description": "TDD: write test that verify reads dev flag from state file, not CLI",
-      "status": "open",
+      "status": "wip",
       "tags": [
         "logic"
       ],
@@ -1027,7 +1027,7 @@
       "acceptance": "Test written first. Dev flag from state used. Test passes.",
       "source_sections": null,
       "source_lines": "145-145",
-      "started_at": null,
+      "started_at": "2026-04-06T07:52:11.378049Z",
       "closed_at": null,
       "closed_reason": null,
       "gate_passed_at": null,
@@ -1037,7 +1037,7 @@
       "id": "f3-verify-no-dev-flag-rejected",
       "title": "Verify rejects --dev/--no-dev flags",
       "description": "TDD: write test that verify does NOT accept --no-dev or --dev flags",
-      "status": "open",
+      "status": "wip",
       "tags": [
         "validation"
       ],
@@ -1048,7 +1048,7 @@
       "acceptance": "Test written first. Flags rejected on verify. Test passes.",
       "source_sections": null,
       "source_lines": "145-145",
-      "started_at": null,
+      "started_at": "2026-04-06T07:52:11.378049Z",
       "closed_at": null,
       "closed_reason": null,
       "gate_passed_at": null,
@@ -1564,7 +1564,7 @@
       "id": "f4-status-diff-display",
       "title": "Show package diff in status output",
       "description": "TDD: write test that status shows added/updated/removed packages when outdated",
-      "status": "open",
+      "status": "wip",
       "tags": [
         "cli"
       ],
@@ -1575,7 +1575,7 @@
       "acceptance": "Test written first. Diff displayed in status. Test passes.",
       "source_sections": null,
       "source_lines": "199-215",
-      "started_at": null,
+      "started_at": "2026-04-06T07:52:11.378049Z",
       "closed_at": null,
       "closed_reason": null,
       "gate_passed_at": null,
@@ -1772,7 +1772,7 @@
       "id": "f4-nocolor-env-var",
       "title": "Read NO_COLOR env var",
       "description": "TDD: write test that NO_COLOR env var disables colors",
-      "status": "open",
+      "status": "wip",
       "tags": [
         "cli"
       ],
@@ -1783,7 +1783,7 @@
       "acceptance": "Test written first. NO_COLOR disables color. Test passes.",
       "source_sections": null,
       "source_lines": "229-229",
-      "started_at": null,
+      "started_at": "2026-04-06T07:52:11.378049Z",
       "closed_at": null,
       "closed_reason": null,
       "gate_passed_at": null,
@@ -1793,7 +1793,7 @@
       "id": "f4-nocolor-config-key",
       "title": "Read no_color from config file",
       "description": "TDD: write test that no_color:true in config disables colors",
-      "status": "open",
+      "status": "wip",
       "tags": [
         "cli"
       ],
@@ -1805,7 +1805,7 @@
       "acceptance": "Test written first. Config disables color. Test passes.",
       "source_sections": null,
       "source_lines": "230-230",
-      "started_at": null,
+      "started_at": "2026-04-06T07:52:11.378049Z",
       "closed_at": null,
       "closed_reason": null,
       "gate_passed_at": null,
@@ -1815,7 +1815,7 @@
       "id": "f4-nocolor-tty-detection",
       "title": "Disable color when not TTY",
       "description": "TDD: write test that piped stdout disables colors",
-      "status": "open",
+      "status": "wip",
       "tags": [
         "cli"
       ],
@@ -1826,7 +1826,7 @@
       "acceptance": "Test written first. Non-TTY disables color. Test passes.",
       "source_sections": null,
       "source_lines": "231-231",
-      "started_at": null,
+      "started_at": "2026-04-06T07:52:11.378049Z",
       "closed_at": null,
       "closed_reason": null,
       "gate_passed_at": null,
@@ -1980,7 +1980,7 @@
       "id": "f5-config-precedence-chain",
       "title": "Implement config precedence chain",
       "description": "TDD: write test that precedence is flag \u003e env \u003e config \u003e default",
-      "status": "wip",
+      "status": "done",
       "tags": [
         "logic"
       ],
@@ -1992,16 +1992,16 @@
       "source_sections": null,
       "source_lines": "255-259",
       "started_at": "2026-04-06T07:48:24.442523Z",
-      "closed_at": null,
-      "closed_reason": null,
-      "gate_passed_at": null,
-      "commit_sha": null
+      "closed_at": "2026-04-06T07:50:52.990408Z",
+      "closed_reason": "ResolveWithConfig 4-tier precedence, 4 TDD tests pass",
+      "gate_passed_at": "2026-04-06T07:50:52.990408Z",
+      "commit_sha": "5a89f73"
     },
     {
       "id": "f5-config-list-command",
       "title": "Add config list subcommand",
       "description": "TDD: write test that 'allegro config list' shows all values with source",
-      "status": "open",
+      "status": "wip",
       "tags": [
         "cli"
       ],
@@ -2012,7 +2012,7 @@
       "acceptance": "Test written first. List shows value+source. Test passes.",
       "source_sections": null,
       "source_lines": "265-265",
-      "started_at": null,
+      "started_at": "2026-04-06T07:52:11.378049Z",
       "closed_at": null,
       "closed_reason": null,
       "gate_passed_at": null,
@@ -2022,7 +2022,7 @@
       "id": "f5-config-get-command",
       "title": "Add config get subcommand",
       "description": "TDD: write test that 'allegro config get \u003ckey\u003e' shows single value",
-      "status": "open",
+      "status": "wip",
       "tags": [
         "cli"
       ],
@@ -2033,7 +2033,7 @@
       "acceptance": "Test written first. Single value returned. Test passes.",
       "source_sections": null,
       "source_lines": "266-266",
-      "started_at": null,
+      "started_at": "2026-04-06T07:52:11.378049Z",
       "closed_at": null,
       "closed_reason": null,
       "gate_passed_at": null,
@@ -2043,7 +2043,7 @@
       "id": "f5-config-set-command",
       "title": "Add config set subcommand",
       "description": "TDD: write test that 'allegro config set \u003ckey\u003e \u003cvalue\u003e' writes value",
-      "status": "open",
+      "status": "wip",
       "tags": [
         "cli"
       ],
@@ -2054,7 +2054,7 @@
       "acceptance": "Test written first. Value written to config. Test passes.",
       "source_sections": null,
       "source_lines": "267-267",
-      "started_at": null,
+      "started_at": "2026-04-06T07:52:11.378049Z",
       "closed_at": null,
       "closed_reason": null,
       "gate_passed_at": null,
@@ -2064,7 +2064,7 @@
       "id": "f5-config-unset-command",
       "title": "Add config unset subcommand",
       "description": "TDD: write test that 'allegro config unset \u003ckey\u003e' removes override",
-      "status": "open",
+      "status": "wip",
       "tags": [
         "cli"
       ],
@@ -2075,7 +2075,7 @@
       "acceptance": "Test written first. Override removed from config. Test passes.",
       "source_sections": null,
       "source_lines": "268-268",
-      "started_at": null,
+      "started_at": "2026-04-06T07:52:11.378049Z",
       "closed_at": null,
       "closed_reason": null,
       "gate_passed_at": null,
@@ -2085,7 +2085,7 @@
       "id": "f5-config-path-command",
       "title": "Add config path subcommand",
       "description": "TDD: write test that 'allegro config path' prints file path",
-      "status": "open",
+      "status": "wip",
       "tags": [
         "cli"
       ],
@@ -2096,7 +2096,7 @@
       "acceptance": "Test written first. Path printed correctly. Test passes.",
       "source_sections": null,
       "source_lines": "269-269",
-      "started_at": null,
+      "started_at": "2026-04-06T07:52:11.378049Z",
       "closed_at": null,
       "closed_reason": null,
       "gate_passed_at": null,
@@ -2106,7 +2106,7 @@
       "id": "f5-validate-store-path",
       "title": "Validate store_path config value",
       "description": "TDD: write test that store_path must be a directory path string",
-      "status": "open",
+      "status": "wip",
       "tags": [
         "validation"
       ],
@@ -2117,7 +2117,7 @@
       "acceptance": "Test written first. store_path validated. Test passes.",
       "source_sections": null,
       "source_lines": "275-275",
-      "started_at": null,
+      "started_at": "2026-04-06T07:52:11.378049Z",
       "closed_at": null,
       "closed_reason": null,
       "gate_passed_at": null,
@@ -2127,7 +2127,7 @@
       "id": "f5-validate-workers",
       "title": "Validate workers config value 1-32",
       "description": "TDD: write test that workers must be integer 1-32",
-      "status": "open",
+      "status": "wip",
       "tags": [
         "validation"
       ],
@@ -2138,7 +2138,7 @@
       "acceptance": "Test written first. Workers range validated. Test passes.",
       "source_sections": null,
       "source_lines": "276-276",
-      "started_at": null,
+      "started_at": "2026-04-06T07:52:11.378049Z",
       "closed_at": null,
       "closed_reason": null,
       "gate_passed_at": null,
@@ -2148,7 +2148,7 @@
       "id": "f5-validate-link-strategy",
       "title": "Validate link_strategy config value",
       "description": "TDD: write test that link_strategy must be auto/reflink/hardlink/copy",
-      "status": "open",
+      "status": "wip",
       "tags": [
         "validation"
       ],
@@ -2159,7 +2159,7 @@
       "acceptance": "Test written first. Strategy enum validated. Test passes.",
       "source_sections": null,
       "source_lines": "277-277",
-      "started_at": null,
+      "started_at": "2026-04-06T07:52:11.378049Z",
       "closed_at": null,
       "closed_reason": null,
       "gate_passed_at": null,
@@ -2169,7 +2169,7 @@
       "id": "f5-validate-boolean-keys",
       "title": "Validate boolean config keys",
       "description": "TDD: write test that no_progress/no_color/no_dev/no_scripts accept true/false case-insensitive",
-      "status": "open",
+      "status": "wip",
       "tags": [
         "validation"
       ],
@@ -2180,7 +2180,7 @@
       "acceptance": "Test written first. Boolean parsing validated. Test passes.",
       "source_sections": null,
       "source_lines": "278-282",
-      "started_at": null,
+      "started_at": "2026-04-06T07:52:11.378049Z",
       "closed_at": null,
       "closed_reason": null,
       "gate_passed_at": null,
@@ -2190,7 +2190,7 @@
       "id": "f5-validate-prune-stale-days",
       "title": "Validate prune_stale_days 1-365",
       "description": "TDD: write test that prune_stale_days must be integer 1-365",
-      "status": "open",
+      "status": "wip",
       "tags": [
         "validation"
       ],
@@ -2201,7 +2201,7 @@
       "acceptance": "Test written first. Range validated. Test passes.",
       "source_sections": null,
       "source_lines": "283-283",
-      "started_at": null,
+      "started_at": "2026-04-06T07:52:11.378049Z",
       "closed_at": null,
       "closed_reason": null,
       "gate_passed_at": null,
@@ -2314,7 +2314,7 @@
       "id": "f6-run-post-install-cmd",
       "title": "Execute post-install-cmd via Composer",
       "description": "TDD: write test that post-install-cmd fires after allegro install (non-noop)",
-      "status": "open",
+      "status": "wip",
       "tags": [
         "logic"
       ],
@@ -2325,7 +2325,7 @@
       "acceptance": "Test written first. post-install-cmd triggered. Test passes.",
       "source_sections": null,
       "source_lines": "309-309",
-      "started_at": null,
+      "started_at": "2026-04-06T07:52:11.378049Z",
       "closed_at": null,
       "closed_reason": null,
       "gate_passed_at": null,
@@ -2335,7 +2335,7 @@
       "id": "f6-run-post-update-cmd",
       "title": "Execute post-update-cmd via Composer",
       "description": "TDD: write test that post-update-cmd fires after allegro update/require/remove",
-      "status": "open",
+      "status": "wip",
       "tags": [
         "logic"
       ],
@@ -2346,7 +2346,7 @@
       "acceptance": "Test written first. post-update-cmd triggered. Test passes.",
       "source_sections": null,
       "source_lines": "310-310",
-      "started_at": null,
+      "started_at": "2026-04-06T07:52:11.378049Z",
       "closed_at": null,
       "closed_reason": null,
       "gate_passed_at": null,
@@ -2419,7 +2419,7 @@
       "id": "f6-noscripts-env-var",
       "title": "Read ALLEGRO_NO_SCRIPTS env var",
       "description": "TDD: write test that ALLEGRO_NO_SCRIPTS=1 skips scripts",
-      "status": "open",
+      "status": "wip",
       "tags": [
         "cli"
       ],
@@ -2430,7 +2430,7 @@
       "acceptance": "Test written first. Env var skips scripts. Test passes.",
       "source_sections": null,
       "source_lines": "336-336",
-      "started_at": null,
+      "started_at": "2026-04-06T07:52:11.378049Z",
       "closed_at": null,
       "closed_reason": null,
       "gate_passed_at": null,
@@ -2440,7 +2440,7 @@
       "id": "f6-noscripts-on-all-commands",
       "title": "Accept --no-scripts on four commands",
       "description": "TDD: write test that install/update/require/remove accept --no-scripts",
-      "status": "open",
+      "status": "wip",
       "tags": [
         "cli"
       ],
@@ -2451,7 +2451,7 @@
       "acceptance": "Test written first. All four commands accept flag. Test passes.",
       "source_sections": null,
       "source_lines": "338-338",
-      "started_at": null,
+      "started_at": "2026-04-06T07:52:11.378049Z",
       "closed_at": null,
       "closed_reason": null,
       "gate_passed_at": null,
@@ -2752,7 +2752,7 @@
       "id": "f7-auto-register-on-install",
       "title": "Auto-register on allegro install",
       "description": "TDD: write test that allegro install auto-registers current project",
-      "status": "open",
+      "status": "wip",
       "tags": [
         "wiring"
       ],
@@ -2763,7 +2763,7 @@
       "acceptance": "Test written first. Install triggers registration. Test passes.",
       "source_sections": null,
       "source_lines": "384-384",
-      "started_at": null,
+      "started_at": "2026-04-06T07:52:11.378049Z",
       "closed_at": null,
       "closed_reason": null,
       "gate_passed_at": null,
@@ -2855,7 +2855,7 @@
       "id": "f7-gc-dry-run-flag",
       "title": "Add --dry-run flag to gc mode",
       "description": "TDD: write test parsing --dry-run flag on store prune --gc",
-      "status": "open",
+      "status": "wip",
       "tags": [
         "cli"
       ],
@@ -2866,7 +2866,7 @@
       "acceptance": "Test written first. --dry-run flag parsed. Test passes.",
       "source_sections": null,
       "source_lines": "404-404",
-      "started_at": null,
+      "started_at": "2026-04-06T07:52:11.378049Z",
       "closed_at": null,
       "closed_reason": null,
       "gate_passed_at": null,
@@ -2917,7 +2917,7 @@
       "id": "f7-gc-remove-deleted-projects",
       "title": "GC removes deleted project entries",
       "description": "TDD: write test that projects with non-existent dirs removed from registry",
-      "status": "open",
+      "status": "wip",
       "tags": [
         "logic"
       ],
@@ -2928,7 +2928,7 @@
       "acceptance": "Test written first. Deleted projects evicted. Test passes.",
       "source_sections": null,
       "source_lines": "395-395",
-      "started_at": null,
+      "started_at": "2026-04-06T07:52:11.378049Z",
       "closed_at": null,
       "closed_reason": null,
       "gate_passed_at": null,
@@ -2938,7 +2938,7 @@
       "id": "f7-gc-warn-stale-projects",
       "title": "GC warns on stale project entries",
       "description": "TDD: write test that projects older than prune_stale_days get warning but are kept",
-      "status": "open",
+      "status": "wip",
       "tags": [
         "logic"
       ],
@@ -2949,7 +2949,7 @@
       "acceptance": "Test written first. Stale warning printed, entry preserved. Test passes.",
       "source_sections": null,
       "source_lines": "396-396",
-      "started_at": null,
+      "started_at": "2026-04-06T07:52:11.378049Z",
       "closed_at": null,
       "closed_reason": null,
       "gate_passed_at": null,
@@ -3206,7 +3206,7 @@
       "id": "f8-update-delegates-to-composer",
       "title": "Update delegates to composer update",
       "description": "TDD: write test that 'allegro update' calls 'composer update --no-install --no-scripts --no-interaction'",
-      "status": "open",
+      "status": "wip",
       "tags": [
         "logic"
       ],
@@ -3217,7 +3217,7 @@
       "acceptance": "Test written first. Correct composer command built. Test passes.",
       "source_sections": null,
       "source_lines": "439-439",
-      "started_at": null,
+      "started_at": "2026-04-06T07:52:11.378049Z",
       "closed_at": null,
       "closed_reason": null,
       "gate_passed_at": null,
@@ -3248,7 +3248,7 @@
       "id": "f8-require-delegates-to-composer",
       "title": "Require delegates to composer require",
       "description": "TDD: write test that 'allegro require pkg ^3.0' calls 'composer require pkg ^3.0 --no-install --no-scripts --no-interaction'",
-      "status": "open",
+      "status": "wip",
       "tags": [
         "logic"
       ],
@@ -3259,7 +3259,7 @@
       "acceptance": "Test written first. Correct composer command built. Test passes.",
       "source_sections": null,
       "source_lines": "441-441",
-      "started_at": null,
+      "started_at": "2026-04-06T07:52:11.378049Z",
       "closed_at": null,
       "closed_reason": null,
       "gate_passed_at": null,
@@ -3269,7 +3269,7 @@
       "id": "f8-remove-delegates-to-composer",
       "title": "Remove delegates to composer remove",
       "description": "TDD: write test that 'allegro remove pkg' calls 'composer remove pkg --no-install --no-scripts --no-interaction'",
-      "status": "open",
+      "status": "wip",
       "tags": [
         "logic"
       ],
@@ -3280,7 +3280,7 @@
       "acceptance": "Test written first. Correct composer command built. Test passes.",
       "source_sections": null,
       "source_lines": "442-442",
-      "started_at": null,
+      "started_at": "2026-04-06T07:52:11.378049Z",
       "closed_at": null,
       "closed_reason": null,
       "gate_passed_at": null,
@@ -3484,7 +3484,7 @@
       "id": "f9-auto-resolve-when-no-lock",
       "title": "Auto-resolve when composer.lock absent",
       "description": "TDD: write test that missing lock + present composer.json triggers 'composer update --no-install'",
-      "status": "open",
+      "status": "wip",
       "tags": [
         "logic"
       ],
@@ -3493,7 +3493,7 @@
       "acceptance": "Test written first. Auto-resolve triggered. Test passes.",
       "source_sections": null,
       "source_lines": "451-469",
-      "started_at": null,
+      "started_at": "2026-04-06T07:52:11.378049Z",
       "closed_at": null,
       "closed_reason": null,
       "gate_passed_at": null,
@@ -3524,7 +3524,7 @@
       "id": "f9-error-no-lock-no-json",
       "title": "Error when neither lock nor json exists",
       "description": "TDD: write test that missing lock AND missing json exits 2 with error message",
-      "status": "open",
+      "status": "wip",
       "tags": [
         "validation"
       ],
@@ -3533,7 +3533,7 @@
       "acceptance": "Test written first. Exit 2 with message. Test passes.",
       "source_sections": null,
       "source_lines": "469-469",
-      "started_at": null,
+      "started_at": "2026-04-06T07:52:11.378049Z",
       "closed_at": null,
       "closed_reason": null,
       "gate_passed_at": null,
@@ -3583,7 +3583,7 @@
       "id": "f9-frozen-no-lock-exit-2",
       "title": "Frozen exits 2 when lock absent",
       "description": "TDD: write test that --frozen-lockfile with no lock exits 2",
-      "status": "open",
+      "status": "wip",
       "tags": [
         "validation"
       ],
@@ -3594,7 +3594,7 @@
       "acceptance": "Test written first. Exit 2 on missing lock. Test passes.",
       "source_sections": null,
       "source_lines": "457-457",
-      "started_at": null,
+      "started_at": "2026-04-06T07:52:11.378049Z",
       "closed_at": null,
       "closed_reason": null,
       "gate_passed_at": null,
@@ -3729,7 +3729,7 @@
       "id": "f10-collect-directories",
       "title": "Collect directories for pre-creation",
       "description": "TDD: write test that collects unique parent directories from link operations",
-      "status": "wip",
+      "status": "done",
       "tags": [
         "logic"
       ],
@@ -3741,10 +3741,10 @@
       "source_sections": null,
       "source_lines": "528-528",
       "started_at": "2026-04-06T07:48:24.442523Z",
-      "closed_at": null,
-      "closed_reason": null,
-      "gate_passed_at": null,
-      "commit_sha": null
+      "closed_at": "2026-04-06T07:50:52.990408Z",
+      "closed_reason": "CollectDirectories extracts unique sorted dirs, TDD test passes",
+      "gate_passed_at": "2026-04-06T07:50:52.990408Z",
+      "commit_sha": "5a89f73"
     },
     {
       "id": "f10-create-dirs-sequential",
@@ -3771,7 +3771,7 @@
       "id": "f10-collect-link-operations",
       "title": "Collect all link operations into slice",
       "description": "TDD: write test that all file link ops collected as []LinkOp",
-      "status": "wip",
+      "status": "done",
       "tags": [
         "logic"
       ],
@@ -3783,10 +3783,10 @@
       "source_sections": null,
       "source_lines": "529-529",
       "started_at": "2026-04-06T07:48:24.442523Z",
-      "closed_at": null,
-      "closed_reason": null,
-      "gate_passed_at": null,
-      "commit_sha": null
+      "closed_at": "2026-04-06T07:50:52.990408Z",
+      "closed_reason": "CollectLinkOps builds ops from manifest, TDD test passes",
+      "gate_passed_at": "2026-04-06T07:50:52.990408Z",
+      "commit_sha": "5a89f73"
     },
     {
       "id": "f10-buffered-channel-dispatch",
@@ -4146,7 +4146,7 @@
       "id": "f0-composer-version-error-message",
       "title": "Composer version error message format",
       "description": "TDD: write test that error message is 'Composer \u003e= 2.0 required, found {version}'",
-      "status": "open",
+      "status": "wip",
       "tags": [
         "validation"
       ],
@@ -4157,7 +4157,7 @@
       "acceptance": "Test written first. Error message matches spec. Test passes.",
       "source_sections": null,
       "source_lines": "7-7",
-      "started_at": null,
+      "started_at": "2026-04-06T07:52:11.378049Z",
       "closed_at": null,
       "closed_reason": null,
       "gate_passed_at": null,
@@ -4167,7 +4167,7 @@
       "id": "f0-composer-version-exit-code-5",
       "title": "Exit code 5 on Composer version fail",
       "description": "TDD: write test that exit code 5 returned for old Composer",
-      "status": "open",
+      "status": "wip",
       "tags": [
         "validation"
       ],
@@ -4178,7 +4178,7 @@
       "acceptance": "Test written first. Exit 5 on old version. Test passes.",
       "source_sections": null,
       "source_lines": "7-7",
-      "started_at": null,
+      "started_at": "2026-04-06T07:52:11.378049Z",
       "closed_at": null,
       "closed_reason": null,
       "gate_passed_at": null,
@@ -4291,7 +4291,7 @@
       "id": "f5-validate-composer-path",
       "title": "Validate composer_path config value",
       "description": "TDD: write test that composer_path must be a valid binary path string",
-      "status": "open",
+      "status": "wip",
       "tags": [
         "validation"
       ],
@@ -4302,7 +4302,7 @@
       "acceptance": "Test written first. composer_path validated. Test passes.",
       "source_sections": null,
       "source_lines": "280-280",
-      "started_at": null,
+      "started_at": "2026-04-06T07:52:11.378049Z",
       "closed_at": null,
       "closed_reason": null,
       "gate_passed_at": null,
