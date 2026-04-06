@@ -38,7 +38,7 @@ func AcquireLock(projectDir string) (*FileLock, error) {
 		}
 		if time.Now().After(deadline) {
 			f.Close()
-			return nil, fmt.Errorf("another allegro process is running (lock timeout after %s)", lockTimeout)
+			return nil, fmt.Errorf("another allegro process is running")
 		}
 		time.Sleep(200 * time.Millisecond)
 	}

@@ -234,7 +234,7 @@ func (o *Orchestrator) extractAndStore(ctx context.Context, r fetcher.DownloadRe
 	}
 
 	if err := o.tryExtract(resp.Body, r.Task, packages); err != nil {
-		return fmt.Errorf("archive extraction failed for %s after retry: %w", r.Task.Name, err)
+		return fmt.Errorf("archive extraction failed for %s: %w", r.Task.Name, err)
 	}
 	return nil
 }
