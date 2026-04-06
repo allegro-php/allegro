@@ -6,7 +6,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"sync"
-	"sync/atomic"
 	"time"
 )
 
@@ -29,7 +28,6 @@ type DownloadResult struct {
 type Pool struct {
 	client       *Client
 	workers      int
-	failureCount int64
 	lastFailures []time.Time
 	mu           sync.Mutex
 }
@@ -173,25 +171,22 @@ func (p *Pool) recordFailure() {
 	defer p.mu.Unlock()
 	now := time.Now()
 	p.lastFailures = append(p.lastFailures, now)
-	atomic.AddInt64(&p.failureCount, 1)
+	// Trim entries older than 10s to prevent unbounded growth
+	cutoff := now.Add(-10 * time.Second)
+	trimmed := p.lastFailures[:0]
+	for _, t := range p.lastFailures {
+		if t.After(cutoff) {
+			trimmed = append(trimmed, t)
+		}
+	}
+	p.lastFailures = trimmed
 }
 
 // shouldAbort returns true if 3 failures within 10 seconds.
 func (p *Pool) shouldAbort() bool {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	if len(p.lastFailures) < 3 {
-		return false
-	}
-	window := 10 * time.Second
-	recent := 0
-	cutoff := time.Now().Add(-window)
-	for _, t := range p.lastFailures {
-		if t.After(cutoff) {
-			recent++
-		}
-	}
-	return recent >= 3
+	return len(p.lastFailures) >= 3
 }
 
 func verifySHA1(data []byte, expected string) error {

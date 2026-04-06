@@ -354,12 +354,7 @@ func (o *Orchestrator) buildVendorTree(ctx context.Context, vendorTmp string, pa
 				if err := o.redownloadPackage(ctx, pkg); err != nil {
 					return fmt.Errorf("re-download %s for missing CAS file: %w", pkg.Name, err)
 				}
-				// Re-read manifest (may have been updated)
-				manifest, err = o.store.ReadManifest(pkg.Name, pkg.Version)
-				if err != nil {
-					return fmt.Errorf("re-read manifest %s: %w", pkg.Name, err)
-				}
-				// Retry — if still missing after re-download, fail
+				// After re-download, verify the specific file is now present
 				if !o.store.FileExists(hash) {
 					return fmt.Errorf("CAS file still missing for %s/%s after re-download", pkg.Name, f.Path)
 				}
