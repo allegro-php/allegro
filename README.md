@@ -1,6 +1,6 @@
-# Allegro — pnpm-inspired Package Linker for PHP
+# Allegro — Fast, Disk-Efficient PHP Package Linker
 
-Allegro is a fast, disk-efficient alternative to `composer install`. It uses a content-addressable store (CAS) to deduplicate PHP packages across projects and links them into `vendor/` via reflink, hardlink, or copy.
+Allegro is a fast, disk-efficient alternative to `composer install`. Inspired by how [pnpm](https://pnpm.io) handles Node.js packages, it uses a content-addressable store (CAS) to deduplicate PHP packages across projects and links them into `vendor/` via reflink, hardlink, or copy.
 
 **Allegro is not a Composer replacement** — it's a Composer accelerator. Composer handles dependency resolution; Allegro handles the file I/O.
 
