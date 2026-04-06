@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+
+	cfg "github.com/allegro-php/allegro/internal/config"
 )
 
 var (
@@ -114,10 +116,22 @@ func ResolveLinkStrategy() string {
 	return os.Getenv("ALLEGRO_LINK_STRATEGY")
 }
 
-// IsDevMode resolves dev mode: --dev flag > --no-dev flag > ALLEGRO_NO_DEV env > default (true).
+// loadedConfig caches the config file for flag resolution.
+var loadedConfig *cfg.Config
+
+func getConfig() cfg.Config {
+	if loadedConfig != nil {
+		return *loadedConfig
+	}
+	c, _ := cfg.ReadConfig(cfg.DefaultConfigPath())
+	loadedConfig = &c
+	return c
+}
+
+// IsDevMode resolves: --dev flag > --no-dev flag > ALLEGRO_NO_DEV env > config > default (true).
 func IsDevMode() bool {
 	if flagDev {
-		return true // explicit --dev overrides everything
+		return true
 	}
 	if flagNoDev {
 		return false
@@ -125,11 +139,13 @@ func IsDevMode() bool {
 	if os.Getenv("ALLEGRO_NO_DEV") != "" {
 		return false
 	}
-	// TODO: config file tier (Phase 2 §7.3)
-	return true // default: install dev deps
+	if getConfig().NoDev {
+		return false
+	}
+	return true
 }
 
-// IsColorEnabled returns true if colored output should be shown.
+// IsColorEnabled resolves: --no-color > NO_COLOR env > config > default (true).
 func IsColorEnabled() bool {
 	if flagNoColor {
 		return false
@@ -137,7 +153,9 @@ func IsColorEnabled() bool {
 	if os.Getenv("NO_COLOR") != "" {
 		return false
 	}
-	// TODO: config file tier, TTY detection
+	if getConfig().NoColor {
+		return false
+	}
 	return true
 }
 
@@ -149,12 +167,15 @@ func IsForce() bool {
 	return os.Getenv("ALLEGRO_FORCE") != ""
 }
 
-// IsNoScripts returns true if --no-scripts flag is set.
+// IsNoScripts resolves: --no-scripts > ALLEGRO_NO_SCRIPTS env > config > default (false).
 func IsNoScripts() bool {
 	if flagNoScripts {
 		return true
 	}
-	return os.Getenv("ALLEGRO_NO_SCRIPTS") != ""
+	if os.Getenv("ALLEGRO_NO_SCRIPTS") != "" {
+		return true
+	}
+	return getConfig().NoScripts
 }
 
 // IsFrozenLockfile returns true if --frozen-lockfile flag is set.

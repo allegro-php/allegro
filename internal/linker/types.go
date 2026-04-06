@@ -36,8 +36,8 @@ type VendorState struct {
 	LinkStrategy    string            `json:"link_strategy"`
 	LockHash        string            `json:"lock_hash"`
 	InstalledAt     time.Time         `json:"installed_at"`
-	Dev             bool              `json:"dev,omitempty"`
-	DevPackages     []string          `json:"dev_packages,omitempty"`
-	ScriptsExecuted bool              `json:"scripts_executed,omitempty"`
+	Dev             bool              `json:"dev"`
+	DevPackages     []string          `json:"dev_packages"`
+	ScriptsExecuted bool              `json:"scripts_executed"`
 	Packages        map[string]string `json:"packages"`
 }

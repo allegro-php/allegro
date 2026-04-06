@@ -2,8 +2,10 @@ package store
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
+	"syscall"
 	"time"
 )
 
@@ -47,6 +49,18 @@ func ReadRegistry(path string) (*ProjectRegistry, error) {
 
 // RegisterProject adds or updates a project entry in the registry.
 func RegisterProject(path string, entry ProjectEntry) error {
+	// Acquire flock on projects.lock (§9.1)
+	lockPath := filepath.Join(filepath.Dir(path), "projects.lock")
+	lockFile, err := os.OpenFile(lockPath, os.O_CREATE|os.O_RDWR, 0644)
+	if err != nil {
+		return fmt.Errorf("create projects lock: %w", err)
+	}
+	defer lockFile.Close()
+	if err := syscall.Flock(int(lockFile.Fd()), syscall.LOCK_EX); err != nil {
+		return fmt.Errorf("acquire projects lock: %w", err)
+	}
+	defer syscall.Flock(int(lockFile.Fd()), syscall.LOCK_UN)
+
 	reg, err := ReadRegistry(path)
 	if err != nil {
 		return err
