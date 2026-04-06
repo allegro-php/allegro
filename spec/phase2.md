@@ -4,7 +4,7 @@
 
 **Note:** This Phase pulls several items originally scoped to Phase 3 in `allegro.md §16` (global config, composer scripts, smart prune, dependency resolution commands). The Phase 1 spec's §16 phased delivery plan should be updated to reflect this re-scoping.
 
-**Prerequisites:** Composer >= 2.7 is required. Allegro checks the Composer version at startup via `composer --version` and exits with code 5 if the version is below 2.7 (message: `"Composer >= 2.7 required, found {version}"`). Exit code 5 is intentionally reused from Phase 1 — it covers all Composer-related failures (binary not found, version too old, dumpautoload failed). Callers distinguish via stderr message. The `--lock` flag was deprecated in Composer 2.7 (now default behavior); Allegro's internal delegation relies on `--no-install` being sufficient.
+**Prerequisites:** Composer >= 2.0 is required (for `--no-install` flag support). Allegro checks the Composer version at startup via `composer --version` and exits with code 5 if the version is below 2.0 (message: `"Composer >= 2.0 required, found {version}"`). Exit code 5 is intentionally reused from Phase 1 — it covers all Composer-related failures (binary not found, version too old, dumpautoload failed). Callers distinguish via stderr message. Allegro's internal delegation relies on `--no-install` to prevent Composer from downloading packages.
 
 ## 1. Design Philosophy
 
