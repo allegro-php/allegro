@@ -3,8 +3,10 @@ package cli
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
+
 	"github.com/allegro-php/allegro/internal/store"
 	"github.com/spf13/cobra"
 )
@@ -148,8 +150,11 @@ func runStorePrune(cmd *cobra.Command, args []string) error {
 			return nil
 		}
 		if !referencedHashes[filepath.Base(path)] {
-			os.Remove(path)
-			pruned++
+			if rmErr := os.Remove(path); rmErr != nil {
+				log.Printf("warning: failed to remove orphaned file %s: %v", path, rmErr)
+			} else {
+				pruned++
+			}
 		}
 		return nil
 	})

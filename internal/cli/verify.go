@@ -132,7 +132,9 @@ func runVerify(cmd *cobra.Command, args []string) error {
 	noDev := !state.EffectiveDev()
 	composerBin, findErr := autoloader.FindComposer(projectDir)
 	if findErr == nil {
-		autoloader.RunDumpautoload(composerBin, projectDir, false, noDev)
+		if dlErr := autoloader.RunDumpautoload(composerBin, projectDir, false, noDev); dlErr != nil {
+			fmt.Fprintf(cmd.ErrOrStderr(), "warning: dumpautoload failed after fix: %v\n", dlErr)
+		}
 	}
 
 	fmt.Fprintf(cmd.OutOrStdout(), "\nFixed %d issues, %d unfixable\n", fixedCount, unfixable)

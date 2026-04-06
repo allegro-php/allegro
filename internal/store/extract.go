@@ -17,6 +17,8 @@ import (
 // ErrEmptyArchive is returned when an archive contains no files.
 var ErrEmptyArchive = errors.New("empty archive (no files after extraction)")
 
+// maxExtractedEntry limits per-file extraction size to prevent zip/tar bombs.
+const maxExtractedEntry = 512 << 20 // 512 MiB per entry
 // isInsideDir checks that the resolved path is inside destDir (prevents path traversal).
 func isInsideDir(path, destDir string) bool {
 	cleanPath := filepath.Clean(path)
@@ -67,7 +69,7 @@ func ExtractZip(data []byte, destDir string) error {
 			rc.Close()
 			return err
 		}
-		_, err = io.Copy(out, rc)
+		_, err = io.Copy(out, io.LimitReader(rc, maxExtractedEntry))
 		rc.Close()
 		out.Close()
 		if err != nil {
@@ -120,7 +122,7 @@ func ExtractTar(r io.Reader, destDir string) error {
 		if err != nil {
 			return err
 		}
-		_, err = io.Copy(out, tr)
+		_, err = io.Copy(out, io.LimitReader(tr, maxExtractedEntry))
 		out.Close()
 		if err != nil {
 			return err
