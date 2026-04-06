@@ -337,6 +337,7 @@ func (o *Orchestrator) storeExtractedFiles(dir, pkgName string, archiveData []by
 func (o *Orchestrator) buildVendorTree(ctx context.Context, vendorTmp string, packages []parser.Package, lnk linker.Linker, strategy linker.Strategy) error {
 	redownloaded := make(map[string]bool) // track already-redownloaded packages
 
+	// Phase 1: Verify CAS integrity and re-download missing packages
 	for _, pkg := range packages {
 		manifest, err := o.store.ReadManifest(pkg.Name, pkg.Version)
 		if err != nil {
@@ -349,14 +350,6 @@ func (o *Orchestrator) buildVendorTree(ctx context.Context, vendorTmp string, pa
 				hash = hash[7:]
 			}
 
-			srcPath := o.store.FilePath(hash)
-			dstPath := filepath.Join(vendorTmp, pkg.Name, f.Path)
-
-			if err := os.MkdirAll(filepath.Dir(dstPath), 0755); err != nil {
-				return err
-			}
-
-			// Check if CAS file exists; if missing, re-download once per package
 			if !o.store.FileExists(hash) {
 				pkgKey := pkg.Name + "@" + pkg.Version
 				if redownloaded[pkgKey] {
@@ -371,24 +364,26 @@ func (o *Orchestrator) buildVendorTree(ctx context.Context, vendorTmp string, pa
 					return fmt.Errorf("CAS file still missing for %s/%s after re-download", pkg.Name, f.Path)
 				}
 			}
-
-			if err := lnk.LinkFile(srcPath, dstPath); err != nil {
-				return fmt.Errorf("link %s/%s: %w", pkg.Name, f.Path, err)
-			}
-
-			// Set vendor permissions (not for hardlinks — they share CAS inode)
-			if strategy != linker.Hardlink {
-				perm := os.FileMode(0644)
-				if f.Executable {
-					perm = 0755
-				}
-				if chErr := os.Chmod(dstPath, perm); chErr != nil {
-					log.Printf("warning: chmod %s: %v", dstPath, chErr)
-				}
-			}
 		}
 	}
-	return nil
+
+	// Phase 2: Collect all link operations
+	var allOps []LinkOp
+	for _, pkg := range packages {
+		manifest, err := o.store.ReadManifest(pkg.Name, pkg.Version)
+		if err != nil {
+			return fmt.Errorf("read manifest %s: %w", pkg.Name, err)
+		}
+		ops := CollectLinkOps(o.store, pkg.Name, manifest, vendorTmp)
+		allOps = append(allOps, ops...)
+	}
+
+	// Phase 3: Parallel link with worker pool
+	workers := o.config.Workers
+	if workers < 1 {
+		workers = 8
+	}
+	return ParallelLink(allOps, lnk, strategy, workers)
 }
 
 // redownloadPackage re-downloads and re-stores a package when CAS files are missing.
