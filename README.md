@@ -37,17 +37,18 @@ allegro install --frozen-lockfile --no-dev --no-scripts
 
 ## Benchmark
 
-Measured on Apple M-series, macOS, APFS, Laravel project with 106 packages:
+Measured on Apple M-series (macOS, APFS) across 3 open-source PHP projects.
+Run `./benchmark/run.sh` to reproduce.
 
-| Scenario | Composer | Allegro | Notes |
-|----------|---------|---------|-------|
-| Cold install (no cache) | 14.1s | 14.4s | Network-bound, similar |
-| Warm cache, no vendor | 3.9s | **1.1s** | **3.5x faster** — CAS linking only |
-| Second project (same deps) | 3.9s | **1.1s** | CAS shared, zero downloads |
+| Scenario | Project | Composer | Allegro | Speedup |
+|----------|---------|---------|---------|---------|
+| Warm cache, no vendor | Laravel (106 pkgs) | 3.83s | **0.96s** | **4.0x** |
+| Warm cache, no vendor | Koel (194 pkgs) | 8.43s | **2.40s** | **3.5x** |
+| Warm cache, no vendor | Matomo (85 pkgs) | 3.58s | **0.89s** | **4.0x** |
+| Noop (vendor up-to-date) | All projects | ~0.40s | **0.03s** | **13x** |
 
 Cold installs are network-bound so both tools perform similarly. The real advantage is on subsequent installs: Allegro skips downloads entirely and links from the local CAS.
 
-## How It Works
 
 ```
 allegro install
