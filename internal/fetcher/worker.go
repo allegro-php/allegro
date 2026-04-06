@@ -83,8 +83,7 @@ func (p *Pool) Download(ctx context.Context, tasks []DownloadTask) []DownloadRes
 
 					resp, err := p.client.DownloadFull(ctx, task.URL)
 					if err != nil {
-						p.recordFailure()
-						if p.shouldAbort() {
+						if p.recordFailureAndCheck() {
 							cancel()
 						}
 						finalErr = err
@@ -101,8 +100,7 @@ func (p *Pool) Download(ctx context.Context, tasks []DownloadTask) []DownloadRes
 							case <-time.After(retryAfter):
 							}
 						}
-						p.recordFailure()
-						if p.shouldAbort() {
+						if p.recordFailureAndCheck() {
 							cancel()
 						}
 						finalErr = fmt.Errorf("HTTP 429 for %s", task.URL)
@@ -113,8 +111,7 @@ func (p *Pool) Download(ctx context.Context, tasks []DownloadTask) []DownloadRes
 						// Verify SHA-1 if shasum is non-empty
 						if task.Shasum != "" {
 							if err := verifySHA1(resp.Body, task.Shasum); err != nil {
-								p.recordFailure()
-								if p.shouldAbort() {
+								if p.recordFailureAndCheck() {
 									cancel()
 								}
 								finalErr = fmt.Errorf("SHA-1 mismatch for %s (attempt %d): %w", task.Name, attempt+1, err)
@@ -131,8 +128,7 @@ func (p *Pool) Download(ctx context.Context, tasks []DownloadTask) []DownloadRes
 						break
 					}
 
-					p.recordFailure()
-					if p.shouldAbort() {
+					if p.recordFailureAndCheck() {
 						cancel()
 					}
 					finalErr = fmt.Errorf("HTTP %d for %s", resp.StatusCode, task.URL)
@@ -166,12 +162,13 @@ func (p *Pool) Download(ctx context.Context, tasks []DownloadTask) []DownloadRes
 	return results
 }
 
-func (p *Pool) recordFailure() {
+// recordFailureAndCheck records a failure timestamp, trims old entries,
+// and returns true if abort threshold is reached (3 failures in 10s).
+func (p *Pool) recordFailureAndCheck() bool {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	now := time.Now()
 	p.lastFailures = append(p.lastFailures, now)
-	// Trim entries older than 10s to prevent unbounded growth
 	cutoff := now.Add(-10 * time.Second)
 	trimmed := make([]time.Time, 0, len(p.lastFailures))
 	for _, t := range p.lastFailures {
@@ -180,12 +177,6 @@ func (p *Pool) recordFailure() {
 		}
 	}
 	p.lastFailures = trimmed
-}
-
-// shouldAbort returns true if 3 failures within 10 seconds.
-func (p *Pool) shouldAbort() bool {
-	p.mu.Lock()
-	defer p.mu.Unlock()
 	return len(p.lastFailures) >= 3
 }
 

@@ -36,6 +36,10 @@ func AcquireLock(projectDir string) (*FileLock, error) {
 		if err == nil {
 			return &FileLock{file: f}, nil
 		}
+		if err != syscall.EWOULDBLOCK {
+			f.Close()
+			return nil, fmt.Errorf("flock: %w", err)
+		}
 		if time.Now().After(deadline) {
 			f.Close()
 			return nil, fmt.Errorf("another allegro process is running")

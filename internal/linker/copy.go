@@ -20,13 +20,17 @@ func (c *CopyLinker) LinkFile(src, dst string) error {
 	if err != nil {
 		return fmt.Errorf("copy create dst: %w", err)
 	}
-	defer out.Close()
 
 	if _, err := io.Copy(out, in); err != nil {
+		out.Close()
+		os.Remove(dst) // clean up partial file
 		return fmt.Errorf("copy content: %w", err)
 	}
 	if err := out.Sync(); err != nil {
+		out.Close()
+		os.Remove(dst)
 		return fmt.Errorf("copy sync: %w", err)
 	}
+	out.Close()
 	return nil
 }
