@@ -4,9 +4,11 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 
+	"github.com/allegro-php/allegro/internal/autoloader"
 	"github.com/allegro-php/allegro/internal/linker"
 	"github.com/allegro-php/allegro/internal/orchestrator"
 	"github.com/allegro-php/allegro/internal/parser"
@@ -30,14 +32,58 @@ func runInstall(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("get working directory: %w", err)
 	}
 
-	// Check required files
-	if _, err := os.Stat("composer.lock"); os.IsNotExist(err) {
-		fmt.Fprintln(cmd.ErrOrStderr(), "composer.lock not found. Run `composer install` first.")
-		os.Exit(ExitProjectFile)
+	lockPath := filepath.Join(projectDir, "composer.lock")
+	vendorDir := filepath.Join(projectDir, "vendor")
+	storePath := store.ResolvePath(flagStorePath, os.Getenv("ALLEGRO_STORE"))
+
+	// --- §10.4/§10.5: Lock file handling ---
+
+	// Frozen-lockfile check (§10.5) — runs first
+	if IsFrozenLockfile() {
+		if _, err := os.Stat(lockPath); os.IsNotExist(err) {
+			fmt.Fprintln(cmd.ErrOrStderr(), "composer.lock not found (--frozen-lockfile is set)")
+			os.Exit(ExitProjectFile)
+		}
+		// Check hash + dev match if state exists
+		state, stateErr := linker.ReadVendorState(vendorDir)
+		if stateErr == nil {
+			currentHash, _ := parser.ComputeLockHash(lockPath)
+			if state.LockHash != currentHash {
+				fmt.Fprintln(cmd.ErrOrStderr(), "composer.lock out of sync with vendor")
+				os.Exit(ExitProjectFile)
+			}
+			if state.EffectiveDev() != IsDevMode() {
+				fmt.Fprintln(cmd.ErrOrStderr(), "vendor dev mode does not match --no-dev/--dev flag")
+				os.Exit(ExitProjectFile)
+			}
+		}
+		// State absent = fresh deploy, proceed
 	}
 
+	// Auto-resolve when no lock file (§10.4)
+	if _, err := os.Stat(lockPath); os.IsNotExist(err) {
+		jsonPath := filepath.Join(projectDir, "composer.json")
+		if _, err := os.Stat(jsonPath); os.IsNotExist(err) {
+			fmt.Fprintln(cmd.ErrOrStderr(), "neither composer.lock nor composer.json found")
+			os.Exit(ExitProjectFile)
+		}
+		composerBin, findErr := autoloader.FindComposer(projectDir)
+		if findErr != nil {
+			fmt.Fprintf(cmd.ErrOrStderr(), "exit 5: %v\n", findErr)
+			os.Exit(ExitComposerError)
+		}
+		if !IsQuiet() {
+			fmt.Fprintln(cmd.OutOrStdout(), "composer.lock not found, resolving dependencies...")
+		}
+		if err := orchestrator.ComposerGenerateLock(composerBin, projectDir); err != nil {
+			fmt.Fprintf(cmd.ErrOrStderr(), "dependency resolution failed: %v\n", err)
+			os.Exit(ExitComposerError)
+		}
+	}
+
+	// composer.json required for autoload (unless --no-autoload)
 	if !flagNoAutoload {
-		if _, err := os.Stat("composer.json"); os.IsNotExist(err) {
+		if _, err := os.Stat(filepath.Join(projectDir, "composer.json")); os.IsNotExist(err) {
 			fmt.Fprintln(cmd.ErrOrStderr(), "composer.json not found. Required for autoload generation.")
 			os.Exit(ExitProjectFile)
 		}
@@ -47,8 +93,35 @@ func runInstall(cmd *cobra.Command, args []string) error {
 		return runDryRun(cmd, projectDir)
 	}
 
-	storePath := store.ResolvePath(flagStorePath, os.Getenv("ALLEGRO_STORE"))
+	// --- §3.2: Incremental noop check ---
+	if !IsForce() {
+		state, stateErr := linker.ReadVendorState(vendorDir)
+		if stateErr == nil {
+			currentHash, _ := parser.ComputeLockHash(lockPath)
+			if orchestrator.IsNoop(state.LockHash, currentHash, state.EffectiveDev(), IsDevMode()) {
+				if !IsQuiet() {
+					fmt.Fprintln(cmd.OutOrStdout(), "Vendor is up to date")
+				}
+				// Update projects.json even on noop (§9.1)
+				s := store.New(storePath)
+				regPath := store.DefaultRegistryPath()
+				lock, _ := parser.ParseLockFile(lockPath)
+				if lock != nil {
+					pkgMap := make(map[string]string)
+					for _, p := range parser.MergePackages(lock) {
+						pkgMap[p.Name] = p.Version
+					}
+					store.RegisterProject(regPath, store.ProjectEntry{
+						Path: projectDir, LockHash: currentHash, Packages: pkgMap,
+					})
+				}
+				_ = s
+				return nil
+			}
+		}
+	}
 
+	// --- Full or incremental install via orchestrator ---
 	cfg := orchestrator.Config{
 		ProjectDir:   projectDir,
 		StorePath:    storePath,
@@ -64,7 +137,6 @@ func runInstall(cmd *cobra.Command, args []string) error {
 	if err := orch.Install(context.Background()); err != nil {
 		errMsg := err.Error()
 		fmt.Fprintf(cmd.ErrOrStderr(), "install failed: %v\n", err)
-		// Map errors to exit codes per spec §7.3
 		switch {
 		case strings.Contains(errMsg, "download") || strings.Contains(errMsg, "HTTP") || strings.Contains(errMsg, "network"):
 			os.Exit(ExitNetworkError)
@@ -81,7 +153,6 @@ func runInstall(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	// Windows bin proxy warning
 	if runtime.GOOS == "windows" {
 		fmt.Fprintln(os.Stderr, "warning: vendor/bin/ proxy scripts are Unix-only; Windows .bat proxies will be available in a future version")
 	}
@@ -90,23 +161,19 @@ func runInstall(cmd *cobra.Command, args []string) error {
 }
 
 func runDryRun(cmd *cobra.Command, projectDir string) error {
-	// Step 1: Locate and parse
 	lockPath := projectDir + "/composer.lock"
 	lock, err := parser.ParseLockFile(lockPath)
 	if err != nil {
 		return err
 	}
 
-	// Step 2: Detect link strategy
 	storePath := store.ResolvePath(flagStorePath, os.Getenv("ALLEGRO_STORE"))
 	s := store.New(storePath)
 	s.EnsureDirectories()
 	strategy, _ := linker.DetectStrategy(s.Root, projectDir, ResolveLinkStrategy())
 
-	// Step 3: Parse packages
 	all := parser.MergePackages(lock)
 
-	// Step 4: Build install plan (check CAS for new vs cached)
 	var newPkgs, cachedPkgs, skippedPkgs int
 	for _, pkg := range all {
 		if pkg.Dist == nil || pkg.Dist.Type == "path" {

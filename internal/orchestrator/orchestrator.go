@@ -136,13 +136,22 @@ func (o *Orchestrator) Install(ctx context.Context) error {
 		}
 	}
 
-	// Step 8: Write state file
+	// Step 8: Write state file with Phase 2 fields
 	lockHash, _ := parser.ComputeLockHash(lockPath)
 	pkgMap := make(map[string]string)
+	devPkgNames := parser.DevPackageNames(lock)
 	for _, pkg := range plan.AllPackages {
 		pkgMap[pkg.Name] = pkg.Version
 	}
-	if err := linker.WriteVendorState(vendorDir, o.config.Version, strategy, lockHash, pkgMap); err != nil {
+	if err := linker.WriteVendorState(vendorDir, linker.WriteVendorStateOpts{
+		Version:         o.config.Version,
+		Strategy:        strategy,
+		LockHash:        lockHash,
+		Packages:        pkgMap,
+		Dev:             true, // Phase 1 always installs dev
+		DevPackages:     devPkgNames,
+		ScriptsExecuted: false, // scripts run after flock release
+	}); err != nil {
 		return err
 	}
 

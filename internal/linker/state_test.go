@@ -12,7 +12,10 @@ func TestWriteAndReadVendorState(t *testing.T) {
 	os.MkdirAll(vendorDir, 0755)
 
 	pkgs := map[string]string{"monolog/monolog": "3.9.0"}
-	err := WriteVendorState(vendorDir, "0.1.0", Reflink, "sha256:abc", pkgs)
+	err := WriteVendorState(vendorDir, WriteVendorStateOpts{
+		Version: "0.1.0", Strategy: Reflink, LockHash: "sha256:abc", Packages: pkgs,
+		Dev: true, DevPackages: []string{}, ScriptsExecuted: false,
+	})
 	if err != nil {
 		t.Fatalf("WriteVendorState: %v", err)
 	}

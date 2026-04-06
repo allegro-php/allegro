@@ -27,7 +27,6 @@ func DefaultRegistryPath() string {
 		return filepath.Join(".", ".allegro", "projects.json")
 	}
 	return filepath.Join(home, ".allegro", "projects.json")
-	return filepath.Join(home, ".allegro", "projects.json")
 }
 
 // ReadRegistry reads ~/.allegro/projects.json. Returns empty registry if missing.

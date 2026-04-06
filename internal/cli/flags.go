@@ -112,7 +112,6 @@ func ResolveLinkStrategy() string {
 		return flagLinkStrategy
 	}
 	return os.Getenv("ALLEGRO_LINK_STRATEGY")
-	return os.Getenv("ALLEGRO_LINK_STRATEGY")
 }
 
 // IsDevMode resolves dev mode: --dev flag > --no-dev flag > ALLEGRO_NO_DEV env > default (true).

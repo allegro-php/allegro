@@ -348,7 +348,10 @@ func TestQA_InstalledPHPDevRequirement(t *testing.T) {
 
 func TestQA_VendorStateRoundtrip(t *testing.T) {
 	dir := t.TempDir(); vd := filepath.Join(dir, "vendor"); os.MkdirAll(vd, 0755)
-	linker.WriteVendorState(vd, "0.1.0", linker.Reflink, "sha256:abc", map[string]string{"a/b": "1.0"})
+	linker.WriteVendorState(vd, linker.WriteVendorStateOpts{
+		Version: "0.1.0", Strategy: linker.Reflink, LockHash: "sha256:abc",
+		Packages: map[string]string{"a/b": "1.0"}, Dev: true,
+	})
 	s, err := linker.ReadVendorState(vd)
 	if err != nil { t.Fatal(err) }
 	if s.AllegroVersion != "0.1.0" || s.LinkStrategy != "reflink" || s.LockHash != "sha256:abc" { t.Error("mismatch") }

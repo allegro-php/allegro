@@ -9,13 +9,29 @@ import (
 )
 
 // WriteVendorState writes vendor/.allegro-state.json.
-func WriteVendorState(vendorDir string, version string, strategy Strategy, lockHash string, packages map[string]string) error {
+// WriteVendorStateOpts holds all options for writing the vendor state file.
+type WriteVendorStateOpts struct {
+	Version         string
+	Strategy        Strategy
+	LockHash        string
+	Packages        map[string]string
+	Dev             bool
+	DevPackages     []string
+	ScriptsExecuted bool
+}
+
+// WriteVendorState writes vendor/.allegro-state.json with all Phase 2 fields.
+func WriteVendorState(vendorDir string, opts WriteVendorStateOpts) error {
 	state := VendorState{
-		AllegroVersion: version,
-		LinkStrategy:   strategy.String(),
-		LockHash:       lockHash,
-		InstalledAt:    time.Now().UTC(),
-		Packages:       packages,
+		AllegroVersion:  opts.Version,
+		SchemaVersion:   2,
+		LinkStrategy:    opts.Strategy.String(),
+		LockHash:        opts.LockHash,
+		InstalledAt:     time.Now().UTC(),
+		Dev:             opts.Dev,
+		DevPackages:     opts.DevPackages,
+		ScriptsExecuted: opts.ScriptsExecuted,
+		Packages:        opts.Packages,
 	}
 
 	data, err := json.MarshalIndent(state, "", "  ")
@@ -49,7 +65,6 @@ func ReadVendorState(vendorDir string) (*VendorState, error) {
 	if state.LockHash == "" {
 		return nil, fmt.Errorf("state file missing lock_hash field")
 	}
-	return &state, nil
 	return &state, nil
 }
 
