@@ -41,7 +41,9 @@ A Go CLI tool that accelerates PHP Composer installs using a content-addressable
 - **Per-file fsync removed** from `CopyLinker` — vendor files are in temp dir with atomic swap, fsync was pure overhead
 - **Hybrid executable detection** — ZIP/TAR archive metadata is unreliable for permissions (GitHub zipballs give LICENSE.md execute bits). Now uses manifest-first (`bin` field from `composer.lock`) + shebang-second (`#!` check) — matching Composer/pip/pnpm best practices
 - **Verify skips composer-plugin packages** — plugins are copy-linked and modify their own files at runtime; verifying them against CAS produced false positives. Plugin package names tracked in `.allegro-state.json`
-### Known Limitations
+- **Root package replace/provide in `installed.php`** — monorepos like Magento 2 declare 241 replace entries in root `composer.json`. These are now emitted so `InstalledVersions::isInstalled()` works for them.
+- **CAS permission self-healing** — `composer dumpautoload` can corrupt hardlinked CAS file permissions via shared inode. `ParallelLink` now checks and re-normalizes CAS permissions (0444/0555) before each hardlink.
+
 - **`composer/installers`** — packages with custom install paths (WordPress, Drupal, CraftCMS) are not supported; everything goes to `vendor/`
 - **`symfony/flex`** — install-time recipe execution not supported (Flex hooks into Composer's install events, not post-install-cmd)
 - **Empty directories** — CAS is file-based, empty dirs from archives are not preserved (rarely matters)
@@ -128,8 +130,9 @@ git push origin v0.x.y
 - **Atomic commits**: one logical change per commit (conventional commit messages)
 - **No `os.Exit` in library code** — only in CLI command handlers
 - **All errors checked**: every `os.Remove`, `os.Chmod`, `json.Unmarshal`, `filepath.Walk` callback error is either returned or logged
-- **Platform guards**: `//go:build !windows` on files using `syscall.Flock`, with `_windows.go` stubs. Shared types go in platform-independent files (e.g. `projects_types.go`)
 - **Config precedence**: CLI flag > env var > config file > default (everywhere)
+- **Release notes**: Write human-readable English descriptions of what changed and why. Do not include raw commit lists — anyone can read `git log`. Group changes by theme (e.g. "Reliable executable detection", "Verify improvements"). Include QA test results when applicable.
+
 
 ## Important Files to Read First
 
