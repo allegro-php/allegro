@@ -23,11 +23,13 @@ type InstalledJSON struct {
 }
 
 // InstalledPackage represents a single package in installed.json.
+// InstalledPackage represents a single package in installed.json.
 type InstalledPackage struct {
 	Name              string                 `json:"name"`
 	Version           string                 `json:"version"`
 	VersionNormalized string                 `json:"version_normalized,omitempty"`
 	Type              string                 `json:"type"`
+	Require           map[string]string      `json:"require,omitempty"`
 	Autoload          interface{}            `json:"autoload"`
 	InstallPath       string                 `json:"install-path"`
 	Extra             map[string]interface{} `json:"extra,omitempty"`
@@ -66,6 +68,7 @@ func GenerateInstalledJSON(lock *parser.ComposerLock) ([]byte, error) {
 			Version:           pkg.Version,
 			VersionNormalized: pkg.VersionNormalized,
 			Type:              typ,
+			Require:           pkg.Require,
 			Autoload:          autoload,
 			InstallPath:       "../" + pkg.Name,
 			Extra:             pkg.Extra,
