@@ -76,11 +76,9 @@ func ExtractZip(data []byte, destDir string) error {
 			return err
 		}
 
-		if f.Mode()&0111 != 0 {
-			if chErr := os.Chmod(path, 0755); chErr != nil {
-				log.Printf("warning: chmod %s: %v", path, chErr)
-			}
-		}
+		// Don't trust ZIP executable metadata — it's unreliable for
+		// GitHub-generated archives. Executable detection is done later
+		// in storeExtractedFiles via shebang inspection.
 	}
 	return nil
 }
@@ -128,11 +126,8 @@ func ExtractTar(r io.Reader, destDir string) error {
 			return err
 		}
 
-		if hdr.Mode&0111 != 0 {
-			if chErr := os.Chmod(path, 0755); chErr != nil {
-				log.Printf("warning: chmod %s: %v", path, chErr)
-			}
-		}
+		// Don't trust tar executable metadata — executable detection
+		// is done later in storeExtractedFiles via shebang inspection.
 	}
 	return nil
 }

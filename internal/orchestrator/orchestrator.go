@@ -148,8 +148,12 @@ func (o *Orchestrator) Install(ctx context.Context) error {
 	lockHash, _ := parser.ComputeLockHash(lockPath)
 	pkgMap := make(map[string]string)
 	devPkgNames := parser.DevPackageNames(lock)
+	var pluginPkgNames []string
 	for _, pkg := range plan.AllPackages {
 		pkgMap[pkg.Name] = pkg.Version
+		if pkg.Type == "composer-plugin" {
+			pluginPkgNames = append(pluginPkgNames, pkg.Name)
+		}
 	}
 	if err := linker.WriteVendorState(vendorDir, linker.WriteVendorStateOpts{
 		Version:         o.config.Version,
@@ -159,6 +163,7 @@ func (o *Orchestrator) Install(ctx context.Context) error {
 		Dev:             o.config.Dev,
 		DevPackages:     devPkgNames,
 		ScriptsExecuted: false, // scripts run after flock release
+		PluginPackages:  pluginPkgNames,
 	}); err != nil {
 		return err
 	}
@@ -297,6 +302,12 @@ func (o *Orchestrator) storeExtractedFiles(dir, pkgName string, archiveData []by
 		return nil, fmt.Errorf("internal: package %s not in plan", pkgName)
 	}
 
+	// Build set of declared bin files for manifest-based executable detection.
+	binFiles := make(map[string]bool, len(pkg.Bin))
+	for _, b := range pkg.Bin {
+		binFiles[filepath.Clean(b)] = true
+	}
+
 	manifest := &store.Manifest{
 		Name:     pkg.Name,
 		Version:  pkg.Version,
@@ -316,7 +327,9 @@ func (o *Orchestrator) storeExtractedFiles(dir, pkgName string, archiveData []by
 			return err
 		}
 
-		executable := info.Mode()&0111 != 0
+		// Executable detection: manifest-first (bin field), shebang-second.
+		// ZIP/TAR metadata is unreliable (GitHub zipballs lose permission info).
+		executable := binFiles[filepath.Clean(relPath)] || hasShebang(path)
 
 		if err := o.store.StoreFile(path, hash, executable); err != nil {
 			return err
@@ -508,4 +521,18 @@ func (o *Orchestrator) readComposerJSON() map[string]interface{} {
 		return map[string]interface{}{}
 	}
 	return result
+}
+
+// hasShebang returns true if the file starts with "#!" (shebang line).
+// This is a reliable indicator of executable files, unlike ZIP metadata
+// which is unreliable for GitHub-generated archives.
+func hasShebang(path string) bool {
+	f, err := os.Open(path)
+	if err != nil {
+		return false
+	}
+	defer f.Close()
+	var buf [2]byte
+	n, err := f.Read(buf[:])
+	return n == 2 && err == nil && buf[0] == '#' && buf[1] == '!'
 }
