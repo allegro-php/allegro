@@ -67,18 +67,25 @@ func garbageCollectImpl(storePath, registryPath string, staleDays int, dryRun bo
 
 		packagesDir := filepath.Join(s.Root, "packages")
 		referencedHashes := make(map[string]bool)
-		filepath.Walk(packagesDir, func(path string, info os.FileInfo, err error) error {
-			if err != nil || info.IsDir() || filepath.Ext(path) != ".json" {
+		if walkErr := filepath.Walk(packagesDir, func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err // propagate walk errors to prevent under-populated hash set
+			}
+			if info.IsDir() || filepath.Ext(path) != ".json" {
 				return nil
 			}
 			data, readErr := os.ReadFile(path)
-			if readErr != nil { return nil }
+			if readErr != nil {
+				return fmt.Errorf("read manifest %s: %w", path, readErr)
+			}
 			var m Manifest
-			if json.Unmarshal(data, &m) != nil { return nil }
+			if json.Unmarshal(data, &m) != nil { return nil } // skip corrupt manifests
 
 			key := m.Name + "@" + m.Version
 			if !referencedPkgs[key] {
-				os.Remove(path)
+				if rmErr := os.Remove(path); rmErr != nil {
+					log.Printf("warning: failed to remove manifest %s: %v", path, rmErr)
+				}
 				result.ManifestsPruned++
 			} else {
 				for _, f := range m.Files {
@@ -88,14 +95,18 @@ func garbageCollectImpl(storePath, registryPath string, staleDays int, dryRun bo
 				}
 			}
 			return nil
-		})
+		}); walkErr != nil {
+			return result, fmt.Errorf("manifest walk: %w", walkErr)
+		}
 
 		filesDir := filepath.Join(s.Root, "files")
 		filepath.Walk(filesDir, func(path string, info os.FileInfo, err error) error {
 			if err != nil || info.IsDir() { return nil }
 			if !referencedHashes[filepath.Base(path)] {
 				result.BytesFreed += info.Size()
-				os.Remove(path)
+				if rmErr := os.Remove(path); rmErr != nil {
+					log.Printf("warning: failed to remove CAS file %s: %v", path, rmErr)
+				}
 				result.FilesPruned++
 			}
 			return nil

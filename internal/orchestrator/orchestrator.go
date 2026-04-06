@@ -329,6 +329,8 @@ func (o *Orchestrator) storeExtractedFiles(dir, pkgName string, archiveData []by
 }
 
 func (o *Orchestrator) buildVendorTree(ctx context.Context, vendorTmp string, packages []parser.Package, lnk linker.Linker, strategy linker.Strategy) error {
+	redownloaded := make(map[string]bool) // track already-redownloaded packages
+
 	for _, pkg := range packages {
 		manifest, err := o.store.ReadManifest(pkg.Name, pkg.Version)
 		if err != nil {
@@ -348,13 +350,17 @@ func (o *Orchestrator) buildVendorTree(ctx context.Context, vendorTmp string, pa
 				return err
 			}
 
-			// Check if CAS file exists; if missing, re-download per spec §6.3 step 3
+			// Check if CAS file exists; if missing, re-download once per package
 			if !o.store.FileExists(hash) {
+				pkgKey := pkg.Name + "@" + pkg.Version
+				if redownloaded[pkgKey] {
+					return fmt.Errorf("CAS file still missing for %s/%s after re-download", pkg.Name, f.Path)
+				}
 				log.Printf("warning: CAS file missing for %s/%s, re-downloading package", pkg.Name, f.Path)
 				if err := o.redownloadPackage(ctx, pkg); err != nil {
 					return fmt.Errorf("re-download %s for missing CAS file: %w", pkg.Name, err)
 				}
-				// After re-download, verify the specific file is now present
+				redownloaded[pkgKey] = true
 				if !o.store.FileExists(hash) {
 					return fmt.Errorf("CAS file still missing for %s/%s after re-download", pkg.Name, f.Path)
 				}

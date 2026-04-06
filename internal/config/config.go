@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+
+	"github.com/allegro-php/allegro/internal/store"
 )
 
 // Config represents ~/.allegro/config.json.
@@ -48,7 +50,7 @@ func WriteConfig(path string, c Config) error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(path, data, 0644)
+	return store.WriteFileAtomic(path, data, 0644)
 }
 
 // ResolveWithConfig implements the 4-tier precedence: flag > env > config > default.

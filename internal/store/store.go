@@ -3,6 +3,7 @@ package store
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"time"
@@ -108,7 +109,9 @@ func (s *Store) StoreFile(srcPath, hash string, executable bool) error {
 		// If destination already exists (race condition), that's OK —
 		// content is identical by definition (same SHA-256).
 		if s.FileExists(hash) {
-			os.Remove(srcPath) // Clean up our copy
+			if rmErr := os.Remove(srcPath); rmErr != nil {
+				log.Printf("warning: failed to clean up temp file %s: %v", srcPath, rmErr)
+			}
 			return nil
 		}
 		return fmt.Errorf("store file rename: %w", err)

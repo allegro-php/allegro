@@ -8,8 +8,16 @@ import (
 	"time"
 )
 
-func TestGCRemoveDeletedProjects(t *testing.T) {
+func setupGCStore(t *testing.T) string {
+	t.Helper()
 	dir := t.TempDir()
+	os.MkdirAll(filepath.Join(dir, "packages"), 0755)
+	os.MkdirAll(filepath.Join(dir, "files"), 0755)
+	return dir
+}
+
+func TestGCRemoveDeletedProjects(t *testing.T) {
+	dir := setupGCStore(t)
 	regPath := filepath.Join(dir, "projects.json")
 
 	entry := ProjectEntry{
@@ -29,7 +37,7 @@ func TestGCRemoveDeletedProjects(t *testing.T) {
 }
 
 func TestGCWarnStaleProjects(t *testing.T) {
-	dir := t.TempDir()
+	dir := setupGCStore(t)
 	regPath := filepath.Join(dir, "projects.json")
 
 	projectDir := filepath.Join(dir, "myproject")
@@ -59,7 +67,7 @@ func TestGCWarnStaleProjects(t *testing.T) {
 }
 
 func TestGCDryRun(t *testing.T) {
-	dir := t.TempDir()
+	dir := setupGCStore(t)
 	regPath := filepath.Join(dir, "projects.json")
 
 	entry := ProjectEntry{
