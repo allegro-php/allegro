@@ -173,7 +173,7 @@ func (p *Pool) recordFailure() {
 	p.lastFailures = append(p.lastFailures, now)
 	// Trim entries older than 10s to prevent unbounded growth
 	cutoff := now.Add(-10 * time.Second)
-	trimmed := p.lastFailures[:0]
+	trimmed := make([]time.Time, 0, len(p.lastFailures))
 	for _, t := range p.lastFailures {
 		if t.After(cutoff) {
 			trimmed = append(trimmed, t)

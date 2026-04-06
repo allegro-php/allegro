@@ -100,8 +100,11 @@ func garbageCollectImpl(storePath, registryPath string, staleDays int, dryRun bo
 		}
 
 		filesDir := filepath.Join(s.Root, "files")
-		filepath.Walk(filesDir, func(path string, info os.FileInfo, err error) error {
-			if err != nil || info.IsDir() { return nil }
+		if walkErr := filepath.Walk(filesDir, func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err // propagate to prevent deleting files from unvisited shards
+			}
+			if info.IsDir() { return nil }
 			if !referencedHashes[filepath.Base(path)] {
 				result.BytesFreed += info.Size()
 				if rmErr := os.Remove(path); rmErr != nil {
@@ -110,7 +113,9 @@ func garbageCollectImpl(storePath, registryPath string, staleDays int, dryRun bo
 				result.FilesPruned++
 			}
 			return nil
-		})
+		}); walkErr != nil {
+			return result, fmt.Errorf("CAS file walk: %w", walkErr)
+		}
 	}
 
 	return result, nil

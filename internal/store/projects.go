@@ -40,7 +40,7 @@ func ReadRegistry(path string) (*ProjectRegistry, error) {
 		if os.IsNotExist(err) {
 			return &ProjectRegistry{}, nil
 		}
-		return &ProjectRegistry{}, nil
+		return nil, fmt.Errorf("read registry: %w", err)
 	}
 	var reg ProjectRegistry
 	if err := json.Unmarshal(data, &reg); err != nil {
