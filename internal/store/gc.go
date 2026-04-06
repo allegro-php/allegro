@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"syscall"
 	"time"
 )
 
@@ -21,6 +22,18 @@ type GCResult struct {
 // GarbageCollect performs smart prune with project awareness.
 func GarbageCollect(storePath, registryPath string, staleDays int, dryRun bool) (*GCResult, error) {
 	result := &GCResult{}
+
+	// Acquire projects.lock for entire GC operation
+	lockPath := filepath.Join(filepath.Dir(registryPath), "projects.lock")
+	lockFile, err := os.OpenFile(lockPath, os.O_CREATE|os.O_RDWR, 0644)
+	if err != nil {
+		return result, fmt.Errorf("create gc lock: %w", err)
+	}
+	defer lockFile.Close()
+	if err := syscall.Flock(int(lockFile.Fd()), syscall.LOCK_EX); err != nil {
+		return result, fmt.Errorf("acquire gc lock: %w", err)
+	}
+	defer syscall.Flock(int(lockFile.Fd()), syscall.LOCK_UN)
 
 	reg, err := ReadRegistry(registryPath)
 	if err != nil {

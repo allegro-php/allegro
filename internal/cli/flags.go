@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"sync"
 
 	cfg "github.com/allegro-php/allegro/internal/config"
 )
@@ -116,16 +117,17 @@ func ResolveLinkStrategy() string {
 	return os.Getenv("ALLEGRO_LINK_STRATEGY")
 }
 
-// loadedConfig caches the config file for flag resolution.
-var loadedConfig *cfg.Config
+var (
+	loadedConfig     *cfg.Config
+	loadedConfigOnce sync.Once
+)
 
 func getConfig() cfg.Config {
-	if loadedConfig != nil {
-		return *loadedConfig
-	}
-	c, _ := cfg.ReadConfig(cfg.DefaultConfigPath())
-	loadedConfig = &c
-	return c
+	loadedConfigOnce.Do(func() {
+		c, _ := cfg.ReadConfig(cfg.DefaultConfigPath())
+		loadedConfig = &c
+	})
+	return *loadedConfig
 }
 
 // IsDevMode resolves: --dev flag > --no-dev flag > ALLEGRO_NO_DEV env > config > default (true).

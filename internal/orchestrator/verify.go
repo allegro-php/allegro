@@ -13,10 +13,11 @@ import (
 
 // VerifyIssue represents a single verification issue.
 type VerifyIssue struct {
-	Package string
-	File    string
-	Type    string // "missing", "modified", "permission"
-	Detail  string
+	Package    string
+	File       string
+	Type       string // "missing", "modified", "permission"
+	Detail     string
+	Executable bool   // whether the file should be executable (for fix mode)
 }
 
 // VerifyResult holds the outcome of a verify operation.
@@ -74,7 +75,7 @@ func VerifyVendor(vendorDir string, s *store.Store, state *linker.VendorState, w
 					// Check exists
 					info, err := os.Stat(vendorPath)
 					if err != nil {
-						issueCh <- VerifyIssue{Package: pkgName, File: f.Path, Type: "missing", Detail: "file not found"}
+						issueCh <- VerifyIssue{Package: pkgName, File: f.Path, Type: "missing", Detail: "file not found", Executable: f.Executable}
 						atomic.AddInt64(&issueCount, 1)
 						continue
 					}
@@ -86,13 +87,13 @@ func VerifyVendor(vendorDir string, s *store.Store, state *linker.VendorState, w
 					}
 					actualHash, err := store.HashFile(vendorPath)
 					if err != nil {
-						issueCh <- VerifyIssue{Package: pkgName, File: f.Path, Type: "modified", Detail: fmt.Sprintf("hash error: %v", err)}
+						issueCh <- VerifyIssue{Package: pkgName, File: f.Path, Type: "modified", Detail: fmt.Sprintf("hash error: %v", err), Executable: f.Executable}
 						atomic.AddInt64(&issueCount, 1)
 						continue
 					}
 					if actualHash != hash {
 						issueCh <- VerifyIssue{Package: pkgName, File: f.Path, Type: "modified",
-							Detail: fmt.Sprintf("expected %s, got %s", hash[:8], actualHash[:8])}
+							Detail: fmt.Sprintf("expected %s, got %s", hash[:8], actualHash[:8]), Executable: f.Executable}
 						atomic.AddInt64(&issueCount, 1)
 						continue
 					}
@@ -102,7 +103,7 @@ func VerifyVendor(vendorDir string, s *store.Store, state *linker.VendorState, w
 					if f.Executable { expectedPerm = execPerm }
 					if info.Mode().Perm() != expectedPerm {
 						issueCh <- VerifyIssue{Package: pkgName, File: f.Path, Type: "permission",
-							Detail: fmt.Sprintf("expected %o, got %o", expectedPerm, info.Mode().Perm())}
+							Detail: fmt.Sprintf("expected %o, got %o", expectedPerm, info.Mode().Perm()), Executable: f.Executable}
 						atomic.AddInt64(&issueCount, 1)
 					}
 				}

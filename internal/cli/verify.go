@@ -108,12 +108,16 @@ func runVerify(cmd *cobra.Command, args []string) error {
 				unfixable++
 				continue
 			}
-			os.Chmod(dstPath, 0644)
+			fixPerm := os.FileMode(0644)
+			if issue.Executable { fixPerm = 0755 }
+			os.Chmod(dstPath, fixPerm)
 			fixedCount++
 
 		case "permission":
 			dstPath := filepath.Join(vendorDir, issue.Package, issue.File)
-			os.Chmod(dstPath, 0644)
+			fixPerm := os.FileMode(0644)
+			if issue.Executable { fixPerm = 0755 }
+			os.Chmod(dstPath, fixPerm)
 			fixedCount++
 		}
 	}

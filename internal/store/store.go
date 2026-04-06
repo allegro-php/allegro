@@ -171,6 +171,11 @@ func writeJSONAtomic(path string, v interface{}) error {
 		os.Remove(tmpPath)
 		return fmt.Errorf("write temp file: %w", err)
 	}
+	if err := tmpFile.Sync(); err != nil {
+		tmpFile.Close()
+		os.Remove(tmpPath)
+		return fmt.Errorf("sync temp file: %w", err)
+	}
 	tmpFile.Close()
 	if err := os.Rename(tmpPath, path); err != nil {
 		os.Remove(tmpPath)
