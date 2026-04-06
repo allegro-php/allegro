@@ -69,8 +69,13 @@ func (o *Orchestrator) Install(ctx context.Context) error {
 		log.Printf("Link strategy: %s", strategy)
 	}
 
-	// Step 3: Parse and build plan
-	allPackages := parser.MergePackages(lock)
+	// Step 3: Parse and build plan (filter dev packages if --no-dev)
+	var allPackages []parser.Package
+	if o.config.Dev {
+		allPackages = parser.MergePackages(lock)
+	} else {
+		allPackages = parser.FilterInstallable(lock.Packages) // exclude packages-dev
+	}
 	plan := o.buildPlan(allPackages)
 
 	if !o.config.Quiet {

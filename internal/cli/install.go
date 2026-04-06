@@ -189,7 +189,7 @@ func runInstall(cmd *cobra.Command, args []string) error {
 }
 
 func runDryRun(cmd *cobra.Command, projectDir string) error {
-	lockPath := projectDir + "/composer.lock"
+	lockPath := filepath.Join(projectDir, "composer.lock")
 	lock, err := parser.ParseLockFile(lockPath)
 	if err != nil {
 		return err
