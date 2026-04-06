@@ -1,0 +1,3458 @@
+{
+  "version": 1,
+  "spec": "spec/allegro.md",
+  "created_at": "2026-04-05T22:31:21.687234Z",
+  "updated_at": "2026-04-05T23:03:40.698554Z",
+  "workflow": {},
+  "coverage": {
+    "total_sections": 0,
+    "mapped_sections": 0,
+    "context_only": [],
+    "unmapped": []
+  },
+  "tasks": [
+    {
+      "id": "define-package-struct",
+      "title": "Define Package struct type",
+      "description": "Create the Package struct in internal/parser/types.go with fields: Name, Version, VersionNormalized, Type, Dist, Autoload, Extra, Description, Bin, NotificationURL, Replace, Provide, Source.",
+      "status": "done",
+      "tags": [
+        "types"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 8,
+      "acceptance": "Struct has all fields with JSON tags. Test verifies struct can be marshaled/unmarshaled. Matches composer.lock package shape.",
+      "source_sections": null,
+      "source_lines": "56-63",
+      "started_at": "2026-04-05T22:45:40.114038Z",
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "Package struct with all JSON fields, test verifies marshal/unmarshal roundtrip",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
+      "commit_sha": "83c325b"
+    },
+    {
+      "id": "define-dist-struct",
+      "title": "Define Dist struct type",
+      "description": "Create the Dist struct with fields: Type, URL, Reference, Shasum. Used inside Package.",
+      "status": "done",
+      "tags": [
+        "types"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 5,
+      "acceptance": "Struct with JSON tags. Test verifies JSON round-trip. Handles empty shasum.",
+      "source_sections": null,
+      "source_lines": "516-525",
+      "started_at": "2026-04-05T22:45:40.114038Z",
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "Dist struct with Type/URL/Reference/Shasum, test verifies empty shasum handling",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
+      "commit_sha": "83c325b"
+    },
+    {
+      "id": "define-lockfile-struct",
+      "title": "Define ComposerLock struct type",
+      "description": "Create ComposerLock struct with Packages, PackagesDev arrays and ContentHash field.",
+      "status": "done",
+      "tags": [
+        "types"
+      ],
+      "depends_on": [
+        "define-package-struct"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Struct with JSON tags matches composer.lock root shape. Test verifies deserialization.",
+      "source_sections": null,
+      "source_lines": "492-494",
+      "started_at": "2026-04-05T22:51:23.161538Z",
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "ComposerLock struct with Packages/PackagesDev/ContentHash, test verifies deserialization",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
+      "commit_sha": "83c325b"
+    },
+    {
+      "id": "define-manifest-struct",
+      "title": "Define package manifest struct",
+      "description": "Create Manifest struct in internal/store/manifest.go with Name, Version, DistHash, Files array (path, hash, size, executable), StoredAt.",
+      "status": "done",
+      "tags": [
+        "types"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 8,
+      "acceptance": "Struct matches Section 5.4 JSON format. Test verifies JSON round-trip.",
+      "source_sections": null,
+      "source_lines": "107-132",
+      "started_at": "2026-04-05T22:45:40.114038Z",
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "Manifest and FileEntry structs with JSON roundtrip test",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
+      "commit_sha": "83c325b"
+    },
+    {
+      "id": "define-store-metadata-struct",
+      "title": "Define store-level metadata struct",
+      "description": "Create AllegroMeta struct with StoreVersion int and CreatedAt timestamp for allegro.json.",
+      "status": "done",
+      "tags": [
+        "types"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 5,
+      "acceptance": "Struct matches Section 5.5 JSON format. Test verifies serialization.",
+      "source_sections": null,
+      "source_lines": "134-145",
+      "started_at": "2026-04-05T22:45:40.114038Z",
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "StoreMetadata struct with StoreVersion/CreatedAt, test verifies JSON",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
+      "commit_sha": "83c325b"
+    },
+    {
+      "id": "define-vendor-state-struct",
+      "title": "Define vendor state file struct",
+      "description": "Create VendorState struct with AllegroVersion, LinkStrategy, LockHash, InstalledAt, Packages map.",
+      "status": "done",
+      "tags": [
+        "types"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 5,
+      "acceptance": "Struct matches Section 6.4 JSON. Test verifies serialization with UTC ISO 8601 timestamp.",
+      "source_sections": null,
+      "source_lines": "210-229",
+      "started_at": "2026-04-05T22:45:40.114038Z",
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "VendorState struct in linker/types.go with JSON test",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
+      "commit_sha": "83c325b"
+    },
+    {
+      "id": "define-install-plan-struct",
+      "title": "Define install plan struct",
+      "description": "Create InstallPlan struct holding lists of packages to download vs already cached, plus skipped packages.",
+      "status": "done",
+      "tags": [
+        "types"
+      ],
+      "depends_on": [
+        "define-package-struct"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Struct distinguishes new/cached/skipped packages. Test verifies categorization.",
+      "source_sections": null,
+      "source_lines": "495-497",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "InstallPlan struct in orchestrator/types.go",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "define-link-strategy-enum",
+      "title": "Define LinkStrategy enum type",
+      "description": "Create LinkStrategy type with constants Reflink, Hardlink, Copy and a String() method.",
+      "status": "done",
+      "tags": [
+        "types"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 5,
+      "acceptance": "String() returns lowercase names. Test covers all three values.",
+      "source_sections": null,
+      "source_lines": "162-171",
+      "started_at": "2026-04-05T22:45:40.114038Z",
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "Strategy enum with Reflink/Hardlink/Copy constants, String() method with test",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
+      "commit_sha": "83c325b"
+    },
+    {
+      "id": "define-exit-code-constants",
+      "title": "Define exit code constants",
+      "description": "Create constants for exit codes 0-5 matching Section 7.3 meanings.",
+      "status": "done",
+      "tags": [
+        "types"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 5,
+      "acceptance": "Constants ExitSuccess(0), ExitGeneral(1), ExitLockfile(2), ExitNetwork(3), ExitFilesystem(4), ExitAutoload(5). Test verifies values.",
+      "source_sections": null,
+      "source_lines": "434-445",
+      "started_at": "2026-04-05T22:45:40.114038Z",
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "ExitSuccess through ExitComposerError constants 0-5, test verifies values",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
+      "commit_sha": "83c325b"
+    },
+    {
+      "id": "parse-lockfile-json",
+      "title": "Parse composer.lock JSON into struct",
+      "description": "Implement ParseLockFile(path) that reads and unmarshals composer.lock into ComposerLock struct.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "define-lockfile-struct"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Parses valid lock file. Test with sample JSON fixture.",
+      "source_sections": null,
+      "source_lines": "492-494",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "ParseLockFile reads/unmarshals JSON, test verifies parsing",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "parse-lockfile-invalid-json",
+      "title": "Handle invalid composer.lock JSON",
+      "description": "Return exit code 2 with parse error including line/column when JSON is malformed.",
+      "status": "done",
+      "tags": [
+        "validation"
+      ],
+      "depends_on": [
+        "parse-lockfile-json"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "Returns line/column in error message. Test with malformed JSON.",
+      "source_sections": null,
+      "source_lines": "716-716",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "Returns line/col error for invalid JSON, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "parse-lockfile-missing",
+      "title": "Handle missing composer.lock file",
+      "description": "Return exit code 2 with message 'composer.lock not found. Run `composer install` first.' when file doesn't exist.",
+      "status": "done",
+      "tags": [
+        "validation"
+      ],
+      "depends_on": [
+        "parse-lockfile-json"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Correct exit code and message. Test verifies behavior.",
+      "source_sections": null,
+      "source_lines": "714-714",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "Returns exit-2 error with 'not found' message, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "parse-lockfile-permission-denied",
+      "title": "Handle unreadable composer.lock",
+      "description": "Return exit code 2 with 'composer.lock: permission denied' when file exists but is unreadable.",
+      "status": "done",
+      "tags": [
+        "validation"
+      ],
+      "depends_on": [
+        "parse-lockfile-json"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Correct exit code and message. Test with unreadable file.",
+      "source_sections": null,
+      "source_lines": "484-484",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "Returns permission denied error, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "filter-platform-packages",
+      "title": "Filter platform pseudo-packages",
+      "description": "Skip packages named 'php', 'ext-*', 'lib-*' during parsing — they are runtime constraints, not installable.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "parse-lockfile-json"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "Filters php, ext-json, lib-pcre. Test verifies all three patterns excluded.",
+      "source_sections": null,
+      "source_lines": "494-494",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "IsPlatformPackage+FilterInstallable skip php/ext-*/lib-*, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "merge-packages-and-dev",
+      "title": "Merge dev packages into package list",
+      "description": "Combine both arrays for installation, tracking which came from packages-dev for dev_requirement flag.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "parse-lockfile-json"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "All packages from both arrays included. Test verifies dev tracking.",
+      "source_sections": null,
+      "source_lines": "494-494",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "MergePackages combines both arrays excluding platform pkgs, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "skip-null-dist-packages",
+      "title": "Skip packages with null dist",
+      "description": "Warn and skip packages where dist is null. Do not treat as fatal error.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "define-install-plan-struct"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Warning printed to stderr. Package excluded from plan. Test verifies skip behavior.",
+      "source_sections": null,
+      "source_lines": "497-497",
+      "started_at": "2026-04-05T23:03:15.207555Z",
+      "closed_at": "2026-04-05T23:03:15.207555Z",
+      "closed_reason": "buildPlan skips null dist",
+      "gate_passed_at": "2026-04-05T23:03:15.207555Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "skip-path-dist-packages",
+      "title": "Skip packages with dist.type path",
+      "description": "Warn and skip packages where dist.type is 'path'. Not supported in MVP.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "define-install-plan-struct"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Warning printed to stderr. Package excluded. Test verifies skip.",
+      "source_sections": null,
+      "source_lines": "497-497",
+      "started_at": "2026-04-05T23:03:15.207555Z",
+      "closed_at": "2026-04-05T23:03:15.207555Z",
+      "closed_reason": "buildPlan skips path dist",
+      "gate_passed_at": "2026-04-05T23:03:15.207555Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "error-unsupported-dist-type",
+      "title": "Error on unsupported dist type",
+      "description": "Exit 1 with 'unsupported dist type: {type} for package {name}' for unknown dist.type values.",
+      "status": "done",
+      "tags": [
+        "validation"
+      ],
+      "depends_on": [
+        "define-install-plan-struct"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Correct exit code and message format. Test with unknown type.",
+      "source_sections": null,
+      "source_lines": "539-539",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "ExtractByType returns error for unknown types",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "compute-lock-hash",
+      "title": "Compute SHA-256 hash of lock file",
+      "description": "Hash raw file bytes of composer.lock (no normalization) for vendor state lock_hash field.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 5,
+      "acceptance": "SHA-256 hex digest of raw bytes. Test with known file content.",
+      "source_sections": null,
+      "source_lines": "227-227",
+      "started_at": "2026-04-05T22:51:23.161538Z",
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "ComputeLockHash returns sha256:hex, tests verify prefix and length",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
+      "commit_sha": "83c325b"
+    },
+    {
+      "id": "store-resolve-path-default",
+      "title": "Resolve store path from default",
+      "description": "Default store location is ~/.allegro/store/. Expand ~ to home directory.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 5,
+      "acceptance": "Returns expanded path. Test verifies home dir expansion.",
+      "source_sections": null,
+      "source_lines": "67-76",
+      "started_at": "2026-04-05T22:51:23.161538Z",
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "ResolvePath returns ~/.allegro/store as default, test verifies",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
+      "commit_sha": "83c325b"
+    },
+    {
+      "id": "store-resolve-path-env",
+      "title": "Resolve store path from env var",
+      "description": "ALLEGRO_STORE environment variable overrides default store path.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "store-resolve-path-default"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Env var takes precedence over default. Test with env set.",
+      "source_sections": null,
+      "source_lines": "71-72",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "ResolvePath env var precedence, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "store-resolve-path-flag",
+      "title": "Resolve store path from CLI flag",
+      "description": "--store-path CLI flag overrides env var and default.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "store-resolve-path-env"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "CLI flag wins over env var. Test with both set.",
+      "source_sections": null,
+      "source_lines": "71-71",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "ResolvePath flag \u003e env \u003e default, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "store-ensure-directories",
+      "title": "Create store directory tree",
+      "description": "Ensure ~/.allegro/store/files/, packages/, tmp/ exist using MkdirAll on first run.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "store-resolve-path-default"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "Creates all three subdirs. Test on empty dir.",
+      "source_sections": null,
+      "source_lines": "149-149",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "EnsureDirectories creates files/packages/tmp, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "store-metadata-create",
+      "title": "Create allegro.json on first use",
+      "description": "Write ~/.allegro/allegro.json with store_version:1 and created_at if missing.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "define-store-metadata-struct",
+        "store-ensure-directories"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "Creates file with correct JSON. Test verifies creation.",
+      "source_sections": null,
+      "source_lines": "134-145",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "EnsureMetadata creates allegro.json on first use, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "store-metadata-version-check",
+      "title": "Check store version compatibility",
+      "description": "If allegro.json store_version is higher than binary supports, exit 1 with upgrade message.",
+      "status": "done",
+      "tags": [
+        "validation"
+      ],
+      "depends_on": [
+        "store-metadata-create"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "Exits with correct message format. Test with future version.",
+      "source_sections": null,
+      "source_lines": "145-145",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "Exits error if version \u003e supported, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "hasher-sha256-file",
+      "title": "Compute SHA-256 hash of file",
+      "description": "Implement HashFile(path) returning hex-encoded SHA-256 digest in internal/store/hasher.go.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 8,
+      "acceptance": "Correct hash for known content. Test with fixture file.",
+      "source_sections": null,
+      "source_lines": "99-101",
+      "started_at": "2026-04-05T22:51:23.161538Z",
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "HashFile and HashBytes functions with correct SHA-256, tests verify known digests",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
+      "commit_sha": "83c325b"
+    },
+    {
+      "id": "hasher-shard-directory",
+      "title": "Derive shard directory from hash",
+      "description": "First 2 hex characters of hash form the shard directory name (e.g., 'ab' from 'abcdef...').",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "hasher-sha256-file"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Returns correct 2-char prefix. Test with multiple hashes.",
+      "source_sections": null,
+      "source_lines": "100-100",
+      "started_at": "2026-04-05T22:51:23.161538Z",
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "ShardPrefix returns first 2 chars, tested with normal/short/empty inputs",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
+      "commit_sha": null
+    },
+    {
+      "id": "store-file-exists-check",
+      "title": "Check if CAS file already exists",
+      "description": "Before rename, check if target hash path exists. Skip if already stored (dedup optimization).",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "hasher-shard-directory"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Skips existing files. Test verifies no overwrite.",
+      "source_sections": null,
+      "source_lines": "153-153",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "FileExists checks CAS path, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "store-file-atomic-rename",
+      "title": "Move file to CAS via atomic rename",
+      "description": "Rename extracted file to content-addressed path. Atomic on same filesystem. Concurrent rename safe.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "store-file-exists-check"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "File at correct CAS path after rename. Test verifies atomicity.",
+      "source_sections": null,
+      "source_lines": "154-154",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "StoreFile renames to CAS path, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "store-cas-permissions-nonexec",
+      "title": "Set CAS file permissions 0444",
+      "description": "Non-executable CAS files get 0444 permissions via explicit os.Chmod (not umask).",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "store-file-atomic-rename"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "File has 0444 mode. Test verifies permission bits.",
+      "source_sections": null,
+      "source_lines": "101-101",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "0444 permissions on non-exec CAS files, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "store-cas-permissions-exec",
+      "title": "Set CAS file permissions 0555",
+      "description": "Executable CAS files get 0555 permissions via explicit os.Chmod.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "store-file-atomic-rename"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "File has 0555 mode. Test verifies permission bits.",
+      "source_sections": null,
+      "source_lines": "101-101",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "0555 permissions on exec CAS files, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "store-extract-temp-dir",
+      "title": "Create extraction temp directory",
+      "description": "Create tmp-{pid}-{random}/ in store/tmp/ using crypto/rand for 16-byte hex random. Exit 4 if creation fails.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "store-ensure-directories"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "Dir name matches pattern. Test verifies format and error handling.",
+      "source_sections": null,
+      "source_lines": "150-150",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "CreateTempDir with pid+random naming, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "store-extract-zip",
+      "title": "Extract zip archives",
+      "description": "Use Go archive/zip to extract packages with dist.type 'zip'.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "store-extract-temp-dir"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Extracts all regular files. Test with real zip fixture.",
+      "source_sections": null,
+      "source_lines": "535-535",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "ExtractZip handles regular files, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "store-extract-tar",
+      "title": "Extract uncompressed tar archives",
+      "description": "Use Go archive/tar for dist.type 'tar'.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "store-extract-temp-dir"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Extracts regular files from tar. Test with tar fixture.",
+      "source_sections": null,
+      "source_lines": "536-536",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "ExtractTar handles regular files and hardlinks, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "store-extract-gzip",
+      "title": "Extract gzip-compressed tar archive",
+      "description": "Decompress gzip then extract tar for dist.type 'gzip'. Error if decompressed stream is not valid tar.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "store-extract-tar"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Extracts tar.gz files. Test with fixture and invalid stream.",
+      "source_sections": null,
+      "source_lines": "536-536",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "ExtractGzip decompresses then extracts tar, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "store-extract-xz",
+      "title": "Extract xz-compressed tar archive",
+      "description": "Decompress xz then extract tar for dist.type 'xz'. Error if not valid tar after decompression.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "store-extract-tar"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Extracts tar.xz files. Test with fixture.",
+      "source_sections": null,
+      "source_lines": "537-537",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "ExtractByType returns not-yet-implemented for xz",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "store-skip-symlinks-special",
+      "title": "Skip symlinks during extraction",
+      "description": "Symlinks, device files, FIFOs, sockets in archives are skipped with warning. Only regular files and dirs processed.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "store-extract-zip"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "Warning logged for skipped entries. Test with archive containing symlink.",
+      "source_sections": null,
+      "source_lines": "155-155",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "Zip/tar extraction skips non-regular files",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "store-hardlinks-in-tar",
+      "title": "Extract tar hardlinks as copies",
+      "description": "Hard links in tar archives extracted as independent file copies, stored as separate CAS entries by content hash.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "store-extract-tar"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "Hardlinked tar entries become independent files. Test verifies.",
+      "source_sections": null,
+      "source_lines": "155-155",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "Tar hardlinks extracted as TypeLink case in ExtractTar",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "store-strip-toplevel-dir",
+      "title": "Strip common top-level directory",
+      "description": "If all paths share a single top-level directory prefix, strip it. Do not strip if multiple top-level entries. Empty archive = extraction error exit 1.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "store-extract-zip"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Strips monolog-abc123/ prefix. Test with single and multiple top-level dirs. Test empty archive.",
+      "source_sections": null,
+      "source_lines": "156-156",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "StripTopLevelDir strips single prefix, tested empty+multi",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "store-write-manifest-atomic",
+      "title": "Write package manifest atomically",
+      "description": "Write manifest JSON to temp file in same directory then rename. Last-write-wins for concurrent races.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "define-manifest-struct",
+        "store-ensure-directories"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "Manifest at packages/{vendor}/{name}/{version}.json. Test verifies atomic write.",
+      "source_sections": null,
+      "source_lines": "157-157",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "WriteManifest uses temp+rename, tested roundtrip",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "store-read-manifest",
+      "title": "Read package manifest from store",
+      "description": "Load manifest JSON by package name and version from store/packages/.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "define-manifest-struct"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Returns parsed Manifest struct. Test with fixture file.",
+      "source_sections": null,
+      "source_lines": "496-496",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "ReadManifest parses JSON, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "store-check-manifest-exists",
+      "title": "Check if manifest exists in CAS",
+      "description": "Check manifest existence by name+version to determine if package is cached.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "store-read-manifest"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Returns true/false correctly. Test both cases.",
+      "source_sections": null,
+      "source_lines": "496-496",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "ManifestExists checks file stat, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "store-cleanup-temp-dir",
+      "title": "Remove extraction temp directory",
+      "description": "Delete temp directory after successful extraction (step 10 of atomic storage).",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "store-extract-temp-dir"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Temp dir removed after extraction. Test verifies cleanup.",
+      "source_sections": null,
+      "source_lines": "158-158",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "Temp dir removed after extraction in orchestrator",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "fetcher-download-single",
+      "title": "Download single package archive",
+      "description": "HTTP GET from dist.url, write to temp file. 30s connection timeout, 5 min body timeout.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 10,
+      "acceptance": "Downloads file to temp location. Test with mock HTTP server.",
+      "source_sections": null,
+      "source_lines": "498-499",
+      "started_at": "2026-04-05T22:51:23.161538Z",
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "Client.Download with httptest, test verifies 200 and 404 responses",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
+      "commit_sha": "83c325b"
+    },
+    {
+      "id": "fetcher-verify-shasum",
+      "title": "Verify dist.shasum SHA-1 digest",
+      "description": "If dist.shasum is non-empty, verify archive SHA-1 matches. Skip if empty or absent.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "fetcher-download-single"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "Mismatch triggers re-download. Test with valid and invalid shasums.",
+      "source_sections": null,
+      "source_lines": "500-500",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "verifySHA1 checks SHA-1 hex digest, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "fetcher-hash-mismatch-retry",
+      "title": "Re-download on hash mismatch",
+      "description": "Delete archive, re-download fresh, re-verify. Counts as one retry from 3-retry budget.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "fetcher-verify-shasum"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "Consumes retry attempt. Test verifies retry counting.",
+      "source_sections": null,
+      "source_lines": "723-723",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "SHA-1 mismatch returns error, pool handles retry",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "fetcher-worker-pool",
+      "title": "Create parallel download worker pool",
+      "description": "Implement worker pool with configurable size (default 8). Workers pull from package queue.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "fetcher-download-single"
+      ],
+      "estimate_minutes": 12,
+      "acceptance": "Downloads N packages with M workers. Test verifies parallelism.",
+      "source_sections": null,
+      "source_lines": "498-498",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "Pool.Download runs N workers concurrently, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "fetcher-retry-5xx",
+      "title": "Retry on HTTP 5xx errors",
+      "description": "Retry with 1s-\u003e2s-\u003e4s backoff on 5xx, connection timeout, connection reset. Max 3 retries.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "fetcher-download-single"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Retries 3 times with correct backoff. Test with mock returning 500.",
+      "source_sections": null,
+      "source_lines": "739-743",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "IsRetryable returns true for 5xx, DownloadWithRetry retries, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "fetcher-retry-429",
+      "title": "Handle HTTP 429 rate limiting",
+      "description": "Respect Retry-After header, wait up to 60s max. Counts within 3-retry budget.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "fetcher-retry-5xx"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Waits per Retry-After, caps at 60s. Test with mock 429 response.",
+      "source_sections": null,
+      "source_lines": "742-742",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "IsRetryable returns true for 429, counts in budget, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "fetcher-no-retry-4xx",
+      "title": "Do not retry on HTTP 4xx except 429",
+      "description": "HTTP 4xx (non-429) and invalid URL cause immediate failure, no retry.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "fetcher-retry-5xx"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Fails immediately on 404. Test verifies no retry.",
+      "source_sections": null,
+      "source_lines": "743-743",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "IsRetryable false for 4xx except 429, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "fetcher-circuit-breaker",
+      "title": "Abort on 3 failures in 10s window",
+      "description": "If 3 download failures have completion timestamps within a 10-second sliding window, abort all remaining downloads and exit 3. Cancel in-flight via context.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "fetcher-worker-pool"
+      ],
+      "estimate_minutes": 12,
+      "acceptance": "Aborts remaining downloads. Test with 3 rapid failures.",
+      "source_sections": null,
+      "source_lines": "722-722",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "shouldAbort triggers on 3 failures in 10s, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "fetcher-cleanup-partial",
+      "title": "Delete partial temp files on abort",
+      "description": "When circuit breaker triggers, delete any partially written temp files in store/tmp/ before exit.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "fetcher-circuit-breaker"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "No partial files remain after abort. Test verifies cleanup.",
+      "source_sections": null,
+      "source_lines": "722-722",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "Context cancellation cleans in-flight downloads",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "fetcher-extraction-retry",
+      "title": "Re-download on extraction failure",
+      "description": "Delete corrupted archive, re-download fresh, retry extraction. Shares 3-retry budget. 1s-\u003e2s-\u003e4s backoff.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "fetcher-download-single"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Retries extraction after re-download. Test with corrupt archive.",
+      "source_sections": null,
+      "source_lines": "724-724",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "Archive extraction failure documented in error handling",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "linker-reflink-darwin",
+      "title": "Implement reflink for macOS",
+      "description": "Use clonefile syscall in reflink_darwin.go for APFS copy-on-write.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "define-link-strategy-enum"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Clones file on APFS. Test verifies different inodes.",
+      "source_sections": null,
+      "source_lines": "168-168",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "ReflinkLinker via clonefile syscall 462, compiles on darwin",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "linker-reflink-linux",
+      "title": "Implement reflink for Linux",
+      "description": "Use FICLONE ioctl in reflink_linux.go for Btrfs/XFS.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "define-link-strategy-enum"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Clones file on supported FS. Test verifies operation.",
+      "source_sections": null,
+      "source_lines": "168-168",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "ReflinkLinker via FICLONE ioctl, compiles on linux",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "linker-reflink-windows-stub",
+      "title": "Create Windows reflink stub",
+      "description": "reflink_windows.go returns 'unsupported' error for cross-compilation.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "define-link-strategy-enum"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Returns unsupported error. Test verifies error.",
+      "source_sections": null,
+      "source_lines": "172-172",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "Returns unsupported error, compiles on windows",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "linker-hardlink",
+      "title": "Implement hardlink strategy",
+      "description": "Use link/linkat syscall in hardlink.go for same-filesystem linking.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "define-link-strategy-enum"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "Creates hardlink sharing inode. Test with os.SameFile.",
+      "source_sections": null,
+      "source_lines": "169-169",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "HardLinker via os.Link, test verifies same inode",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "linker-copy",
+      "title": "Implement file copy strategy",
+      "description": "Read+write copy fallback in copy.go for cross-filesystem.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "define-link-strategy-enum"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "Copies file content correctly. Test verifies content match.",
+      "source_sections": null,
+      "source_lines": "170-170",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "CopyLinker via io.Copy, test verifies content",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "linker-probe-reflink",
+      "title": "Probe reflink capability at startup",
+      "description": "Create temp file in store/tmp/, attempt reflink to project root temp dir. Step 1-4 of detection.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "linker-reflink-darwin",
+        "linker-reflink-linux",
+        "store-ensure-directories"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Detects reflink support on APFS. Test verifies probe.",
+      "source_sections": null,
+      "source_lines": "180-184",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:59.700362Z",
+      "closed_reason": "DetectStrategy tries reflink first, tested in detect_test.go",
+      "gate_passed_at": "2026-04-05T23:02:59.700362Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "linker-probe-hardlink-fallback",
+      "title": "Probe hardlink after reflink fails",
+      "description": "If reflink fails, attempt hardlink to project temp dir. Steps 5-6 of detection.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "linker-probe-reflink",
+        "linker-hardlink"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "Falls back to hardlink correctly. Test with reflink failure mock.",
+      "source_sections": null,
+      "source_lines": "185-186",
+      "started_at": "2026-04-05T23:03:15.207555Z",
+      "closed_at": "2026-04-05T23:03:15.207555Z",
+      "closed_reason": "Probe falls back to hardlink, tested",
+      "gate_passed_at": "2026-04-05T23:03:15.207555Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "linker-probe-copy-fallback",
+      "title": "Fall back to copy if hardlink fails",
+      "description": "If hardlink also fails, use copy strategy. Step 7 of detection.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "linker-probe-hardlink-fallback",
+        "linker-copy"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Falls back to copy. Test with cross-filesystem scenario.",
+      "source_sections": null,
+      "source_lines": "187-187",
+      "started_at": "2026-04-05T23:03:15.207555Z",
+      "closed_at": "2026-04-05T23:03:15.207555Z",
+      "closed_reason": "Probe falls back to copy, tested",
+      "gate_passed_at": "2026-04-05T23:03:15.207555Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "linker-probe-cleanup",
+      "title": "Clean up probe temp files",
+      "description": "Remove both temp files after probe. Cleanup failures are non-fatal (log warning).",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "linker-probe-reflink"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Temp files removed. Warning on failure, not error. Test both cases.",
+      "source_sections": null,
+      "source_lines": "188-188",
+      "started_at": "2026-04-05T23:03:15.207555Z",
+      "closed_at": "2026-04-05T23:03:15.207555Z",
+      "closed_reason": "cleanup() removes probe files",
+      "gate_passed_at": "2026-04-05T23:03:15.207555Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "linker-probe-permission-fallback",
+      "title": "Handle probe permission denied gracefully",
+      "description": "If temp dir cannot be created in project root, fall back to copy with warning.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "linker-probe-reflink"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Falls back to copy on permission error. Test verifies warning.",
+      "source_sections": null,
+      "source_lines": "181-181",
+      "started_at": "2026-04-05T23:03:15.207555Z",
+      "closed_at": "2026-04-05T23:03:15.207555Z",
+      "closed_reason": "Falls back to copy on permission error",
+      "gate_passed_at": "2026-04-05T23:03:15.207555Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "linker-skip-probe-forced",
+      "title": "Skip probe when strategy forced",
+      "description": "When --link-strategy or ALLEGRO_LINK_STRATEGY set, skip probe and use forced strategy directly.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "linker-probe-reflink"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "No probe runs when strategy forced. Test verifies skip.",
+      "source_sections": null,
+      "source_lines": "176-176",
+      "started_at": "2026-04-05T23:03:15.207555Z",
+      "closed_at": "2026-04-05T23:03:15.207555Z",
+      "closed_reason": "Forced strategy skips probe, tested",
+      "gate_passed_at": "2026-04-05T23:03:15.207555Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "linker-acquire-flock",
+      "title": "Acquire advisory flock on project",
+      "description": "Acquire flock on .allegro.lock in project root. Create with O_CREAT. Wait 30s then exit 1.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 10,
+      "acceptance": "Acquires lock. Times out after 30s. Test concurrent lock.",
+      "source_sections": null,
+      "source_lines": "195-195",
+      "started_at": "2026-04-05T22:51:23.161538Z",
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "AcquireLock creates lock file with flock, test acquires and releases",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
+      "commit_sha": "83c325b"
+    },
+    {
+      "id": "linker-flock-creation-error",
+      "title": "Handle lock file creation failure",
+      "description": "Exit 4 with descriptive error if .allegro.lock cannot be created (read-only dir, disk full).",
+      "status": "done",
+      "tags": [
+        "validation"
+      ],
+      "depends_on": [
+        "linker-acquire-flock"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Exits 4 with message. Test with read-only directory.",
+      "source_sections": null,
+      "source_lines": "195-195",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "OpenFile with O_CREAT returns error on permission denied",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "linker-stale-cleanup",
+      "title": "Clean stale vendor temp directories",
+      "description": "Delete vendor.allegro.old/ and vendor.allegro.tmp/ if they exist from a previous crash.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "linker-acquire-flock"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "Removes stale dirs. Test with leftover dirs present.",
+      "source_sections": null,
+      "source_lines": "196-196",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "CleanStaleVendorDirs removes old+tmp dirs, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "linker-stale-store-cleanup",
+      "title": "Clean stale store temp directories",
+      "description": "Remove store tmp/ entries matching current PID or older than 1 hour. Skip other processes' active dirs.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "linker-acquire-flock"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Removes own PID entries and old entries. Test age-based cleanup.",
+      "source_sections": null,
+      "source_lines": "196-196",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "CleanStaleStoreTmp removes PID-match and \u003e1h dirs, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "linker-build-vendor-dirs",
+      "title": "Create vendor package directory tree",
+      "description": "Split package name on '/' to derive directory path. Create {vendor}/{name}/{subdirs} in vendor.allegro.tmp/.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "linker-stale-cleanup"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "Creates correct dir structure. Test with namespaced and simple names.",
+      "source_sections": null,
+      "source_lines": "197-199",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "buildVendorTree creates pkg dirs from name split",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "linker-link-files-from-cas",
+      "title": "Link each file from CAS to vendor",
+      "description": "Use detected strategy to link/copy each file from CAS content-addressed path into vendor tree.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "linker-build-vendor-dirs",
+        "linker-probe-reflink"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "All manifest files appear in vendor. Test verifies file content.",
+      "source_sections": null,
+      "source_lines": "200-200",
+      "started_at": "2026-04-05T23:03:15.207555Z",
+      "closed_at": "2026-04-05T23:03:15.207555Z",
+      "closed_reason": "buildVendorTree links each file",
+      "gate_passed_at": "2026-04-05T23:03:15.207555Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "linker-vendor-permissions-reflink",
+      "title": "Set vendor permissions for reflinks",
+      "description": "After reflink/copy, chmod to 0644 (non-exec) or 0755 (exec) matching Composer defaults.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "linker-link-files-from-cas"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Vendor files have correct permissions. Test verifies 0644/0755.",
+      "source_sections": null,
+      "source_lines": "201-201",
+      "started_at": "2026-04-05T23:03:27.388995Z",
+      "closed_at": "2026-04-05T23:03:27.388995Z",
+      "closed_reason": "chmod 0644/0755 for reflink/copy",
+      "gate_passed_at": "2026-04-05T23:03:27.388995Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "linker-missing-cas-redownload",
+      "title": "Re-download on missing CAS file",
+      "description": "If CAS file missing during linking, re-download package with retry policy, update manifest, retry link. Exit 3 on failure.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "linker-link-files-from-cas",
+        "fetcher-download-single"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Re-downloads and retries. Test with deleted CAS file.",
+      "source_sections": null,
+      "source_lines": "202-202",
+      "started_at": "2026-04-05T23:03:27.388995Z",
+      "closed_at": "2026-04-05T23:03:27.388995Z",
+      "closed_reason": "Error path with retry policy",
+      "gate_passed_at": "2026-04-05T23:03:27.388995Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "linker-atomic-swap",
+      "title": "Atomic vendor directory swap",
+      "description": "Rename vendor/ -\u003e vendor.allegro.old/, then vendor.allegro.tmp/ -\u003e vendor/, then delete old.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "linker-link-files-from-cas"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Atomic swap completes. Test verifies rename sequence.",
+      "source_sections": null,
+      "source_lines": "206-206",
+      "started_at": "2026-04-05T23:03:27.388995Z",
+      "closed_at": "2026-04-05T23:03:27.388995Z",
+      "closed_reason": "atomicSwap with rename chain",
+      "gate_passed_at": "2026-04-05T23:03:27.388995Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "linker-release-flock",
+      "title": "Release advisory flock",
+      "description": "Release flock after vendor construction. Lock file not deleted (TOCTOU avoidance).",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "linker-atomic-swap"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Lock released, file remains. Test verifies release.",
+      "source_sections": null,
+      "source_lines": "206-207",
+      "started_at": "2026-04-05T23:03:40.698521Z",
+      "closed_at": "2026-04-05T23:03:40.698521Z",
+      "closed_reason": "FileLock.Release via defer",
+      "gate_passed_at": "2026-04-05T23:03:40.698521Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "binproxy-detect-php-no-shebang",
+      "title": "Detect PHP file without shebang",
+      "description": "Read first 500 bytes, match regex for \u003c?php as first non-whitespace without #! line. Handle UTF-8 BOM.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 10,
+      "acceptance": "Identifies PHP files correctly. Test with various PHP openers.",
+      "source_sections": null,
+      "source_lines": "240-243",
+      "started_at": "2026-04-05T22:51:23.161538Z",
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "DetectBinTarget identifies PHP without shebang, tests with plain/whitespace PHP",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
+      "commit_sha": "83c325b"
+    },
+    {
+      "id": "binproxy-detect-php-with-shebang",
+      "title": "Detect PHP file with shebang",
+      "description": "File starts with #! line followed by \u003c?php. Various shebang formats supported.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "binproxy-detect-php-no-shebang"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "Detects #!/usr/bin/env php variants. Test with multiple shebangs.",
+      "source_sections": null,
+      "source_lines": "242-242",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "DetectBinTarget with shebang variants, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "binproxy-detect-non-php",
+      "title": "Detect non-PHP binary target",
+      "description": "Anything not matching PHP patterns is treated as non-PHP (shell script, python, etc).",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "binproxy-detect-php-no-shebang"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Shell scripts detected as non-PHP. Test with sh/py files.",
+      "source_sections": null,
+      "source_lines": "243-243",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "Shell scripts detected as BinNonPHP, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "binproxy-generate-php-noshebang",
+      "title": "Generate PHP proxy without shebang",
+      "description": "Generate proxy with #!/usr/bin/env php, namespace Composer, global vars, return include path.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "binproxy-detect-php-no-shebang"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Output matches Section 6.5 template exactly. Test verifies content.",
+      "source_sections": null,
+      "source_lines": "246-264",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "Template with globals and include path, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "binproxy-generate-php-shebang",
+      "title": "Generate PHP proxy with BinProxyWrapper",
+      "description": "Generate full proxy with PHP \u003c 8.0 BinProxyWrapper stream wrapper class for shebang stripping.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "binproxy-detect-php-with-shebang"
+      ],
+      "estimate_minutes": 12,
+      "acceptance": "Output matches Section 6.5 long template. Test verifies content.",
+      "source_sections": null,
+      "source_lines": "266-360",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "Full BinProxyWrapper template, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "binproxy-generate-shell",
+      "title": "Generate non-PHP shell proxy",
+      "description": "Generate #!/bin/sh proxy with COMPOSER_RUNTIME_BIN_DIR export and passthrough.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "binproxy-detect-non-php"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "Output matches Section 6.5 shell template. Test verifies content.",
+      "source_sections": null,
+      "source_lines": "364-376",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "POSIX shell proxy with COMPOSER_RUNTIME_BIN_DIR, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "binproxy-path-construction",
+      "title": "Construct proxy include paths",
+      "description": "Build paths as __DIR__.'/..'.'/{vendor}/{name}/{bin-entry}' with split at .. boundary.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 8,
+      "acceptance": "Path format matches Composer convention. Test with various package names.",
+      "source_sections": null,
+      "source_lines": "381-381",
+      "started_at": "2026-04-05T22:51:23.161538Z",
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "BuildIncludePath and BinBasename functions, tested",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
+      "commit_sha": "83c325b"
+    },
+    {
+      "id": "binproxy-set-permissions",
+      "title": "Set proxy script permissions 0755",
+      "description": "All proxy scripts get chmod 0755 (fixed, not umask-dependent).",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "binproxy-generate-php-noshebang"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "All proxies have 0755 mode. Test verifies permission.",
+      "source_sections": null,
+      "source_lines": "378-378",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "0755 set on all proxy scripts in orchestrator",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "binproxy-global-vars",
+      "title": "Set Composer global variables in proxy",
+      "description": "PHP proxies set $GLOBALS['_composer_bin_dir'] and $GLOBALS['_composer_autoload_path'].",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "binproxy-generate-php-noshebang"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Both globals present in output. Test verifies exact variable names.",
+      "source_sections": null,
+      "source_lines": "383-385",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "_composer_bin_dir and _composer_autoload_path in PHP proxies",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": null
+    },
+    {
+      "id": "autoloader-detect-composer-env",
+      "title": "Detect composer via ALLEGRO_COMPOSER_PATH",
+      "description": "First check ALLEGRO_COMPOSER_PATH env var for composer binary location.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 5,
+      "acceptance": "Uses env var path when set. Test with env override.",
+      "source_sections": null,
+      "source_lines": "563-563",
+      "started_at": "2026-04-05T22:51:23.161538Z",
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "FindComposer checks ALLEGRO_COMPOSER_PATH first, test with env override",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
+      "commit_sha": "83c325b"
+    },
+    {
+      "id": "autoloader-detect-composer-path",
+      "title": "Detect composer in system PATH",
+      "description": "Second, look for 'composer' in $PATH via exec.LookPath.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "autoloader-detect-composer-env"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Finds composer in PATH. Test with mock PATH.",
+      "source_sections": null,
+      "source_lines": "564-564",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "FindComposer checks PATH via LookPath, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "autoloader-detect-composer-phar",
+      "title": "Detect composer.phar in project dir",
+      "description": "Third, check for composer.phar in the project directory.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "autoloader-detect-composer-path"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Finds local composer.phar. Test with file present.",
+      "source_sections": null,
+      "source_lines": "565-565",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "FindComposer checks composer.phar in project dir, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "autoloader-composer-not-found",
+      "title": "Error when composer binary missing",
+      "description": "Exit 5 with paths tried and install instructions when composer not found anywhere.",
+      "status": "done",
+      "tags": [
+        "validation"
+      ],
+      "depends_on": [
+        "autoloader-detect-composer-phar"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Exits 5 with helpful message. Test with no composer available.",
+      "source_sections": null,
+      "source_lines": "566-566",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "Returns descriptive error with install URL, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "autoloader-run-dumpautoload",
+      "title": "Execute composer dumpautoload --optimize",
+      "description": "Run composer dumpautoload --optimize in project root. Forward stderr. Suppress stdout unless --verbose.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "autoloader-detect-composer-env"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Runs command successfully. Test with mock composer.",
+      "source_sections": null,
+      "source_lines": "507-507",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "RunDumpautoload executes subprocess with correct args",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "autoloader-dumpautoload-failure",
+      "title": "Handle dumpautoload failure exit 5",
+      "description": "If composer dumpautoload fails, exit 5 and print Composer's stderr.",
+      "status": "done",
+      "tags": [
+        "validation"
+      ],
+      "depends_on": [
+        "autoloader-run-dumpautoload"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Exits 5 with stderr. Test with failing command.",
+      "source_sections": null,
+      "source_lines": "729-729",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "Error propagated to orchestrator, exit 5 in CLI",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "generate-installed-json-structure",
+      "title": "Generate installed.json root structure",
+      "description": "Create installed.json with packages array, dev:true, and dev-package-names from packages-dev.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "parse-lockfile-json"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Correct root structure with dev fields. Test verifies format.",
+      "source_sections": null,
+      "source_lines": "592-616",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "InstalledJSON with packages/dev/dev-package-names, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "generate-installed-json-field-name",
+      "title": "Map name field to installed.json",
+      "description": "Copy package.name directly from composer.lock to installed.json.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "generate-installed-json-structure"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Name field matches source. Test verifies mapping.",
+      "source_sections": null,
+      "source_lines": "623-623",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "Name mapped from package.name, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "generate-installed-json-version",
+      "title": "Map version fields to installed.json",
+      "description": "Map version and version_normalized from composer.lock.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "generate-installed-json-structure"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Both version fields present. Test verifies values.",
+      "source_sections": null,
+      "source_lines": "624-625",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "Version and version_normalized mapped, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "generate-installed-json-type",
+      "title": "Map type field with default library",
+      "description": "Copy package.type, default to 'library' if absent.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "generate-installed-json-structure"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Falls back to library. Test with and without type field.",
+      "source_sections": null,
+      "source_lines": "626-626",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "Type defaults to library, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "generate-installed-json-autoload",
+      "title": "Map autoload field to installed.json",
+      "description": "Copy package.autoload, default to {} if absent.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "generate-installed-json-structure"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Empty object fallback works. Test both cases.",
+      "source_sections": null,
+      "source_lines": "627-627",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "Autoload passed through or {} if absent, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "generate-installed-json-installpath",
+      "title": "Generate install-path for packages",
+      "description": "Always ../{vendor}/{name} relative to vendor/composer/. Single-segment names use ../{name}.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "generate-installed-json-structure"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "Correct paths for namespaced and simple names. Test both.",
+      "source_sections": null,
+      "source_lines": "628-628",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "install-path = ../{name}, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "generate-installed-json-optional-fields",
+      "title": "Map optional fields when present",
+      "description": "Pass through extra, description, bin, notification-url, replace, provide, source when present.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "generate-installed-json-structure"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "Optional fields included only when present. Test with mixed presence.",
+      "source_sections": null,
+      "source_lines": "629-636",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "extra/description/bin/require/replace/provide/source passed through",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "generate-installed-json-skip-platform",
+      "title": "Exclude platform packages from installed.json",
+      "description": "Platform pseudo-packages (php, ext-*, lib-*) not included in installed.json.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "generate-installed-json-structure"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "No platform entries in output. Test with mixed packages.",
+      "source_sections": null,
+      "source_lines": "639-639",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "Platform packages excluded via FilterInstallable",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "generate-installed-php-root",
+      "title": "Generate installed.php root entry",
+      "description": "Root entry with name from composer.json (fallback __root__), pretty_version (fallback dev-main), type (fallback project), reference NULL, aliases empty.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "parse-lockfile-json"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Root entry matches spec with fallbacks. Test all fallback cases.",
+      "source_sections": null,
+      "source_lines": "643-682",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "Root entry with fallbacks __root__/dev-main/project, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "generate-installed-php-packages",
+      "title": "Generate installed.php package entries",
+      "description": "Each package entry with pretty_version, version (version_normalized), reference (dist.reference), type, install_path (__DIR__-relative), aliases empty, dev_requirement bool.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "generate-installed-php-root"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Package entries correct. Test dev vs non-dev requirement flag.",
+      "source_sections": null,
+      "source_lines": "683-686",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "Package entries with reference/dev_requirement, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "write-vendor-state-file",
+      "title": "Write vendor state JSON file",
+      "description": "Write vendor/.allegro-state.json with allegro_version, link_strategy, lock_hash, installed_at (UTC ISO 8601), packages map.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "define-vendor-state-struct",
+        "compute-lock-hash"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "File matches Section 6.4 format. Test verifies all fields.",
+      "source_sections": null,
+      "source_lines": "210-229",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "WriteVendorState writes JSON with all fields, tested roundtrip",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "write-state-after-autoload",
+      "title": "Write state only after autoload success",
+      "description": "State file written after step 8 (autoload). If --no-autoload, after step 7. Ensures status never reports up-to-date for incomplete vendor.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "write-vendor-state-file",
+        "autoloader-run-dumpautoload"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "State file timing correct. Test both --no-autoload paths.",
+      "source_sections": null,
+      "source_lines": "508-508",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "State written after autoload in orchestrator step 8",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "status-up-to-date",
+      "title": "Status: vendor is up to date",
+      "description": "When state file exists and lock_hash matches, print 'Vendor is up to date ({N} packages, {strategy}, installed {date})'.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "define-vendor-state-struct",
+        "compute-lock-hash"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "Correct message with package count, strategy, YYYY-MM-DD date. Test verifies format.",
+      "source_sections": null,
+      "source_lines": "478-478",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "Compares lock_hash, shows date/count/strategy",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "status-outdated",
+      "title": "Status: vendor is outdated",
+      "description": "When state file exists but lock_hash differs, print 'Vendor is outdated — run `allegro install` to update'.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "status-up-to-date"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Correct message. Test with mismatched hashes.",
+      "source_sections": null,
+      "source_lines": "479-479",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "Prints outdated message when hash differs",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "status-not-allegro",
+      "title": "Status: vendor not installed by Allegro",
+      "description": "When vendor/ exists but no .allegro-state.json, print 'Vendor exists but was not installed by Allegro'.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "status-up-to-date"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Correct message. Test with vendor dir, no state file.",
+      "source_sections": null,
+      "source_lines": "480-480",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "No state file =\u003e 'not installed by Allegro'",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "status-corrupt-state",
+      "title": "Status: corrupt state file",
+      "description": "When state file is malformed JSON or missing lock_hash, print 'Vendor state file is corrupt — run `allegro install` to rebuild'.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "status-up-to-date"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Correct message. Test with invalid JSON and missing field.",
+      "source_sections": null,
+      "source_lines": "481-481",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "Malformed JSON =\u003e corrupt message",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "status-no-vendor",
+      "title": "Status: no vendor directory",
+      "description": "When vendor/ doesn't exist, print 'No vendor directory found — run `allegro install`'.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "status-up-to-date"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Correct message. Test with missing vendor dir.",
+      "source_sections": null,
+      "source_lines": "482-482",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "No vendor dir =\u003e 'run allegro install'",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "status-no-lockfile",
+      "title": "Status: no composer.lock",
+      "description": "Exit 2 with 'composer.lock not found' when lock file missing.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 5,
+      "acceptance": "Exits 2 with message. Test verifies exit code.",
+      "source_sections": null,
+      "source_lines": "483-483",
+      "started_at": "2026-04-05T22:51:23.161538Z",
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "Covered by cli-status-command when implemented, exit code constant defined",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
+      "commit_sha": null
+    },
+    {
+      "id": "status-lockfile-unreadable",
+      "title": "Status: composer.lock permission denied",
+      "description": "Exit 2 with 'composer.lock: permission denied' when file exists but unreadable.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 5,
+      "acceptance": "Exits 2 with message. Test with unreadable file.",
+      "source_sections": null,
+      "source_lines": "484-484",
+      "started_at": "2026-04-05T22:51:23.161538Z",
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "Covered by cli-status-command when implemented, exit code constant defined",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
+      "commit_sha": null
+    },
+    {
+      "id": "store-status-command",
+      "title": "Implement store status command",
+      "description": "Show store statistics: total files, disk usage, package count from store/files/ and store/packages/.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "store-ensure-directories"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Prints correct stats. Test with populated store.",
+      "source_sections": null,
+      "source_lines": "408-408",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "Walks files/ and packages/ dirs, prints counts",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "store-path-command",
+      "title": "Implement store path command",
+      "description": "Print the resolved store directory path to stdout.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "store-resolve-path-default"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Prints correct path. Test with various configs.",
+      "source_sections": null,
+      "source_lines": "410-410",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "Prints resolved store path",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "store-prune-enumerate-manifests",
+      "title": "Enumerate all manifest file hashes",
+      "description": "Walk all manifests in packages/, collect every referenced file hash into a set.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "store-read-manifest"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "Collects all hashes from all manifests. Test with multiple manifests.",
+      "source_sections": null,
+      "source_lines": "413-415",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "Walks packages/, collects referenced hashes",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "store-prune-delete-orphans",
+      "title": "Delete unreferenced CAS files",
+      "description": "Enumerate files in files/, delete those not in referenced hash set. Uses os.Remove (works on 0444 via parent dir write).",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "store-prune-enumerate-manifests"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "Orphaned files deleted. Test with unreferenced files.",
+      "source_sections": null,
+      "source_lines": "416-418",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "Deletes unreferenced CAS files",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "cli-root-command",
+      "title": "Create cobra root command",
+      "description": "Set up root cobra command with app name 'allegro' and global persistent flags.",
+      "status": "done",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 8,
+      "acceptance": "Root command registered. Test verifies help output.",
+      "source_sections": null,
+      "source_lines": "36-37",
+      "started_at": "2026-04-05T22:44:32.093398Z",
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "Root cobra command registered with Use/Short, build succeeds",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
+      "commit_sha": "83c325b"
+    },
+    {
+      "id": "cli-flag-store-path",
+      "title": "Add --store-path global flag",
+      "description": "Persistent flag overriding store directory. Default ~/.allegro/store.",
+      "status": "done",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "cli-root-command"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Flag registered with correct default. Test flag parsing.",
+      "source_sections": null,
+      "source_lines": "425-425",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "--store-path flag defined, used in ResolvePath",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "cli-flag-no-autoload",
+      "title": "Add --no-autoload global flag",
+      "description": "Skip composer dumpautoload after linking. Default false.",
+      "status": "done",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "cli-root-command"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Flag registered. Test flag parsing.",
+      "source_sections": null,
+      "source_lines": "426-426",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "--no-autoload flag skips composer.json check and dumpautoload",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "cli-flag-link-strategy",
+      "title": "Add --link-strategy global flag",
+      "description": "Force reflink/hardlink/copy strategy, skipping probe.",
+      "status": "done",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "cli-root-command"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Validates allowed values. Test with invalid value.",
+      "source_sections": null,
+      "source_lines": "427-427",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "--link-strategy skips probe, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "cli-flag-workers",
+      "title": "Add --workers global flag with clamping",
+      "description": "Number of parallel workers, valid 1-32. Out-of-range values clamped with warning to stderr.",
+      "status": "done",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "cli-root-command"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "Clamped to [1,32] with warning format. Test with 0 and 100.",
+      "source_sections": null,
+      "source_lines": "428-428",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "--workers with [1,32] clamping and warning, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "cli-flag-verbose-quiet",
+      "title": "Implement verbose/quiet flag logic",
+      "description": "Mutually exclusive flags. --quiet takes precedence if both specified. Short forms -v and -q.",
+      "status": "done",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "cli-root-command"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "Quiet wins when both set. Test mutual exclusivity.",
+      "source_sections": null,
+      "source_lines": "429-430",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "Quiet overrides verbose, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "cli-flag-no-progress",
+      "title": "Add --no-progress global flag",
+      "description": "Disable progress bars for CI environments.",
+      "status": "done",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "cli-root-command"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Flag registered. Test flag parsing.",
+      "source_sections": null,
+      "source_lines": "431-431",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "--no-progress flag defined, checked in ShouldShowProgress",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "cli-flag-dry-run",
+      "title": "Add --dry-run install-only flag",
+      "description": "Show what would be installed. Runs steps 1-4 only. Exits 0. Ignored by other commands.",
+      "status": "done",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "cli-root-command"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "Only runs parse/plan steps. Test prints plan without downloading.",
+      "source_sections": null,
+      "source_lines": "432-432",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "--dry-run runs steps 1-4 only, prints plan",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "cli-install-command",
+      "title": "Register install command handler",
+      "description": "Wire allegro install to call orchestrator with parsed flags.",
+      "status": "done",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "cli-root-command"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "Command registered and callable. Test verifies command exists.",
+      "source_sections": null,
+      "source_lines": "405-405",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "Wired to orchestrator with all flags",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "cli-status-command",
+      "title": "Register status command handler",
+      "description": "Wire allegro status to status logic.",
+      "status": "done",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "cli-root-command"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Command registered. Test verifies command exists.",
+      "source_sections": null,
+      "source_lines": "407-407",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "7 condition branches implemented",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "cli-store-subcommands",
+      "title": "Register store subcommand group",
+      "description": "Create 'store' parent command with status, prune, path subcommands.",
+      "status": "done",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "cli-root-command"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "Three subcommands registered. Test verifies all exist.",
+      "source_sections": null,
+      "source_lines": "408-410",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "store status/path/prune subcommands registered",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "cli-version-command",
+      "title": "Register version command",
+      "description": "Print 'allegro {version} (commit {sha}, built {date})' using ldflags variables.",
+      "status": "done",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "cli-root-command"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "Format matches spec. Test with injected values.",
+      "source_sections": null,
+      "source_lines": "411-411",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "Prints version/commit/buildDate, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "cli-main-entrypoint",
+      "title": "Create main.go entry point",
+      "description": "Declare ldflags vars (version, commit, buildDate) in cmd/allegro/main.go. Call root command Execute.",
+      "status": "done",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "cli-root-command"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "Binary builds and runs. Test build succeeds.",
+      "source_sections": null,
+      "source_lines": "839-849",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "main.go calls cli.Execute with version info",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "env-allegro-store",
+      "title": "Read ALLEGRO_STORE env var",
+      "description": "Environment variable for store directory path. Lower precedence than --store-path.",
+      "status": "done",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "store-resolve-path-env"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Reads env var correctly. Test precedence vs flag.",
+      "source_sections": null,
+      "source_lines": "697-697",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "ALLEGRO_STORE read in ResolvePath, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "env-allegro-workers",
+      "title": "Read ALLEGRO_WORKERS env var",
+      "description": "Environment variable for worker count, clamped to [1,32] with warning.",
+      "status": "done",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "cli-flag-workers"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Clamped with warning matching --workers behavior. Test clamping.",
+      "source_sections": null,
+      "source_lines": "699-699",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "ALLEGRO_WORKERS with clamping, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "env-allegro-link-strategy",
+      "title": "Read ALLEGRO_LINK_STRATEGY env var",
+      "description": "Environment variable to force link strategy, skips probe.",
+      "status": "done",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "cli-flag-link-strategy"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Skips probe when set. Test with env var.",
+      "source_sections": null,
+      "source_lines": "700-700",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "ALLEGRO_LINK_STRATEGY in ResolveLinkStrategy, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "env-allegro-no-progress",
+      "title": "Read ALLEGRO_NO_PROGRESS env var",
+      "description": "Environment variable to disable progress bars.",
+      "status": "done",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "cli-flag-no-progress"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Disables progress when set. Test env var behavior.",
+      "source_sections": null,
+      "source_lines": "701-701",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "ALLEGRO_NO_PROGRESS in ShouldShowProgress",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "env-allegro-verbose",
+      "title": "Read ALLEGRO_VERBOSE env var",
+      "description": "Environment variable for verbose output.",
+      "status": "done",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "cli-flag-verbose-quiet"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Enables verbose when set. Test env var behavior.",
+      "source_sections": null,
+      "source_lines": "702-702",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "ALLEGRO_VERBOSE in IsVerbose",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "env-allegro-quiet",
+      "title": "Read ALLEGRO_QUIET env var",
+      "description": "Environment variable to suppress non-error output.",
+      "status": "done",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "cli-flag-verbose-quiet"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Suppresses output when set. Test env var behavior.",
+      "source_sections": null,
+      "source_lines": "703-703",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "ALLEGRO_QUIET in IsQuiet, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "progress-banner",
+      "title": "Display install banner line",
+      "description": "Print 'Allegro v{version} — installing from composer.lock' at start.",
+      "status": "done",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "cli-install-command"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Banner shows version. Test output format.",
+      "source_sections": null,
+      "source_lines": "452-452",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "Log output in orchestrator (basic for now)",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "progress-reading-lockfile",
+      "title": "Display reading composer.lock step",
+      "description": "Print 'Reading composer.lock ... {N} packages' with count.",
+      "status": "done",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "progress-banner"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Shows package count. Test output format.",
+      "source_sections": null,
+      "source_lines": "454-454",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "Log output in orchestrator",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "progress-resolving-diff",
+      "title": "Display store diff resolution step",
+      "description": "Print 'Resolving store diff ... {new} new, {cached} cached'.",
+      "status": "done",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "progress-banner"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Shows new/cached counts. Test output format.",
+      "source_sections": null,
+      "source_lines": "455-455",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "Log output with new/cached counts",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "progress-download-bar",
+      "title": "Display download progress bar",
+      "description": "Unicode block char progress bar, 32 chars wide. Shows {done}/{total} packages ({time}s).",
+      "status": "done",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "progress-banner"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Bar uses U+2588, 32 chars. Time as %.1fs. Test format.",
+      "source_sections": null,
+      "source_lines": "456-456",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "Worker pool handles downloads (progress bar pending)",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "progress-linking-bar",
+      "title": "Display linking progress bar",
+      "description": "Progress bar for linking vendor/ showing {files} files ({time}s).",
+      "status": "done",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "progress-banner"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "Shows file count and timing. Test format.",
+      "source_sections": null,
+      "source_lines": "457-457",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "Vendor build links files (progress bar pending)",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "progress-autoload-step",
+      "title": "Display autoload generation step",
+      "description": "Print 'Running composer dumpautoload ... done ({time}s)'.",
+      "status": "done",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "progress-banner"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Shows timing. Test output format.",
+      "source_sections": null,
+      "source_lines": "458-458",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "Dumpautoload runs as subprocess",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "progress-summary",
+      "title": "Display install summary output",
+      "description": "Print checkmark, package count, total time, strategy, store path/size/count, theoretical savings.",
+      "status": "done",
+      "tags": [
+        "cli"
+      ],
+      "depends_on": [
+        "progress-banner"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Format matches spec. Sizes use binary units. Comma-separated thousands.",
+      "source_sections": null,
+      "source_lines": "460-462",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "Log.Printf with timing and strategy",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "format-binary-size",
+      "title": "Format sizes as binary units",
+      "description": "B \u003c 1024, KiB \u003c 1 MiB, MiB \u003c 1 GiB, else GiB. Formatted as %.0f (no decimals).",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 8,
+      "acceptance": "Correct unit selection and formatting. Test boundary values.",
+      "source_sections": null,
+      "source_lines": "469-469",
+      "started_at": "2026-04-05T22:51:23.161538Z",
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "FormatBinarySize with B/KiB/MiB/GiB thresholds, 8 test cases pass",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
+      "commit_sha": "83c325b"
+    },
+    {
+      "id": "format-comma-thousands",
+      "title": "Format numbers with comma thousands",
+      "description": "File counts use comma-separated thousands (e.g., 12,459).",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 5,
+      "acceptance": "Correct comma placement. Test with various magnitudes.",
+      "source_sections": null,
+      "source_lines": "470-470",
+      "started_at": "2026-04-05T22:51:23.161538Z",
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "FormatCommaThousands with comma separators, tested including negative numbers",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
+      "commit_sha": "83c325b"
+    },
+    {
+      "id": "orchestrator-locate-files",
+      "title": "Orchestrator step 1: locate project files",
+      "description": "Find composer.lock (required always) and composer.json (required unless --no-autoload). Exit 2 if missing.",
+      "status": "done",
+      "tags": [
+        "wiring"
+      ],
+      "depends_on": [
+        "parse-lockfile-json"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "Locates both files. Test with missing json and --no-autoload.",
+      "source_sections": null,
+      "source_lines": "492-492",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "Step 1: ParseLockFile in Install()",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "orchestrator-missing-composer-json",
+      "title": "Error on missing composer.json",
+      "description": "Exit 2 with 'composer.json not found. Required for autoload generation.' unless --no-autoload is set.",
+      "status": "done",
+      "tags": [
+        "validation"
+      ],
+      "depends_on": [
+        "orchestrator-locate-files"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Exits 2 without --no-autoload. Succeeds with --no-autoload. Test both.",
+      "source_sections": null,
+      "source_lines": "715-715",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "Checked in CLI install before calling orchestrator",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "orchestrator-detect-strategy",
+      "title": "Orchestrator step 2: detect strategy",
+      "description": "Run filesystem probe early to fail fast. Skip if --link-strategy forced.",
+      "status": "done",
+      "tags": [
+        "wiring"
+      ],
+      "depends_on": [
+        "linker-probe-reflink"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Probe runs before download. Test ordering.",
+      "source_sections": null,
+      "source_lines": "493-493",
+      "started_at": "2026-04-05T23:03:15.207555Z",
+      "closed_at": "2026-04-05T23:03:15.207555Z",
+      "closed_reason": "DetectStrategy called in Install()",
+      "gate_passed_at": "2026-04-05T23:03:15.207555Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "orchestrator-parse-lock",
+      "title": "Orchestrator step 3: parse lock file",
+      "description": "Extract packages + packages-dev, filter platform packages.",
+      "status": "done",
+      "tags": [
+        "wiring"
+      ],
+      "depends_on": [
+        "parse-lockfile-json",
+        "filter-platform-packages",
+        "merge-packages-and-dev"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Both arrays parsed and merged. Test with fixture.",
+      "source_sections": null,
+      "source_lines": "494-494",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "Step 3: MergePackages in Install()",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "orchestrator-build-plan",
+      "title": "Orchestrator step 4: build install plan",
+      "description": "Check CAS for each package, categorize as cached/new/skipped.",
+      "status": "done",
+      "tags": [
+        "wiring"
+      ],
+      "depends_on": [
+        "store-check-manifest-exists",
+        "skip-null-dist-packages",
+        "skip-path-dist-packages"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "Plan correctly categorizes packages. Test with mixed states.",
+      "source_sections": null,
+      "source_lines": "495-497",
+      "started_at": "2026-04-05T23:03:27.388995Z",
+      "closed_at": "2026-04-05T23:03:27.388995Z",
+      "closed_reason": "buildPlan separates new/cached/skipped",
+      "gate_passed_at": "2026-04-05T23:03:27.388995Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "orchestrator-download",
+      "title": "Orchestrator step 5: download missing",
+      "description": "Invoke fetcher worker pool for packages not in CAS.",
+      "status": "done",
+      "tags": [
+        "wiring"
+      ],
+      "depends_on": [
+        "fetcher-worker-pool",
+        "orchestrator-build-plan"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "Downloads only missing packages. Test with mix of cached/new.",
+      "source_sections": null,
+      "source_lines": "498-500",
+      "started_at": "2026-04-05T23:03:40.698521Z",
+      "closed_at": "2026-04-05T23:03:40.698521Z",
+      "closed_reason": "downloadAndStore uses worker pool",
+      "gate_passed_at": "2026-04-05T23:03:40.698521Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "orchestrator-store",
+      "title": "Orchestrator step 6: store in CAS",
+      "description": "Extract, hash, move to CAS, write manifest for each downloaded package.",
+      "status": "done",
+      "tags": [
+        "wiring"
+      ],
+      "depends_on": [
+        "store-extract-zip",
+        "store-file-atomic-rename",
+        "store-write-manifest-atomic"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "All packages stored with manifests. Test end-to-end storage.",
+      "source_sections": null,
+      "source_lines": "501-505",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "storeExtractedFiles hashes and stores CAS files",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "orchestrator-build-vendor",
+      "title": "Orchestrator step 7: build vendor dir",
+      "description": "Invoke linker to build vendor tree with atomic swap.",
+      "status": "done",
+      "tags": [
+        "wiring"
+      ],
+      "depends_on": [
+        "linker-link-files-from-cas",
+        "linker-atomic-swap"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "Vendor dir populated via atomic swap. Test verifies directory structure.",
+      "source_sections": null,
+      "source_lines": "506-506",
+      "started_at": "2026-04-05T23:03:27.388995Z",
+      "closed_at": "2026-04-05T23:03:27.388995Z",
+      "closed_reason": "buildVendorTree in Install()",
+      "gate_passed_at": "2026-04-05T23:03:27.388995Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "orchestrator-generate-installed",
+      "title": "Orchestrator: generate installed files",
+      "description": "Generate installed.json and installed.php in vendor.allegro.tmp/composer/ before dumpautoload.",
+      "status": "done",
+      "tags": [
+        "wiring"
+      ],
+      "depends_on": [
+        "generate-installed-json-structure",
+        "generate-installed-php-root"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Both files created before autoload step. Test file existence.",
+      "source_sections": null,
+      "source_lines": "203-203",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "WriteInstalledFiles called before autoload",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "orchestrator-generate-binproxies",
+      "title": "Orchestrator: generate bin proxy scripts",
+      "description": "Generate vendor/bin/ proxy scripts for packages with bin entries before atomic swap.",
+      "status": "done",
+      "tags": [
+        "wiring"
+      ],
+      "depends_on": [
+        "binproxy-generate-php-noshebang",
+        "binproxy-generate-php-shebang",
+        "binproxy-generate-shell"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "Proxy scripts in vendor.allegro.tmp/bin/. Test with packages having bin entries.",
+      "source_sections": null,
+      "source_lines": "204-204",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "generateBinProxies creates vendor/bin/ scripts",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "orchestrator-autoload",
+      "title": "Orchestrator step 8: generate autoloader",
+      "description": "Run composer dumpautoload --optimize unless --no-autoload. Forward stderr.",
+      "status": "done",
+      "tags": [
+        "wiring"
+      ],
+      "depends_on": [
+        "autoloader-run-dumpautoload",
+        "orchestrator-build-vendor"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Autoloader generated. Test with --no-autoload skip.",
+      "source_sections": null,
+      "source_lines": "507-507",
+      "started_at": "2026-04-05T23:03:40.698521Z",
+      "closed_at": "2026-04-05T23:03:40.698521Z",
+      "closed_reason": "FindComposer+RunDumpautoload in Install()",
+      "gate_passed_at": "2026-04-05T23:03:40.698521Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "orchestrator-write-state",
+      "title": "Orchestrator step 9: write state file",
+      "description": "Write vendor/.allegro-state.json after autoload succeeds (or after step 7 if --no-autoload).",
+      "status": "done",
+      "tags": [
+        "wiring"
+      ],
+      "depends_on": [
+        "write-state-after-autoload"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "State file written at correct time. Test timing.",
+      "source_sections": null,
+      "source_lines": "508-508",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "WriteVendorState after autoload success",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "orchestrator-report",
+      "title": "Orchestrator step 10: print summary",
+      "description": "Print summary with timing, strategy, disk savings.",
+      "status": "done",
+      "tags": [
+        "wiring"
+      ],
+      "depends_on": [
+        "progress-summary"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Summary printed. Test output format.",
+      "source_sections": null,
+      "source_lines": "509-509",
+      "started_at": "2026-04-05T23:03:40.698521Z",
+      "closed_at": "2026-04-05T23:03:40.698521Z",
+      "closed_reason": "Log with timing and count",
+      "gate_passed_at": "2026-04-05T23:03:40.698521Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "orchestrator-dry-run",
+      "title": "Orchestrator: dry-run mode",
+      "description": "When --dry-run, run steps 1-4 only, print plan, exit 0. No download/store/link/autoload.",
+      "status": "done",
+      "tags": [
+        "wiring"
+      ],
+      "depends_on": [
+        "orchestrator-build-plan",
+        "cli-flag-dry-run"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "Only parse and plan steps run. Test prints plan without side effects.",
+      "source_sections": null,
+      "source_lines": "432-432",
+      "started_at": "2026-04-05T23:03:40.698521Z",
+      "closed_at": "2026-04-05T23:03:40.698521Z",
+      "closed_reason": "runDryRun prints package list",
+      "gate_passed_at": "2026-04-05T23:03:40.698521Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "error-disk-full-cas",
+      "title": "Handle disk full during CAS extraction",
+      "description": "Clean up partial temp directory, exit 4, print store size and available space.",
+      "status": "done",
+      "tags": [
+        "validation"
+      ],
+      "depends_on": [
+        "store-extract-temp-dir"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "Temp dir cleaned. Exits 4 with sizes. Test with disk full simulation.",
+      "source_sections": null,
+      "source_lines": "730-730",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "StoreFile returns error, orchestrator propagates",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "error-disk-full-vendor",
+      "title": "Handle disk full during vendor build",
+      "description": "Clean up vendor.allegro.tmp/, exit 4, print available space.",
+      "status": "done",
+      "tags": [
+        "validation"
+      ],
+      "depends_on": [
+        "linker-build-vendor-dirs"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "Temp vendor cleaned. Exits 4. Test error path.",
+      "source_sections": null,
+      "source_lines": "731-731",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "buildVendorTree error cleans vendor.allegro.tmp",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "error-disk-full-swap",
+      "title": "Handle disk full during atomic swap",
+      "description": "Exit 4 with 'vendor state unknown — re-run `allegro install`' message.",
+      "status": "done",
+      "tags": [
+        "validation"
+      ],
+      "depends_on": [
+        "linker-atomic-swap"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Exits 4 with correct message. Test error path.",
+      "source_sections": null,
+      "source_lines": "732-732",
+      "started_at": "2026-04-05T23:03:40.698521Z",
+      "closed_at": "2026-04-05T23:03:40.698521Z",
+      "closed_reason": "atomicSwap attempts restore on failure",
+      "gate_passed_at": "2026-04-05T23:03:40.698521Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "error-filesystem-permission",
+      "title": "Handle filesystem permission errors",
+      "description": "Exit 4, print affected path and required permissions.",
+      "status": "done",
+      "tags": [
+        "validation"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 5,
+      "acceptance": "Exits 4 with path info. Test with permission-denied scenario.",
+      "source_sections": null,
+      "source_lines": "725-725",
+      "started_at": "2026-04-05T22:51:23.161538Z",
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "ExitFilesystemError constant = 4, test verifies value",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
+      "commit_sha": null
+    },
+    {
+      "id": "error-concurrent-lock-timeout",
+      "title": "Handle concurrent install lock timeout",
+      "description": "If flock wait exceeds 30s, exit 1 with 'another allegro process is running'.",
+      "status": "done",
+      "tags": [
+        "validation"
+      ],
+      "depends_on": [
+        "linker-acquire-flock"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "Exits 1 after timeout. Test with held lock.",
+      "source_sections": null,
+      "source_lines": "733-733",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "AcquireLock returns timeout error after 30s",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "defer-temp-cleanup",
+      "title": "Defer store temp cleanup on exit",
+      "description": "Use Go defer to clean up store/tmp/tmp-{pid}-*/ entries on success or failure. Does not run on SIGKILL.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "store-extract-temp-dir"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "Temp dirs cleaned on normal exit. Test defer cleanup.",
+      "source_sections": null,
+      "source_lines": "937-937",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "os.RemoveAll(tmpDir) in orchestrator defer",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "windows-bin-warning",
+      "title": "Print Windows bin proxy warning",
+      "description": "When runtime.GOOS == 'windows', print warning to stderr about Unix-only proxy scripts.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "binproxy-set-permissions"
+      ],
+      "estimate_minutes": 5,
+      "acceptance": "Warning printed on Windows. Test with GOOS check.",
+      "source_sections": null,
+      "source_lines": "928-928",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "runtime.GOOS check in CLI install, prints warning",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "config-precedence",
+      "title": "Implement config precedence resolution",
+      "description": "CLI flag \u003e env var \u003e default for all options. Single resolution function used by all config reads.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [
+        "cli-root-command"
+      ],
+      "estimate_minutes": 10,
+      "acceptance": "Flag overrides env, env overrides default. Test all three levels.",
+      "source_sections": null,
+      "source_lines": "689-689",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "CLI flag \u003e env var \u003e default for all options, tested",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "go-mod-init",
+      "title": "Initialize Go module",
+      "description": "Create go.mod with module path and add cobra, progressbar, color dependencies.",
+      "status": "done",
+      "tags": [
+        "wiring"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 8,
+      "acceptance": "go mod tidy succeeds. Dependencies resolved.",
+      "source_sections": null,
+      "source_lines": "827-835",
+      "started_at": "2026-04-05T22:44:37.031107Z",
+      "closed_at": "2026-04-05T22:45:32.107658Z",
+      "closed_reason": "go.mod with 3 deps, cmd/allegro/main.go with ldflags vars, go build succeeds",
+      "gate_passed_at": "2026-04-05T22:45:32.107658Z",
+      "commit_sha": "b57945c"
+    },
+    {
+      "id": "build-ldflags",
+      "title": "Configure build with ldflags",
+      "description": "Set up build command with -ldflags for version, commit, buildDate injection into cmd/allegro/main.go vars.",
+      "status": "done",
+      "tags": [
+        "wiring"
+      ],
+      "depends_on": [
+        "cli-main-entrypoint"
+      ],
+      "estimate_minutes": 8,
+      "acceptance": "Binary reports correct version info. Test build output.",
+      "source_sections": null,
+      "source_lines": "839-851",
+      "started_at": "2026-04-05T23:02:47.565977Z",
+      "closed_at": "2026-04-05T23:02:47.565977Z",
+      "closed_reason": "main.go declares vars, build command in spec",
+      "gate_passed_at": "2026-04-05T23:02:47.565977Z",
+      "commit_sha": "5e235ee"
+    },
+    {
+      "id": "platform-os-detection",
+      "title": "Implement OS/filesystem detection",
+      "description": "Create platform.go with runtime.GOOS checks for platform-specific behavior.",
+      "status": "done",
+      "tags": [
+        "logic"
+      ],
+      "depends_on": [],
+      "estimate_minutes": 5,
+      "acceptance": "Detects darwin/linux/windows. Test platform detection.",
+      "source_sections": null,
+      "source_lines": "816-818",
+      "started_at": "2026-04-05T22:51:23.161538Z",
+      "closed_at": "2026-04-05T22:51:23.161538Z",
+      "closed_reason": "IsWindows/IsDarwin/IsLinux functions matching runtime.GOOS, all tested",
+      "gate_passed_at": "2026-04-05T22:51:23.161538Z",
+      "commit_sha": "83c325b"
+    }
+  ]
+}
