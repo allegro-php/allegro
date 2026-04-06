@@ -1,6 +1,7 @@
 package autoloader
 
 import (
+	"embed"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -10,6 +11,9 @@ import (
 	"github.com/allegro-php/allegro/internal/parser"
 	"github.com/allegro-php/allegro/internal/store"
 )
+
+//go:embed InstalledVersions.php
+var installedVersionsPHP embed.FS
 
 // InstalledJSON represents vendor/composer/installed.json.
 type InstalledJSON struct {
@@ -173,6 +177,15 @@ func WriteInstalledFiles(vendorDir string, lock *parser.ComposerLock, composerJS
 	phpContent := GenerateInstalledPHP(lock, composerJSON)
 	if err := store.WriteFileAtomic(filepath.Join(composerDir, "installed.php"), []byte(phpContent), 0644); err != nil {
 		return fmt.Errorf("write installed.php: %w", err)
+	}
+
+	// Write InstalledVersions.php — Composer runtime class needed by autoloader
+	ivData, err := installedVersionsPHP.ReadFile("InstalledVersions.php")
+	if err != nil {
+		return fmt.Errorf("read embedded InstalledVersions.php: %w", err)
+	}
+	if err := store.WriteFileAtomic(filepath.Join(composerDir, "InstalledVersions.php"), ivData, 0644); err != nil {
+		return fmt.Errorf("write InstalledVersions.php: %w", err)
 	}
 
 	return nil
