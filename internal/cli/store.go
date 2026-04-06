@@ -114,14 +114,20 @@ func runStorePrune(cmd *cobra.Command, args []string) error {
 	packagesDir := filepath.Join(s.Root, "packages")
 	referencedHashes := make(map[string]bool)
 
-	filepath.Walk(packagesDir, func(path string, info os.FileInfo, err error) error {
-		if err != nil || info.IsDir() || filepath.Ext(path) != ".json" {
+	if walkErr := filepath.Walk(packagesDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err // propagate to prevent under-populated hash set
+		}
+		if info.IsDir() || filepath.Ext(path) != ".json" {
 			return nil
 		}
-		data, _ := os.ReadFile(path)
+		data, readErr := os.ReadFile(path)
+		if readErr != nil {
+			return fmt.Errorf("read manifest %s: %w", path, readErr)
+		}
 		var m store.Manifest
-		if json.Unmarshal(data, &m) != nil {
-			return nil
+		if err := json.Unmarshal(data, &m); err != nil {
+			return fmt.Errorf("corrupt manifest %s: %w", path, err)
 		}
 		for _, f := range m.Files {
 			hash := f.Hash
@@ -131,7 +137,9 @@ func runStorePrune(cmd *cobra.Command, args []string) error {
 			referencedHashes[hash] = true
 		}
 		return nil
-	})
+	}); walkErr != nil {
+		return fmt.Errorf("manifest walk: %w", walkErr)
+	}
 
 	filesDir := filepath.Join(s.Root, "files")
 	var pruned int

@@ -31,6 +31,9 @@ func (c *CopyLinker) LinkFile(src, dst string) error {
 		os.Remove(dst)
 		return fmt.Errorf("copy sync: %w", err)
 	}
-	out.Close()
+	if err := out.Close(); err != nil {
+		os.Remove(dst)
+		return fmt.Errorf("copy close: %w", err)
+	}
 	return nil
 }
