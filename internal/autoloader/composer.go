@@ -33,7 +33,7 @@ func FindComposer(projectDir string) (string, error) {
 // RunDumpautoload runs "composer dumpautoload --optimize" in the given directory.
 // stderr is forwarded, stdout is captured.
 func RunDumpautoload(composerPath, projectDir string, verbose, noDev bool) error {
-	args := []string{"dumpautoload", "--optimize"}
+	args := []string{"dumpautoload", "--optimize", "--no-plugins"}
 	if noDev {
 		args = append(args, "--no-dev")
 	}
