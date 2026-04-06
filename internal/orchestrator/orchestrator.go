@@ -366,16 +366,29 @@ func (o *Orchestrator) buildVendorTree(ctx context.Context, vendorTmp string, pa
 			}
 		}
 	}
+	// Phase 2: Collect link operations, separating composer-plugin packages
+	// Composer plugins may modify their own vendor files at runtime
+	// (e.g. phpstan/extension-installer writes GeneratedConfig.php).
+	// Hardlinked files are read-only (0444), so plugins must use copy.
+	pluginPkgs := make(map[string]bool)
+	for _, pkg := range packages {
+		if pkg.Type == "composer-plugin" {
+			pluginPkgs[pkg.Name] = true
+		}
+	}
 
-	// Phase 2: Collect all link operations
-	var allOps []LinkOp
+	var regularOps, pluginOps []LinkOp
 	for _, pkg := range packages {
 		manifest, err := o.store.ReadManifest(pkg.Name, pkg.Version)
 		if err != nil {
 			return fmt.Errorf("read manifest %s: %w", pkg.Name, err)
 		}
 		ops := CollectLinkOps(o.store, pkg.Name, manifest, vendorTmp)
-		allOps = append(allOps, ops...)
+		if pluginPkgs[pkg.Name] {
+			pluginOps = append(pluginOps, ops...)
+		} else {
+			regularOps = append(regularOps, ops...)
+		}
 	}
 
 	// Phase 3: Parallel link with worker pool
@@ -383,7 +396,17 @@ func (o *Orchestrator) buildVendorTree(ctx context.Context, vendorTmp string, pa
 	if workers < 1 {
 		workers = 8
 	}
-	return ParallelLink(allOps, lnk, strategy, workers)
+	if err := ParallelLink(regularOps, lnk, strategy, workers); err != nil {
+		return err
+	}
+	// Link composer-plugin packages with copy (writable)
+	if len(pluginOps) > 0 {
+		copyLnk := &linker.CopyLinker{}
+		if err := ParallelLink(pluginOps, copyLnk, linker.Copy, workers); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // redownloadPackage re-downloads and re-stores a package when CAS files are missing.
