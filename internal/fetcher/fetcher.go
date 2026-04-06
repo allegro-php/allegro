@@ -23,6 +23,9 @@ func NewClient() *Client {
 	}
 }
 
+
+const maxResponseSize = 512 << 20 // 512 MiB max response body
+
 func readAll(r io.Reader) ([]byte, error) {
-	return io.ReadAll(r)
+	return io.ReadAll(io.LimitReader(r, maxResponseSize))
 }

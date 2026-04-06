@@ -3,6 +3,7 @@ package linker
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -70,7 +71,9 @@ func cleanup(probeFile, probeDir string) {
 
 func randomHex(n int) string {
 	b := make([]byte, n)
-	rand.Read(b)
+	if _, err := rand.Read(b); err != nil {
+		panic(fmt.Sprintf("crypto/rand unavailable: %v", err))
+	}
 	return hex.EncodeToString(b)
 }
 
