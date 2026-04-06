@@ -42,7 +42,7 @@ allegro install --frozen-lockfile --no-dev --no-scripts
 Measured on Apple M-series (macOS, APFS). Run `./benchmark/run.sh` to reproduce.
 
 | Scenario | Project | Composer | Allegro | Speedup |
-|----------|---------|---------|---------|---------|
+|----------|---------|---------|---------|---------:|
 | Warm cache, no vendor | Laravel (106 pkgs) | 5.93s | **1.25s** | **4.7x** |
 | Warm cache, no vendor | Koel (194 pkgs) | 8.53s | **2.06s** | **4.1x** |
 | Warm cache, no vendor | Matomo (85 pkgs) | 3.73s | **0.95s** | **3.9x** |
@@ -157,6 +157,23 @@ go test ./...              # all tests
 go test -race ./...        # with race detector
 go test -v ./qa/...        # QA test suite (92 tests)
 ```
+
+## Tested With
+
+Allegro is QA-tested against real-world projects spanning the PHP ecosystem. Every install is verified for file integrity (hash + permissions) and autoloader correctness.
+
+| Project | Type | Packages | Files | Notes |
+|---------|------|----------|-------|-------|
+| [Spryker Suite](https://github.com/spryker-shop/suite) | Enterprise e-commerce | 1,574 | 81,775 | Largest PHP Composer project |
+| [Sylius](https://github.com/Sylius/Sylius) | Symfony e-commerce | 277 | 26,662 | |
+| [Mautic](https://github.com/mautic/mautic) | Marketing automation | 255 | 30,029 | Path repo, composer-patches plugin |
+| [Magento 2](https://github.com/magento/magento2) | E-commerce monorepo | 214 | 24,623 | 241 root replace entries |
+| [Filament](https://github.com/filamentphp/filament) | Laravel admin monorepo | 198 | 21,473 | Path repository |
+| [Drupal](https://github.com/drupal/recommended-project) | CMS | 154 | 30,722 | 8 composer-plugins, metapackages |
+| [Laravel + Filament](https://github.com/laravel/laravel) | Laravel app | 138 | 15,940 | |
+| [Symfony](https://github.com/symfony/symfony) | Framework monorepo | 95 | 5,150 | Path + null dist packages |
+
+**Total: 2,905 packages, 236K files — all verified, zero failures.**
 
 ## Architecture
 
