@@ -145,6 +145,42 @@ func GenerateInstalledPHP(lock *parser.ComposerLock, composerJSON map[string]int
 	b.WriteString("            'dev_requirement' => false,\n")
 	b.WriteString("        ),\n")
 	emitted[rootNameStr] = true
+
+	// Emit root package's replace/provide entries.
+	// Monorepos like Magento use root replace to declare 241+ sub-packages.
+	if rootReplace, ok := composerJSON["replace"].(map[string]interface{}); ok {
+		for name, ver := range rootReplace {
+			verStr := "*"
+			if v, ok := ver.(string); ok {
+				verStr = v
+			}
+			if emitted[name] || parser.IsPlatformPackage(name) {
+				continue
+			}
+			b.WriteString(fmt.Sprintf("        '%s' => array(\n", escapePHP(name)))
+			b.WriteString("            'dev_requirement' => false,\n")
+			b.WriteString(fmt.Sprintf("            'replaced' => array('%s'),\n", escapePHP(verStr)))
+			b.WriteString("        ),\n")
+			emitted[name] = true
+		}
+	}
+	if rootProvide, ok := composerJSON["provide"].(map[string]interface{}); ok {
+		for name, ver := range rootProvide {
+			verStr := "*"
+			if v, ok := ver.(string); ok {
+				verStr = v
+			}
+			if emitted[name] || parser.IsPlatformPackage(name) {
+				continue
+			}
+			b.WriteString(fmt.Sprintf("        '%s' => array(\n", escapePHP(name)))
+			b.WriteString("            'dev_requirement' => false,\n")
+			b.WriteString(fmt.Sprintf("            'provided' => array('%s'),\n", escapePHP(verStr)))
+			b.WriteString("        ),\n")
+			emitted[name] = true
+		}
+	}
+
 	for _, pkg := range all {
 		isDev := parser.IsDevPackage(pkg.Name, lock)
 		ref := "NULL"
