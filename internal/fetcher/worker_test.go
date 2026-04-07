@@ -85,7 +85,6 @@ func TestPoolDownloadWithSHA1(t *testing.T) {
 		t.Errorf("download with valid shasum: %v", results[0].Error)
 	}
 }
-
 func TestPoolDownloadSHA1Mismatch(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("bad data"))
@@ -93,12 +92,10 @@ func TestPoolDownloadSHA1Mismatch(t *testing.T) {
 	defer srv.Close()
 
 	pool := NewPool(1)
-	tasks := []DownloadTask{
-		{Name: "pkg/a", URL: srv.URL, Shasum: "0000000000000000000000000000000000000000"},
-	}
-
-	results := drainCh(pool.Download(context.Background(), tasks, 1))
-	if results[0].Error == nil {
+	_, err := pool.DownloadOne(context.Background(), DownloadTask{
+		Name: "pkg/a", URL: srv.URL, Shasum: "0000000000000000000000000000000000000000",
+	})
+	if err == nil {
 		t.Error("expected SHA-1 mismatch error")
 	}
 }

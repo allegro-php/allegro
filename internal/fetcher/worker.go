@@ -189,7 +189,6 @@ func (p *Pool) Download(ctx context.Context, tasks []DownloadTask, resultBuf int
 	return resultCh
 }
 
-// DownloadOne downloads a single task and returns the result.
 func (p *Pool) DownloadOne(ctx context.Context, task DownloadTask) (DownloadResult, error) {
 	for r := range p.Download(ctx, []DownloadTask{task}, 1) {
 		if r.Error != nil {
@@ -197,7 +196,11 @@ func (p *Pool) DownloadOne(ctx context.Context, task DownloadTask) (DownloadResu
 		}
 		return r, nil
 	}
-	return DownloadResult{}, ctx.Err()
+	// Channel closed without a result — either context cancelled or circuit-breaker fired
+	if ctx.Err() != nil {
+		return DownloadResult{}, ctx.Err()
+	}
+	return DownloadResult{}, fmt.Errorf("download %s: failed (no result returned)", task.Name)
 }
 
 // recordFailureAndCheck records a failure timestamp, trims old entries,
