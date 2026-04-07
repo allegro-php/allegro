@@ -1,3 +1,11 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="art/logo-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="art/logo-light.svg">
+    <img alt="Allegro" src="art/logo-light.svg" width="120">
+  </picture>
+</p>
+
 # Allegro — Fast, Disk-Efficient PHP Package Linker
 
 Allegro is a fast, disk-efficient alternative to `composer install`. Inspired by how [pnpm](https://pnpm.io) handles Node.js packages, it uses a content-addressable store (CAS) to deduplicate PHP packages across projects and links them into `vendor/` via reflink, hardlink, or copy.
