@@ -30,10 +30,11 @@ func FindComposer(projectDir string) (string, error) {
 	return "", fmt.Errorf("composer binary not found. Tried:\n  1. ALLEGRO_COMPOSER_PATH env var (not set or file missing)\n  2. 'composer' in PATH (not found)\n  3. '%s' (not found)\n\nInstall Composer: https://getcomposer.org/download/", pharPath)
 }
 
-// RunDumpautoload runs "composer dumpautoload --optimize" in the given directory.
-// stderr is forwarded, stdout is captured.
+// RunDumpautoload runs "composer dumpautoload" in the given directory.
+// Does not use --optimize by default, matching Composer's own install behavior.
+// Users who want optimized autoloading can run `composer dumpautoload --optimize` separately.
 func RunDumpautoload(composerPath, projectDir string, verbose, noDev bool) error {
-	args := []string{"dumpautoload", "--optimize"}
+	args := []string{"dumpautoload"}
 	if noDev {
 		args = append(args, "--no-dev")
 	}
