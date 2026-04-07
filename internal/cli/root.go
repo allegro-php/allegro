@@ -28,7 +28,7 @@ func SetVersionInfo(version, commit, buildDate string) {
 
 var rootCmd = &cobra.Command{
 	Use:   "allegro",
-	Short: "pnpm-inspired package linker for PHP",
+	Short: "Fast, disk-efficient PHP package linker",
 }
 
 func Execute() error {
