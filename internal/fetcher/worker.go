@@ -24,14 +24,15 @@ type DownloadResult struct {
 	Data  []byte
 	Error error
 }
-
 // Pool manages parallel downloads.
 type Pool struct {
 	client       *Client
 	workers      int
 	lastFailures []time.Time
 	mu           sync.Mutex
-	OnProgress   func(completed, total int, name string) // optional progress callback
+	OnProgress   func(completed, total int, name string) // optional: called when a download completes
+	OnStart      func(workerID int, name, version string) // optional: called when a worker starts a download
+	OnFinish     func(workerID int, name, version string) // optional: called when a worker finishes a download
 }
 
 // NewPool creates a download pool with the given worker count.
@@ -54,9 +55,12 @@ func (p *Pool) Download(ctx context.Context, tasks []DownloadTask) []DownloadRes
 	var wg sync.WaitGroup
 	for i := 0; i < p.workers; i++ {
 		wg.Add(1)
-		go func() {
+		go func(workerID int) {
 			defer wg.Done()
 			for task := range taskCh {
+				if p.OnStart != nil {
+					p.OnStart(workerID, task.Name, task.Version)
+				}
 				if ctx.Err() != nil {
 					resultCh <- DownloadResult{Task: task, Error: ctx.Err()}
 					continue
@@ -136,13 +140,16 @@ func (p *Pool) Download(ctx context.Context, tasks []DownloadTask) []DownloadRes
 					finalErr = fmt.Errorf("HTTP %d for %s", resp.StatusCode, task.URL)
 				}
 
+			if p.OnFinish != nil {
+					p.OnFinish(workerID, task.Name, task.Version)
+				}
 				if finalErr != nil {
 					resultCh <- DownloadResult{Task: task, Error: finalErr}
 				} else {
 					resultCh <- DownloadResult{Task: task, Data: finalData}
 				}
 			}
-		}()
+		}(i)
 	}
 
 	// Send tasks

@@ -8,8 +8,9 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
+	"sync"
 	"time"
-
 	"github.com/allegro-php/allegro/internal/autoloader"
 	"github.com/allegro-php/allegro/internal/fetcher"
 	"github.com/allegro-php/allegro/internal/linker"
@@ -216,23 +217,73 @@ func (o *Orchestrator) downloadAndStore(ctx context.Context, packages []parser.P
 
 	pool := fetcher.NewPool(o.config.Workers)
 	if !o.config.Quiet {
-		pool.OnProgress = func(completed, total int, name string) {
-			pct := completed * 100 / total
-			barWidth := 30
-			filled := barWidth * completed / total
-			bar := make([]byte, barWidth)
-			for i := range bar {
-				if i < filled {
-					bar[i] = '='
-				} else if i == filled {
-					bar[i] = '>'
+		numWorkers := o.config.Workers
+		if numWorkers < 1 {
+			numWorkers = 8
+		}
+		if numWorkers > len(tasks) {
+			numWorkers = len(tasks)
+		}
+
+		var displayMu sync.Mutex
+		slots := make([]string, numWorkers) // what each worker is currently downloading
+		completed := 0
+		total := len(tasks)
+		rendered := false
+
+		render := func() {
+			var b strings.Builder
+			// Move cursor up to overwrite previous render
+			if rendered {
+				fmt.Fprintf(&b, "\033[%dA", numWorkers+1)
+			}
+			rendered = true
+
+			// Summary line
+			fmt.Fprintf(&b, "\033[K  Downloading %d/%d packages\n", completed, total)
+
+			// Worker slots
+			for i, name := range slots {
+				prefix := "├─"
+				if i == len(slots)-1 {
+					prefix = "└─"
+				}
+				if name == "" {
+					fmt.Fprintf(&b, "\033[K  %s (idle)\n", prefix)
 				} else {
-					bar[i] = '-'
+					fmt.Fprintf(&b, "\033[K  %s %s\n", prefix, name)
 				}
 			}
-			fmt.Fprintf(os.Stderr, "\r\033[K  Downloading (%d/%d) [%s] %d%%", completed, total, string(bar), pct)
-			if completed == total {
-				fmt.Fprintln(os.Stderr)
+			fmt.Fprint(os.Stderr, b.String())
+		}
+
+		pool.OnStart = func(workerID int, name, version string) {
+			displayMu.Lock()
+			defer displayMu.Unlock()
+			slots[workerID] = fmt.Sprintf("%s (%s)", name, version)
+			render()
+		}
+
+		pool.OnFinish = func(workerID int, name, version string) {
+			displayMu.Lock()
+			defer displayMu.Unlock()
+			slots[workerID] = ""
+		}
+
+		pool.OnProgress = func(done, total int, name string) {
+			displayMu.Lock()
+			defer displayMu.Unlock()
+			completed = done
+			render()
+			if done == total {
+				// Clear worker lines, print final summary
+				fmt.Fprintf(os.Stderr, "\033[%dA", numWorkers+1)
+				fmt.Fprintf(os.Stderr, "\033[K  Downloaded %d packages\n", total)
+				for i := 0; i < numWorkers; i++ {
+					fmt.Fprint(os.Stderr, "\033[K\n")
+				}
+				// Move back up to remove blank lines
+				fmt.Fprintf(os.Stderr, "\033[%dA", numWorkers)
 			}
 		}
 	}
