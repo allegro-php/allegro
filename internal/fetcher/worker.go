@@ -11,9 +11,10 @@ import (
 
 // DownloadTask represents a single package to download.
 type DownloadTask struct {
-	Name    string
-	URL     string
-	Shasum  string // SHA-1 hex digest, empty to skip verification
+	Name     string
+	Version  string
+	URL      string
+	Shasum   string // SHA-1 hex digest, empty to skip verification
 	DistType string
 }
 
@@ -30,6 +31,7 @@ type Pool struct {
 	workers      int
 	lastFailures []time.Time
 	mu           sync.Mutex
+	OnProgress   func(completed, total int, name string) // optional progress callback
 }
 
 // NewPool creates a download pool with the given worker count.
@@ -155,9 +157,13 @@ func (p *Pool) Download(ctx context.Context, tasks []DownloadTask) []DownloadRes
 		close(resultCh)
 	}()
 
-	results := make([]DownloadResult, 0, len(tasks))
+	total := len(tasks)
+	results := make([]DownloadResult, 0, total)
 	for r := range resultCh {
 		results = append(results, r)
+		if p.OnProgress != nil {
+			p.OnProgress(len(results), total, r.Task.Name)
+		}
 	}
 	return results
 }

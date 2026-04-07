@@ -66,7 +66,7 @@ func (o *Orchestrator) Install(ctx context.Context) error {
 
 	strategy, lnk := linker.DetectStrategy(o.store.Root, o.config.ProjectDir, o.config.LinkStrategy)
 	if !o.config.Quiet {
-		log.Printf("Link strategy: %s", strategy)
+		fmt.Fprintf(os.Stderr, "Link strategy: %s\n", strategy)
 	}
 
 	// Step 3: Parse and build plan (filter dev packages if --no-dev)
@@ -79,13 +79,13 @@ func (o *Orchestrator) Install(ctx context.Context) error {
 	plan := o.buildPlan(allPackages)
 
 	if !o.config.Quiet {
-		log.Printf("Packages: %d new, %d cached, %d skipped",
+		fmt.Fprintf(os.Stderr, "Packages: %d new, %d cached, %d skipped\n",
 			len(plan.NewPackages), len(plan.CachedPackages), len(plan.SkippedPackages))
 	}
 
 	// Warn about skipped packages per spec §8.1 step 4
 	for _, sp := range plan.SkippedPackages {
-		log.Printf("warning: skipping package %s (%s)", sp.Name, sp.Reason)
+		fmt.Fprintf(os.Stderr, "  warning: skipping %s (%s)\n", sp.Name, sp.Reason)
 	}
 
 	// Step 4-5: Download and store new packages
@@ -169,9 +169,7 @@ func (o *Orchestrator) Install(ctx context.Context) error {
 	}
 
 	elapsed := time.Since(start)
-	if !o.config.Quiet {
-		log.Printf("Installed %d packages in %.1fs (%s)", len(plan.AllPackages), elapsed.Seconds(), strategy)
-	}
+		fmt.Fprintf(os.Stderr, "Installed %d packages in %.1fs (%s)\n", len(plan.AllPackages), elapsed.Seconds(), strategy)
 
 	return nil
 }
@@ -209,6 +207,7 @@ func (o *Orchestrator) downloadAndStore(ctx context.Context, packages []parser.P
 	for i, pkg := range packages {
 		tasks[i] = fetcher.DownloadTask{
 			Name:     pkg.Name,
+			Version:  pkg.Version,
 			URL:      pkg.Dist.URL,
 			Shasum:   pkg.Dist.Shasum,
 			DistType: pkg.Dist.Type,
@@ -216,6 +215,27 @@ func (o *Orchestrator) downloadAndStore(ctx context.Context, packages []parser.P
 	}
 
 	pool := fetcher.NewPool(o.config.Workers)
+	if !o.config.Quiet {
+		pool.OnProgress = func(completed, total int, name string) {
+			pct := completed * 100 / total
+			barWidth := 30
+			filled := barWidth * completed / total
+			bar := make([]byte, barWidth)
+			for i := range bar {
+				if i < filled {
+					bar[i] = '='
+				} else if i == filled {
+					bar[i] = '>'
+				} else {
+					bar[i] = '-'
+				}
+			}
+			fmt.Fprintf(os.Stderr, "\r\033[K  Downloading (%d/%d) [%s] %d%%", completed, total, string(bar), pct)
+			if completed == total {
+				fmt.Fprintln(os.Stderr)
+			}
+		}
+	}
 	results := pool.Download(ctx, tasks)
 
 	for _, r := range results {
@@ -229,7 +249,6 @@ func (o *Orchestrator) downloadAndStore(ctx context.Context, packages []parser.P
 	}
 	return nil
 }
-
 // extractAndStore handles extraction with a single re-download retry per spec §11.1.
 // The worker pool has already used its share of the 3-retry budget for HTTP-level
 // errors. Extraction failure gets at most 1 re-download attempt to stay within
@@ -429,7 +448,7 @@ func (o *Orchestrator) redownloadPackage(ctx context.Context, pkg parser.Package
 	}
 	pool := fetcher.NewPool(1)
 	results := pool.Download(ctx, []fetcher.DownloadTask{{
-		Name: pkg.Name, URL: pkg.Dist.URL,
+		Name: pkg.Name, Version: pkg.Version, URL: pkg.Dist.URL,
 		Shasum: pkg.Dist.Shasum, DistType: pkg.Dist.Type,
 	}})
 	if len(results) == 0 || results[0].Error != nil {
