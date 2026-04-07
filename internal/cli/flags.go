@@ -57,7 +57,7 @@ func ResolveWorkers() int {
 		}
 	}
 	if w == 0 {
-		return 8 // default
+		return 16 // default
 	}
 	if w < 1 {
 		fmt.Fprintf(os.Stderr, "warning: --workers %d out of range [1,32], clamped to 1\n", w)

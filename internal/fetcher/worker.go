@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -24,15 +25,16 @@ type DownloadResult struct {
 	Data  []byte
 	Error error
 }
+
 // Pool manages parallel downloads.
 type Pool struct {
 	client       *Client
 	workers      int
 	lastFailures []time.Time
 	mu           sync.Mutex
-	OnProgress   func(completed, total int, name string) // optional: called when a download completes
-	OnStart      func(workerID int, name, version string) // optional: called when a worker starts a download
-	OnFinish     func(workerID int, name, version string) // optional: called when a worker finishes a download
+	OnProgress   func(completed, total int, name string)
+	OnStart      func(workerID int, name, version string)
+	OnFinish     func(workerID int, name, version string)
 }
 
 // NewPool creates a download pool with the given worker count.
@@ -43,13 +45,23 @@ func NewPool(workers int) *Pool {
 	}
 }
 
-// Download downloads all tasks in parallel, returning results.
-func (p *Pool) Download(ctx context.Context, tasks []DownloadTask) []DownloadResult {
+// Download downloads all tasks in parallel, returning a channel of results.
+// resultBuf controls channel buffer size (use extractCap for back-pressure).
+// The channel is closed after all workers finish.
+func (p *Pool) Download(ctx context.Context, tasks []DownloadTask, resultBuf int) <-chan DownloadResult {
+	if len(tasks) == 0 {
+		ch := make(chan DownloadResult)
+		close(ch)
+		return ch
+	}
+
 	ctx, cancel := context.WithCancel(ctx)
-	defer cancel()
 
 	taskCh := make(chan DownloadTask, len(tasks))
-	resultCh := make(chan DownloadResult, len(tasks))
+	resultCh := make(chan DownloadResult, resultBuf)
+
+	total := len(tasks)
+	var completed atomic.Int32
 
 	// Start workers
 	var wg sync.WaitGroup
@@ -62,13 +74,14 @@ func (p *Pool) Download(ctx context.Context, tasks []DownloadTask) []DownloadRes
 					p.OnStart(workerID, task.Name, task.Version)
 				}
 				if ctx.Err() != nil {
-					resultCh <- DownloadResult{Task: task, Error: ctx.Err()}
+					select {
+					case resultCh <- DownloadResult{Task: task, Error: ctx.Err()}:
+					case <-ctx.Done():
+						return
+					}
 					continue
 				}
 
-				// Unified retry loop per spec §11.2:
-				// Max 3 retries total. HTTP errors, hash mismatches, and 429s
-				// all consume from the same shared 3-retry budget.
 				var finalData []byte
 				var finalErr error
 
@@ -114,14 +127,13 @@ func (p *Pool) Download(ctx context.Context, tasks []DownloadTask) []DownloadRes
 					}
 
 					if resp.StatusCode >= 200 && resp.StatusCode < 300 {
-						// Verify SHA-1 if shasum is non-empty
 						if task.Shasum != "" {
 							if err := verifySHA1(resp.Body, task.Shasum); err != nil {
 								if p.recordFailureAndCheck() {
 									cancel()
 								}
 								finalErr = fmt.Errorf("SHA-1 mismatch for %s (attempt %d): %w", task.Name, attempt+1, err)
-								continue // Re-download counts as retry
+								continue
 							}
 						}
 						finalData = resp.Body
@@ -140,13 +152,22 @@ func (p *Pool) Download(ctx context.Context, tasks []DownloadTask) []DownloadRes
 					finalErr = fmt.Errorf("HTTP %d for %s", resp.StatusCode, task.URL)
 				}
 
-			if p.OnFinish != nil {
+				if p.OnFinish != nil {
 					p.OnFinish(workerID, task.Name, task.Version)
 				}
-				if finalErr != nil {
-					resultCh <- DownloadResult{Task: task, Error: finalErr}
-				} else {
-					resultCh <- DownloadResult{Task: task, Data: finalData}
+
+				// Fire progress before send
+				if p.OnProgress != nil {
+					c := int(completed.Add(1))
+					p.OnProgress(c, total, task.Name)
+				}
+
+				// Send result — select with ctx.Done for non-blocking exit
+				result := DownloadResult{Task: task, Data: finalData, Error: finalErr}
+				select {
+				case resultCh <- result:
+				case <-ctx.Done():
+					return
 				}
 			}
 		}(i)
@@ -158,21 +179,25 @@ func (p *Pool) Download(ctx context.Context, tasks []DownloadTask) []DownloadRes
 	}
 	close(taskCh)
 
-	// Collect results
+	// Supervisor: close channel and cancel context after all workers finish
 	go func() {
 		wg.Wait()
 		close(resultCh)
+		cancel()
 	}()
 
-	total := len(tasks)
-	results := make([]DownloadResult, 0, total)
-	for r := range resultCh {
-		results = append(results, r)
-		if p.OnProgress != nil {
-			p.OnProgress(len(results), total, r.Task.Name)
+	return resultCh
+}
+
+// DownloadOne downloads a single task and returns the result.
+func (p *Pool) DownloadOne(ctx context.Context, task DownloadTask) (DownloadResult, error) {
+	for r := range p.Download(ctx, []DownloadTask{task}, 1) {
+		if r.Error != nil {
+			return DownloadResult{}, r.Error
 		}
+		return r, nil
 	}
-	return results
+	return DownloadResult{}, ctx.Err()
 }
 
 // recordFailureAndCheck records a failure timestamp, trims old entries,

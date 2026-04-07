@@ -243,15 +243,16 @@ func TestQA_FetcherSHA1Pass(t *testing.T) {
 	h := sha1.Sum(data); shasum := hex.EncodeToString(h[:])
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.Write(data) }))
 	defer srv.Close()
-	res := fetcher.NewPool(1).Download(context.Background(), []fetcher.DownloadTask{{Name: "a", URL: srv.URL, Shasum: shasum}})
-	if res[0].Error != nil { t.Error(res[0].Error) }
+	r, err := fetcher.NewPool(1).DownloadOne(context.Background(), fetcher.DownloadTask{Name: "a", URL: srv.URL, Shasum: shasum})
+	if err != nil { t.Error(err) }
+	_ = r
 }
 
 func TestQA_FetcherSHA1Fail(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("x")) }))
 	defer srv.Close()
-	res := fetcher.NewPool(1).Download(context.Background(), []fetcher.DownloadTask{{Name: "a", URL: srv.URL, Shasum: "0000000000000000000000000000000000000000"}})
-	if res[0].Error == nil { t.Fatal("should fail") }
+	_, err := fetcher.NewPool(1).DownloadOne(context.Background(), fetcher.DownloadTask{Name: "a", URL: srv.URL, Shasum: "0000000000000000000000000000000000000000"})
+	if err == nil { t.Fatal("should fail") }
 }
 
 func TestQA_RetryAfterCap(t *testing.T) {

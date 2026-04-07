@@ -8,9 +8,11 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
+
 	"github.com/allegro-php/allegro/internal/autoloader"
 	"github.com/allegro-php/allegro/internal/fetcher"
 	"github.com/allegro-php/allegro/internal/linker"
@@ -216,33 +218,30 @@ func (o *Orchestrator) downloadAndStore(ctx context.Context, packages []parser.P
 	}
 
 	pool := fetcher.NewPool(o.config.Workers)
+
+	// Display variables at function scope for deferred cleanup
+	var rendered bool
+	var numWorkers int
+
 	if !o.config.Quiet {
-		numWorkers := o.config.Workers
+		numWorkers = o.config.Workers
 		if numWorkers < 1 {
-			numWorkers = 8
+			numWorkers = 16
 		}
 		if numWorkers > len(tasks) {
 			numWorkers = len(tasks)
 		}
 
 		var displayMu sync.Mutex
-		slots := make([]string, numWorkers) // what each worker is currently downloading
-		completed := 0
-		total := len(tasks)
-		rendered := false
+		slots := make([]string, numWorkers)
 
-		render := func() {
+		render := func(done, total int) {
 			var b strings.Builder
-			// Move cursor up to overwrite previous render
 			if rendered {
 				fmt.Fprintf(&b, "\033[%dA", numWorkers+1)
 			}
 			rendered = true
-
-			// Summary line
-			fmt.Fprintf(&b, "\033[K  Downloading %d/%d packages\n", completed, total)
-
-			// Worker slots
+			fmt.Fprintf(&b, "\033[K  Downloading %d/%d packages\n", done, total)
 			for i, name := range slots {
 				prefix := "├─"
 				if i == len(slots)-1 {
@@ -260,21 +259,23 @@ func (o *Orchestrator) downloadAndStore(ctx context.Context, packages []parser.P
 		pool.OnStart = func(workerID int, name, version string) {
 			displayMu.Lock()
 			defer displayMu.Unlock()
-			slots[workerID] = fmt.Sprintf("%s (%s)", name, version)
-			render()
+			if workerID < len(slots) {
+				slots[workerID] = fmt.Sprintf("%s (%s)", name, version)
+			}
 		}
 
 		pool.OnFinish = func(workerID int, name, version string) {
 			displayMu.Lock()
 			defer displayMu.Unlock()
-			slots[workerID] = ""
+			if workerID < len(slots) {
+				slots[workerID] = ""
+			}
 		}
 
 		pool.OnProgress = func(done, total int, name string) {
 			displayMu.Lock()
 			defer displayMu.Unlock()
-			completed = done
-			render()
+			render(done, total)
 			if done == total {
 				// Clear worker lines, print final summary
 				fmt.Fprintf(os.Stderr, "\033[%dA", numWorkers+1)
@@ -282,21 +283,68 @@ func (o *Orchestrator) downloadAndStore(ctx context.Context, packages []parser.P
 				for i := 0; i < numWorkers; i++ {
 					fmt.Fprint(os.Stderr, "\033[K\n")
 				}
-				// Move back up to remove blank lines
 				fmt.Fprintf(os.Stderr, "\033[%dA", numWorkers)
 			}
 		}
 	}
-	results := pool.Download(ctx, tasks)
 
-	for _, r := range results {
+	// Deferred display cleanup on any exit path
+	defer func() {
+		if !o.config.Quiet && rendered {
+			// Clear worker lines if display was active
+			fmt.Fprintf(os.Stderr, "\033[%dA", numWorkers+1)
+			fmt.Fprintf(os.Stderr, "\033[K  Downloaded %d packages\n", len(tasks))
+			for i := 0; i < numWorkers; i++ {
+				fmt.Fprint(os.Stderr, "\033[K\n")
+			}
+			fmt.Fprintf(os.Stderr, "\033[%dA", numWorkers)
+		}
+	}()
+
+	// Pipeline: download → extract concurrently
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	extractCap := max(2, min(runtime.NumCPU(), 8))
+	resultCh := pool.Download(ctx, tasks, extractCap)
+
+	extractSem := make(chan struct{}, extractCap)
+	var extractWg sync.WaitGroup
+	var extractErr error
+	var errOnce sync.Once
+
+loop:
+	for r := range resultCh {
+		if ctx.Err() != nil {
+			break loop
+		}
 		if r.Error != nil {
-			return fmt.Errorf("download %s: %w", r.Task.Name, r.Error)
+			errOnce.Do(func() {
+				extractErr = fmt.Errorf("download %s: %w", r.Task.Name, r.Error)
+				cancel()
+			})
+			break loop
 		}
-
-		if err := o.extractAndStore(ctx, r, packages); err != nil {
-			return err
+		select {
+		case extractSem <- struct{}{}:
+		case <-ctx.Done():
+			break loop
 		}
+		extractWg.Add(1)
+		go func(r fetcher.DownloadResult) {
+			defer extractWg.Done()
+			defer func() { <-extractSem }()
+			if ctx.Err() != nil {
+				return
+			}
+			if err := o.extractAndStore(ctx, r, packages); err != nil {
+				errOnce.Do(func() { extractErr = err; cancel() })
+			}
+		}(r)
+	}
+	extractWg.Wait()
+	if extractErr != nil {
+		return extractErr
 	}
 	return nil
 }
@@ -498,18 +546,13 @@ func (o *Orchestrator) redownloadPackage(ctx context.Context, pkg parser.Package
 		return fmt.Errorf("cannot re-download %s: no dist info", pkg.Name)
 	}
 	pool := fetcher.NewPool(1)
-	results := pool.Download(ctx, []fetcher.DownloadTask{{
+	r, err := pool.DownloadOne(ctx, fetcher.DownloadTask{
 		Name: pkg.Name, Version: pkg.Version, URL: pkg.Dist.URL,
 		Shasum: pkg.Dist.Shasum, DistType: pkg.Dist.Type,
-	}})
-	if len(results) == 0 || results[0].Error != nil {
-		if len(results) > 0 {
-			return results[0].Error
-		}
-		return fmt.Errorf("re-download %s: no results", pkg.Name)
+	})
+	if err != nil {
+		return fmt.Errorf("re-download %s: %w", pkg.Name, err)
 	}
-
-	r := results[0]
 	return o.extractAndStore(ctx, r, []parser.Package{pkg})
 }
 

@@ -8,8 +8,8 @@ func TestResolveWorkersDefault(t *testing.T) {
 	flagWorkers = 0
 	t.Setenv("ALLEGRO_WORKERS", "")
 	got := ResolveWorkers()
-	if got != 8 {
-		t.Errorf("default = %d, want 8", got)
+	if got != 16 {
+		t.Errorf("default = %d, want 16", got)
 	}
 }
 

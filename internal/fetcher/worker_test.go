@@ -9,6 +9,15 @@ import (
 	"testing"
 )
 
+// drainCh collects all results from a download channel into a slice.
+func drainCh(ch <-chan DownloadResult) []DownloadResult {
+	var results []DownloadResult
+	for r := range ch {
+		results = append(results, r)
+	}
+	return results
+}
+
 func TestVerifySHA1(t *testing.T) {
 	data := []byte("hello world")
 	h := sha1.Sum(data)
@@ -24,8 +33,6 @@ func TestVerifySHA1(t *testing.T) {
 }
 
 func TestVerifySHA1Empty(t *testing.T) {
-	// Empty shasum should be checked before calling verifySHA1
-	// but verifySHA1 with empty expected should fail
 	if err := verifySHA1([]byte("data"), ""); err == nil {
 		t.Error("empty expected should fail")
 	}
@@ -43,7 +50,7 @@ func TestPoolDownload(t *testing.T) {
 		{Name: "c/d", URL: srv.URL + "/c", Shasum: ""},
 	}
 
-	results := pool.Download(context.Background(), tasks)
+	results := drainCh(pool.Download(context.Background(), tasks, 2))
 	if len(results) != 2 {
 		t.Fatalf("results = %d, want 2", len(results))
 	}
@@ -73,7 +80,7 @@ func TestPoolDownloadWithSHA1(t *testing.T) {
 		{Name: "pkg/a", URL: srv.URL, Shasum: shasum},
 	}
 
-	results := pool.Download(context.Background(), tasks)
+	results := drainCh(pool.Download(context.Background(), tasks, 1))
 	if results[0].Error != nil {
 		t.Errorf("download with valid shasum: %v", results[0].Error)
 	}
@@ -90,7 +97,7 @@ func TestPoolDownloadSHA1Mismatch(t *testing.T) {
 		{Name: "pkg/a", URL: srv.URL, Shasum: "0000000000000000000000000000000000000000"},
 	}
 
-	results := pool.Download(context.Background(), tasks)
+	results := drainCh(pool.Download(context.Background(), tasks, 1))
 	if results[0].Error == nil {
 		t.Error("expected SHA-1 mismatch error")
 	}
@@ -110,11 +117,69 @@ func TestPoolCircuitBreaker(t *testing.T) {
 		tasks[i] = DownloadTask{Name: "pkg/" + string(rune('a'+i)), URL: srv.URL}
 	}
 
-	results := pool.Download(context.Background(), tasks)
-	// All should fail
+	results := drainCh(pool.Download(context.Background(), tasks, 5))
 	for _, r := range results {
 		if r.Error == nil {
 			t.Error("expected error")
 		}
+	}
+}
+
+func TestPoolDownloadEmpty(t *testing.T) {
+	pool := NewPool(2)
+	results := drainCh(pool.Download(context.Background(), nil, 1))
+	if len(results) != 0 {
+		t.Errorf("expected 0 results, got %d", len(results))
+	}
+}
+
+func TestPoolDownloadOne(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("single-pkg"))
+	}))
+	defer srv.Close()
+
+	pool := NewPool(1)
+	r, err := pool.DownloadOne(context.Background(), DownloadTask{
+		Name: "test/pkg", URL: srv.URL,
+	})
+	if err != nil {
+		t.Fatalf("DownloadOne: %v", err)
+	}
+	if string(r.Data) != "single-pkg" {
+		t.Errorf("data = %q, want single-pkg", r.Data)
+	}
+}
+
+func TestPoolDownloadOneError(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(404)
+	}))
+	defer srv.Close()
+
+	pool := NewPool(1)
+	_, err := pool.DownloadOne(context.Background(), DownloadTask{
+		Name: "bad/pkg", URL: srv.URL,
+	})
+	if err == nil {
+		t.Error("expected error from DownloadOne")
+	}
+}
+
+func TestPoolDownloadOneCancelled(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("data"))
+	}))
+	defer srv.Close()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel() // cancel immediately
+
+	pool := NewPool(1)
+	_, err := pool.DownloadOne(ctx, DownloadTask{
+		Name: "cancel/pkg", URL: srv.URL,
+	})
+	if err == nil {
+		t.Error("expected error from cancelled DownloadOne")
 	}
 }

@@ -2,6 +2,7 @@ package fetcher
 
 import (
 	"io"
+	"net"
 	"net/http"
 	"time"
 )
@@ -11,13 +12,21 @@ type Client struct {
 	httpClient *http.Client
 }
 
-// NewClient creates a fetcher client with spec timeouts.
+// NewClient creates a fetcher client with a tuned transport.
+// This is the single constructor for all HTTP clients — transport
+// tuning in this function applies globally (Pool workers, re-downloads, etc.).
 func NewClient() *Client {
 	return &Client{
 		httpClient: &http.Client{
 			Timeout: 5 * time.Minute,
 			Transport: &http.Transport{
+				MaxIdleConns:          100,
+				MaxIdleConnsPerHost:   32,
+				IdleConnTimeout:       90 * time.Second,
 				ResponseHeaderTimeout: 30 * time.Second,
+				TLSHandshakeTimeout:  10 * time.Second,
+				ForceAttemptHTTP2:     true,
+				DialContext:           (&net.Dialer{Timeout: 10 * time.Second}).DialContext,
 			},
 		},
 	}
