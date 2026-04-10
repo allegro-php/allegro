@@ -48,3 +48,19 @@ changelog:
     exclude:
       - "^chore\\(deps\\)"
       - "^docs\\(changelog\\)"
+
+brews:
+  - repository:
+      owner: allegro-php
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    commit_author:
+      name: goreleaser
+      email: goreleaser@users.noreply.github.com
+    homepage: "https://github.com/allegro-php/allegro"
+    description: "Accelerate PHP Composer installs with a content-addressable store"
+    license: MIT
+    install: |
+      bin.install "allegro"
+    test: |
+      system "#{bin}/allegro", "--version"
